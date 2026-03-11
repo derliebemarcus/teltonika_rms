@@ -25,6 +25,13 @@ class NormalizedDevice:
     raw: dict[str, Any]
 
 
+def has_location_coordinates(device: NormalizedDevice | None) -> bool:
+    """Return True when a normalized device has usable GPS coordinates."""
+    if device is None:
+        return False
+    return device.latitude is not None and device.longitude is not None
+
+
 def parse_rms_timestamp(value: str | None) -> datetime | None:
     """Parse RMS UTC timestamps in Y-m-d H:i:s format."""
     if not value:

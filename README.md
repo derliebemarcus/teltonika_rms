@@ -15,7 +15,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 - Per-device entities:
   - `binary_sensor`: online connectivity
   - `sensor`: model, firmware, serial, last seen timestamp
-  - `device_tracker` (optional): GPS location if RMS location data is available
+  - `device_tracker` (optional): GPS location only for devices that provide coordinates
 - Service:
   - `teltonika_rms.refresh` to trigger immediate refresh
 
@@ -90,3 +90,28 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 ```bash
 python3 tools/generate_rms_endpoint_matrix.py /path/to/compiled.yaml
 ```
+
+## Conventions and Tests
+
+- Development conventions are aligned with Home Assistant custom integration guidance:
+  - [Home Assistant Developer Docs](https://developers.home-assistant.io/docs/development_index/)
+- Translation consistency can be validated with:
+
+```bash
+python3 tools/check_translations.py
+```
+
+- Test suite follows HA-style layout under:
+  - `tests/components/teltonika_rms/`
+
+- Run tests with:
+
+```bash
+python3 -m pytest
+```
+
+Hinweis: Für den vollständigen Testlauf wird eine Home-Assistant-Entwicklungsumgebung benötigt
+(siehe Developer Docs), da Integrationsmodule `homeassistant.*` importieren.
+
+- Release notes are tracked in:
+  - `CHANGELOG.md`

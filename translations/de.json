@@ -10,27 +10,27 @@
     },
     "step": {
       "user": {
-        "title": "Verbinden Sie sich zu Teltonika RMS",
-        "description": "Wählen Sie aus, wie Sie sich bei Teltonika RMS authentifizieren möchten.",
+        "title": "Teltonika RMS verbinden",
+        "description": "Wähle, wie du dich bei Teltonika RMS authentifizieren möchtest.",
         "menu_options": {
           "oauth2": "OAuth2 (empfohlen)",
           "pat": "Persönlicher Zugriffstoken (PAT)"
         }
       },
       "pat": {
-        "title": "Verbinden Sie sich mit PAT",
-        "description": "Fügen Sie Ihren persönlichen Zugriffstoken ein.",
+        "title": "Mit PAT verbinden",
+        "description": "Füge deinen persönlichen Teltonika-RMS-Zugriffstoken ein.",
         "data": {
           "pat_token": "Persönlicher Zugriffstoken"
         }
       },
       "reauth_confirm": {
         "title": "Teltonika RMS erneut authentifizieren",
-        "description": "Ihr Teltonika RMS-Token ist abgelaufen oder wurde widerrufen."
+        "description": "Dein Teltonika-RMS-Token ist abgelaufen oder wurde widerrufen."
       },
       "reauth_pat": {
         "title": "PAT-Token aktualisieren",
-        "description": "Stellen Sie einen neuen persönlichen Zugriffstoken bereit.",
+        "description": "Gib einen neuen persönlichen Teltonika-RMS-Zugriffstoken an.",
         "data": {
           "pat_token": "Persönlicher Zugriffstoken"
         }
@@ -41,20 +41,20 @@
     "step": {
       "init": {
         "title": "Teltonika RMS Optionen",
-        "description": "Optimieren Sie das Abfrageverhalten und das Budget für API-Anfragen.",
+        "description": "Stelle Abfrageverhalten und API-Anfragebudget ein.",
         "data": {
-          "inventory_interval": "Inventarabfrageintervall (Sekunden)",
-          "state_interval": "Statusabfrageintervall (Sekunden)",
-          "estimated_devices": "Geschätzte Anzahl der Geräte",
-          "tags": "Geräte-Tags-Filter (durch Kommas getrennt)",
-          "device_status": "Gerätestatusfilter",
-          "spec_path": "Kompilierter OpenAPI-YAML-Pfad (optional)",
-          "enable_location": "Aktivieren Sie GPS-Standortverfolgungseinheiten"
+          "inventory_interval": "Inventar-Abfrageintervall (Sekunden)",
+          "state_interval": "Status-Abfrageintervall (Sekunden)",
+          "estimated_devices": "Geschätzte Anzahl Geräte",
+          "tags": "Geräte-Tag-Filter (kommagetrennt)",
+          "device_status": "Gerätestatus-Filter",
+          "spec_path": "Pfad zur kompilierten OpenAPI-YAML (optional)",
+          "enable_location": "GPS-Standort-Tracker-Entitäten aktivieren"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Die konfigurierten Intervalle sind zu niedrig und haben den Spielraum des monatlichen Anforderungsbudgets für RMS überschritten. Erhöhen Sie die Intervalle, um diesen Fehler zu vermeiden."
+      "request_budget_exceeded": "Die konfigurierten Intervalle überschreiten den RMS-Spielraum des monatlichen Anfragebudgets."
     }
   },
   "entity": {

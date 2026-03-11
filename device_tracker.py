@@ -11,6 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import TeltonikaRmsRuntime
 from .coordinator import CoordinatorBundle
 from .entity import TeltonikaRmsEntity
+from .models import has_location_coordinates
 
 
 async def async_setup_entry(
@@ -27,7 +28,7 @@ async def async_setup_entry(
         new_entities: list[RmsDeviceTracker] = []
         for device_id in bundle.inventory.data:
             normalized = bundle.merged_device(device_id)
-            if normalized is None or normalized.latitude is None or normalized.longitude is None:
+            if not has_location_coordinates(normalized):
                 continue
             unique = f"{device_id}_location"
             if unique in known:
@@ -55,10 +56,7 @@ class RmsDeviceTracker(TeltonikaRmsEntity, TrackerEntity):
 
     @property
     def available(self) -> bool:
-        normalized = self._normalized
-        if normalized is None:
-            return False
-        return normalized.latitude is not None and normalized.longitude is not None
+        return has_location_coordinates(self._normalized)
 
     @property
     def latitude(self) -> float | None:

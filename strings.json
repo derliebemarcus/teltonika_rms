@@ -1,45 +1,60 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Das Konto ist bereits konfiguriert.",
+      "wrong_account": "Bei der erneuten Authentifizierung wurde ein anderes RMS-Konto verwendet.",
+      "reauth_failed": "Die erneute Authentifizierungssitzung ist ungültig."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Der persönliche Zugriffstoken darf nicht leer sein."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Teltonika RMS verbinden",
+        "description": "Wähle, wie du dich bei Teltonika RMS authentifizieren möchtest.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (empfohlen)",
+          "pat": "Persönlicher Zugriffstoken (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token."
+        "title": "Mit PAT verbinden",
+        "description": "Füge deinen persönlichen Teltonika-RMS-Zugriffstoken ein.",
+        "data": {
+          "pat_token": "Persönlicher Zugriffstoken"
+        }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Teltonika RMS erneut authentifizieren",
+        "description": "Dein Teltonika-RMS-Token ist abgelaufen oder wurde widerrufen."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token."
+        "title": "PAT-Token aktualisieren",
+        "description": "Gib einen neuen persönlichen Teltonika-RMS-Zugriffstoken an.",
+        "data": {
+          "pat_token": "Persönlicher Zugriffstoken"
+        }
       }
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget."
+        "title": "Teltonika RMS Optionen",
+        "description": "Stelle Abfrageverhalten und API-Anfragebudget ein.",
+        "data": {
+          "inventory_interval": "Inventar-Abfrageintervall (Sekunden)",
+          "state_interval": "Status-Abfrageintervall (Sekunden)",
+          "estimated_devices": "Geschätzte Anzahl Geräte",
+          "tags": "Geräte-Tag-Filter (kommagetrennt)",
+          "device_status": "Gerätestatus-Filter",
+          "spec_path": "Pfad zur kompilierten OpenAPI-YAML (optional)",
+          "enable_location": "GPS-Standort-Tracker-Entitäten aktivieren"
+        }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Die konfigurierten Intervalle überschreiten den RMS-Spielraum des monatlichen Anfragebudgets."
     }
   },
   "entity": {
@@ -50,21 +65,21 @@
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modell"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Seriennummer"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Zuletzt gesehen"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Standort"
       }
     }
   }
