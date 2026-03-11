@@ -11,7 +11,7 @@
     "step": {
       "user": {
         "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "description": "Choose how to authenticate against Teltonika RMS.",
         "menu_options": {
           "oauth2": "OAuth2 (recommended)",
           "pat": "Personal access token (PAT)"

@@ -27,3 +27,25 @@ def test_has_location_coordinates_true_with_coords() -> None:
     )
     assert normalized is not None
     assert has_location_coordinates(normalized) is True
+
+
+def test_normalize_device_parses_lat_lng_and_location_label() -> None:
+    normalized = normalize_device(
+        {"id": "a1", "name": "Router A"},
+        location={"lat": "54.1234", "lng": "25.5678", "address": "Vilnius, LT"},
+    )
+    assert normalized is not None
+    assert normalized.latitude == 54.1234
+    assert normalized.longitude == 25.5678
+    assert normalized.location_label == "Vilnius, LT"
+
+
+def test_normalize_device_parses_geojson_coordinates() -> None:
+    normalized = normalize_device(
+        {"id": "a1", "name": "Router A"},
+        location={"coordinates": [25.5678, 54.1234]},
+    )
+    assert normalized is not None
+    assert normalized.latitude == 54.1234
+    assert normalized.longitude == 25.5678
+    assert normalized.location_label == "54.123400, 25.567800"

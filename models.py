@@ -22,6 +22,7 @@ class NormalizedDevice:
     last_seen: datetime | None
     latitude: float | None
     longitude: float | None
+    location_label: str | None
     raw: dict[str, Any]
 
 
@@ -88,6 +89,24 @@ def parse_float(value: Any) -> float | None:
         return None
 
 
+def _parse_coordinate_pair(value: Any) -> tuple[float | None, float | None]:
+    """Parse coordinates in common tuple/list/string formats.
+
+    Returns `(latitude, longitude)` when possible.
+    """
+    if isinstance(value, (list, tuple)) and len(value) >= 2:
+        # GeoJSON uses [longitude, latitude].
+        longitude = parse_float(value[0])
+        latitude = parse_float(value[1])
+        return latitude, longitude
+    if isinstance(value, str) and "," in value:
+        lon_raw, lat_raw = value.split(",", maxsplit=1)
+        latitude = parse_float(lat_raw.strip())
+        longitude = parse_float(lon_raw.strip())
+        return latitude, longitude
+    return None, None
+
+
 def normalize_device(
     inventory: dict[str, Any],
     state: dict[str, Any] | None = None,
@@ -137,11 +156,55 @@ def normalize_device(
         last_seen = parse_rms_timestamp(str(last_seen_raw)) if last_seen_raw else None
 
     latitude = parse_float(
-        first_value(merged, "location.latitude", "latitude", "gps.latitude", "lat")
+        first_value(
+            merged,
+            "location.latitude",
+            "location.lat",
+            "location.coords.latitude",
+            "latitude",
+            "gps.latitude",
+            "lat",
+        )
     )
     longitude = parse_float(
-        first_value(merged, "location.longitude", "longitude", "gps.longitude", "lon", "lng")
+        first_value(
+            merged,
+            "location.longitude",
+            "location.lon",
+            "location.lng",
+            "location.coords.longitude",
+            "longitude",
+            "gps.longitude",
+            "lon",
+            "lng",
+        )
     )
+    if latitude is None or longitude is None:
+        list_latitude, list_longitude = _parse_coordinate_pair(
+            first_value(
+                merged,
+                "location.coordinates",
+                "gps.coordinates",
+                "coordinates",
+            )
+        )
+        if latitude is None:
+            latitude = list_latitude
+        if longitude is None:
+            longitude = list_longitude
+
+    location_label_raw = first_value(
+        merged,
+        "location.address",
+        "location.address.formatted",
+        "location.formatted",
+        "location.name",
+        "address",
+        "gps.address",
+    )
+    location_label = str(location_label_raw) if location_label_raw is not None else None
+    if location_label is None and latitude is not None and longitude is not None:
+        location_label = f"{latitude:.6f}, {longitude:.6f}"
 
     return NormalizedDevice(
         device_id=device_id_str,
@@ -153,5 +216,6 @@ def normalize_device(
         last_seen=last_seen,
         latitude=latitude,
         longitude=longitude,
+        location_label=location_label,
         raw=merged,
     )

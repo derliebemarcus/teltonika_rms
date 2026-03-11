@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.3.0 - 2026-03-11
+
+- Added versioned repository Git hooks (`.githooks`):
+  - `pre-commit` runs all tests, prints per-test name/duration/result, and blocks commit on failures.
+  - `pre-push` enforces an existing release tag `v<manifest.version>`.
+- Added tooling scripts:
+  - `tools/install_git_hooks.sh`
+  - `tools/print_pytest_summary.py`
+  - `tools/create_version_tag.sh`
+- Extended location normalization to detect more coordinate formats (`lat/lng`, `lon`, GeoJSON coordinate arrays, coordinate strings).
+- Device tracker now exposes explicit location attributes:
+  - `location_detail`
+  - `coordinates`
+  - `google_maps_url`
+
 ## 0.2.0 - 2026-03-11
 
 - Added dual authentication modes:

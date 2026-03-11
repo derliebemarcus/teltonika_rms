@@ -15,7 +15,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 - Per-device entities:
   - `binary_sensor`: online connectivity
   - `sensor`: model, firmware, serial, last seen timestamp
-  - `device_tracker` (optional): GPS location only for devices that provide coordinates
+  - `device_tracker` (optional): GPS location only for devices that provide coordinates, including detailed location attributes (`location_detail`, `coordinates`, `google_maps_url`)
 - Service:
   - `teltonika_rms.refresh` to trigger immediate refresh
 
@@ -115,3 +115,33 @@ Hinweis: Für den vollständigen Testlauf wird eine Home-Assistant-Entwicklungsu
 
 - Release notes are tracked in:
   - `CHANGELOG.md`
+
+## Git Hooks and Version Tags
+
+Install repository hooks once:
+
+```bash
+tools/install_git_hooks.sh
+```
+
+`pre-commit` hook behavior:
+
+- Runs the full test suite (`python3 -m pytest --maxfail=0`)
+- Always prints per-test summary with:
+  - test name
+  - duration
+  - result
+- Blocks commit when at least one test fails
+- Requires a test environment where integration imports resolve (Home Assistant dev dependencies installed)
+
+`pre-push` hook behavior:
+
+- Ensures a version tag `v<manifest.version>` exists before push
+- Ensures the tag is part of current branch history
+
+Create a release tag for the current version:
+
+```bash
+tools/create_version_tag.sh
+git push --follow-tags
+```

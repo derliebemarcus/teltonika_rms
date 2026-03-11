@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -u
+
+ROOT="$(git rev-parse --show-toplevel)"
+REPORT_FILE="$(mktemp "${TMPDIR:-/tmp}/teltonika-rms-pytest-XXXXXX.xml")"
+PYTHON_BIN="python3"
+if [ -x "$ROOT/.venv/bin/python" ]; then
+  PYTHON_BIN="$ROOT/.venv/bin/python"
+fi
+
+cleanup() {
+  rm -f "$REPORT_FILE"
+}
+trap cleanup EXIT
+
+cd "$ROOT" || exit 1
+
+echo "[pre-commit] Running full test suite..."
+"$PYTHON_BIN" -m pytest --maxfail=0 --junitxml "$REPORT_FILE"
+PYTEST_EXIT=$?
+
+"$PYTHON_BIN" tools/print_pytest_summary.py "$REPORT_FILE"
+
+if [ "$PYTEST_EXIT" -ne 0 ]; then
+  echo "[pre-commit] Commit blocked: at least one test failed."
+  exit 1
+fi
+
+echo "[pre-commit] All tests passed."
+exit 0

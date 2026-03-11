@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+MANIFEST="$ROOT/manifest.json"
+
+if [ ! -f "$MANIFEST" ]; then
+  exit 0
+fi
+
+VERSION="$(
+  python3 - "$MANIFEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(str(manifest.get("version", "")).strip())
+PY
+)"
+
+if [ -z "$VERSION" ]; then
+  echo "[pre-push] manifest.json has no version."
+  exit 1
+fi
+
+TAG="v$VERSION"
+if ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+  echo "[pre-push] Missing tag $TAG for manifest version $VERSION."
+  echo "[pre-push] Run: tools/create_version_tag.sh"
+  exit 1
+fi
+
+TAG_COMMIT="$(git rev-list -n 1 "$TAG")"
+if ! git merge-base --is-ancestor "$TAG_COMMIT" HEAD; then
+  echo "[pre-push] Tag $TAG is not in current branch history."
+  echo "[pre-push] Create/update release tag on your current version commit."
+  exit 1
+fi
+
+exit 0

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from homeassistant.components.device_tracker import SourceType
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.config_entries import ConfigEntry
@@ -67,6 +69,24 @@ class RmsDeviceTracker(TeltonikaRmsEntity, TrackerEntity):
     def longitude(self) -> float | None:
         normalized = self._normalized
         return normalized.longitude if normalized else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        normalized = self._normalized
+        if normalized is None:
+            return {}
+
+        attrs: dict[str, Any] = {}
+        if normalized.location_label:
+            attrs["location_detail"] = normalized.location_label
+
+        if normalized.latitude is not None and normalized.longitude is not None:
+            coords = f"{normalized.latitude:.6f}, {normalized.longitude:.6f}"
+            attrs["coordinates"] = coords
+            attrs["google_maps_url"] = (
+                f"https://maps.google.com/?q={normalized.latitude:.6f},{normalized.longitude:.6f}"
+            )
+        return attrs
 
     @property
     def location_accuracy(self) -> int:
