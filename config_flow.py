@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import logging
 from typing import Any
 
 import voluptuous as vol
@@ -37,6 +38,8 @@ from .const import (
 )
 from .endpoint_matrix import load_endpoint_matrix
 
+LOGGER = logging.getLogger(__name__)
+
 
 class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domain=DOMAIN):
     """Handle OAuth2/PAT config flow for Teltonika RMS."""
@@ -45,6 +48,11 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
     VERSION = 1
 
     _reauth_entry: ConfigEntry | None = None
+
+    @property
+    def logger(self) -> logging.Logger:
+        """Return flow logger required by Home Assistant."""
+        return LOGGER
 
     @property
     def extra_authorize_data(self) -> dict[str, str]:
