@@ -7,9 +7,9 @@ from collections.abc import Iterable
 from datetime import UTC, datetime
 import logging
 import random
-from typing import Any
+from typing import Any, Protocol
 
-from aiohttp import ClientError, ClientResponse
+from aiohttp import ClientError, ClientResponse, ClientSession
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session
 
@@ -24,15 +24,94 @@ _MAX_RETRIES = 4
 _RETRIABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
+class RmsAuthClient(Protocol):
+    """Authentication transport abstraction used by RMS API client."""
+
+    async def async_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: dict[str, Any] | None,
+        json: dict[str, Any] | None,
+        timeout: int,
+    ) -> ClientResponse:
+        """Perform HTTP request with auth attached."""
+
+    async def async_get_access_token(self) -> str | None:
+        """Return bearer token for status socket usage."""
+
+
+class OAuth2RmsAuthClient:
+    """OAuth2 auth provider backed by Home Assistant OAuth2Session."""
+
+    def __init__(self, oauth_session: OAuth2Session) -> None:
+        self._oauth_session = oauth_session
+
+    async def async_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: dict[str, Any] | None,
+        json: dict[str, Any] | None,
+        timeout: int,
+    ) -> ClientResponse:
+        return await self._oauth_session.async_request(
+            method,
+            url,
+            params=params,
+            json=json,
+            timeout=timeout,
+        )
+
+    async def async_get_access_token(self) -> str | None:
+        await self._oauth_session.async_ensure_token_valid()
+        token = self._oauth_session.token.get("access_token")
+        return token if isinstance(token, str) else None
+
+
+class PatRmsAuthClient:
+    """PAT auth provider using static bearer token."""
+
+    def __init__(self, session: ClientSession, pat_token: str) -> None:
+        self._session = session
+        self._pat_token = pat_token.strip()
+
+    async def async_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: dict[str, Any] | None,
+        json: dict[str, Any] | None,
+        timeout: int,
+    ) -> ClientResponse:
+        headers = {
+            "Authorization": f"Bearer {self._pat_token}",
+        }
+        return await self._session.request(
+            method,
+            url,
+            params=params,
+            json=json,
+            timeout=timeout,
+            headers=headers,
+        )
+
+    async def async_get_access_token(self) -> str | None:
+        return self._pat_token
+
+
 class RmsApiClient:
     """Typed RMS API client with retry and envelope parsing."""
 
     def __init__(
         self,
-        oauth_session: OAuth2Session,
+        auth: "RmsAuthClient",
         endpoint_matrix: EndpointMatrix,
     ) -> None:
-        self._oauth_session = oauth_session
+        self._auth = auth
         self._matrix = endpoint_matrix
         self._request_counter = 0
         self._request_window_start = datetime.now(tz=UTC)
@@ -56,9 +135,7 @@ class RmsApiClient:
 
     async def async_get_access_token(self) -> str | None:
         """Return current bearer token."""
-        await self._oauth_session.async_ensure_token_valid()
-        token = self._oauth_session.token.get("access_token")
-        return token if isinstance(token, str) else None
+        return await self._auth.async_get_access_token()
 
     async def async_validate_connection(self) -> None:
         """Validate credentials by loading the first page of devices."""
@@ -203,7 +280,7 @@ class RmsApiClient:
             self._increment_request_counter()
             response: ClientResponse | None = None
             try:
-                response = await self._oauth_session.async_request(
+                response = await self._auth.async_request(
                     method,
                     url,
                     params=params,

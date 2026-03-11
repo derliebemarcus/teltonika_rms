@@ -12,9 +12,14 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import config_entry_oauth2_flow
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import RmsApiClient
+from .api import OAuth2RmsAuthClient, PatRmsAuthClient, RmsApiClient
 from .const import (
+    AUTH_MODE_OAUTH2,
+    AUTH_MODE_PAT,
+    CONF_AUTH_MODE,
+    CONF_PAT_TOKEN,
     CONF_SPEC_PATH,
     DEFAULT_OPTIONS,
     DEFAULT_SPEC_PATH,
@@ -53,19 +58,27 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: TeltonikaRmsConfigEntry) -> bool:
     """Set up Teltonika RMS from config entry."""
-    try:
-        implementation = await config_entry_oauth2_flow.async_get_config_entry_implementation(
-            hass, entry
-        )
-    except config_entry_oauth2_flow.ImplementationUnavailableError as err:
-        raise ConfigEntryNotReady(f"OAuth implementation unavailable: {err}") from err
+    auth_mode = str(entry.data.get(CONF_AUTH_MODE, AUTH_MODE_OAUTH2))
+    if auth_mode == AUTH_MODE_PAT:
+        pat_token = str(entry.data.get(CONF_PAT_TOKEN, "")).strip()
+        if not pat_token:
+            raise ConfigEntryNotReady("PAT token missing")
+        auth_client = PatRmsAuthClient(async_get_clientsession(hass), pat_token)
+    else:
+        try:
+            implementation = await config_entry_oauth2_flow.async_get_config_entry_implementation(
+                hass, entry
+            )
+        except config_entry_oauth2_flow.ImplementationUnavailableError as err:
+            raise ConfigEntryNotReady(f"OAuth implementation unavailable: {err}") from err
+        oauth_session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
+        auth_client = OAuth2RmsAuthClient(oauth_session)
 
-    oauth_session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
     spec_path = str(entry.options.get(CONF_SPEC_PATH, DEFAULT_SPEC_PATH))
     endpoint_matrix = await hass.async_add_executor_job(load_endpoint_matrix, spec_path)
 
     api = RmsApiClient(
-        oauth_session=oauth_session,
+        auth=auth_client,
         endpoint_matrix=endpoint_matrix,
     )
     status_manager = RmsStatusChannelManager(api)

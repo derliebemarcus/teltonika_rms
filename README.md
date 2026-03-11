@@ -1,10 +1,10 @@
 # Teltonika RMS Home Assistant Integration
 
-Custom Home Assistant integration for read-only Teltonika RMS monitoring with OAuth2 + PKCE.
+Custom Home Assistant integration for read-only Teltonika RMS monitoring with OAuth2 + PKCE or Personal Access Token (PAT).
 
 ## Features (v1)
 
-- OAuth2 authentication (authorization code + PKCE)
+- OAuth2 authentication (authorization code + PKCE) and PAT authentication
 - Device inventory and state refresh using `DataUpdateCoordinator`
 - Request budget safeguards for RMS monthly quota
 - RMS `meta.channel` handling with Socket.IO-first and HTTP polling fallback

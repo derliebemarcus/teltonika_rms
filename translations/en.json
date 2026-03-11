@@ -2,16 +2,38 @@
   "config": {
     "abort": {
       "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account."
+      "wrong_account": "Reauthentication used a different RMS account.",
+      "reauth_failed": "Reauthentication session is invalid."
+    },
+    "error": {
+      "invalid_pat": "Personal access token cannot be empty."
     },
     "step": {
       "user": {
         "title": "Connect Teltonika RMS",
-        "description": "Authenticate against Teltonika RMS with OAuth2."
+        "description": "Choose how to authenticate with Teltonika RMS.",
+        "menu_options": {
+          "oauth2": "OAuth2 (recommended)",
+          "pat": "Personal access token (PAT)"
+        }
+      },
+      "pat": {
+        "title": "Connect with PAT",
+        "description": "Paste your Teltonika RMS personal access token.",
+        "data": {
+          "pat_token": "Personal access token"
+        }
       },
       "reauth_confirm": {
         "title": "Reconnect Teltonika RMS",
         "description": "Your Teltonika RMS token expired or was revoked."
+      },
+      "reauth_pat": {
+        "title": "Update PAT token",
+        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "data": {
+          "pat_token": "Personal access token"
+        }
       }
     }
   },

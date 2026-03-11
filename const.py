@@ -9,6 +9,11 @@ TOKEN_URL = "https://rms.teltonika-networks.com/account/token"
 API_BASE_URL = "https://api.rms.teltonika-networks.com"
 STATUS_BASE_URL = "https://rms.teltonika-networks.com/status"
 
+CONF_AUTH_MODE = "auth_mode"
+CONF_PAT_TOKEN = "pat_token"
+AUTH_MODE_OAUTH2 = "oauth2"
+AUTH_MODE_PAT = "pat"
+
 OAUTH2_SCOPES: tuple[str, ...] = (
     "devices:read",
     "device_location:read",

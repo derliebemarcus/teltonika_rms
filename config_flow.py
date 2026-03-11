@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 from typing import Any
 
@@ -16,10 +17,14 @@ from homeassistant.helpers import config_entry_oauth2_flow
 
 from .api import estimate_monthly_requests, normalize_tags
 from .const import (
+    AUTH_MODE_OAUTH2,
+    AUTH_MODE_PAT,
+    CONF_AUTH_MODE,
     CONF_DEVICE_STATUS,
     CONF_ENABLE_LOCATION,
     CONF_ESTIMATED_DEVICES,
     CONF_INVENTORY_INTERVAL,
+    CONF_PAT_TOKEN,
     CONF_SPEC_PATH,
     CONF_STATE_INTERVAL,
     CONF_TAGS,
@@ -34,7 +39,7 @@ from .endpoint_matrix import load_endpoint_matrix
 
 
 class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domain=DOMAIN):
-    """Handle OAuth2 config flow for Teltonika RMS."""
+    """Handle OAuth2/PAT config flow for Teltonika RMS."""
 
     DOMAIN = DOMAIN
     VERSION = 1
@@ -46,10 +51,67 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
         """Append OAuth scopes during authorize step."""
         return {"scope": " ".join(OAUTH2_SCOPES)}
 
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Offer authentication mode selection."""
+        return self.async_show_menu(step_id="user", menu_options=["oauth2", "pat"])
+
+    async def async_step_oauth2(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Start OAuth2 authentication."""
+        return await super().async_step_user(user_input)
+
+    async def async_step_pat(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Create entry using PAT token authentication."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            token = str(user_input.get(CONF_PAT_TOKEN, "")).strip()
+            if not token:
+                errors["base"] = "invalid_pat"
+            else:
+                unique_id = f"pat_{_token_fingerprint(token)}"
+                await self.async_set_unique_id(unique_id)
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(
+                    title="Teltonika RMS",
+                    data={
+                        CONF_AUTH_MODE: AUTH_MODE_PAT,
+                        CONF_PAT_TOKEN: token,
+                    },
+                    options=dict(DEFAULT_OPTIONS),
+                )
+
+        schema = vol.Schema({vol.Required(CONF_PAT_TOKEN): str})
+        return self.async_show_form(step_id="pat", data_schema=schema, errors=errors)
+
     async def async_step_reauth(self, entry_data: dict[str, Any]) -> FlowResult:
-        """Begin reauthentication."""
+        """Begin reauthentication for the existing auth mode."""
         self._reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        if self._reauth_entry is None:
+            return self.async_abort(reason="reauth_failed")
+        auth_mode = str(self._reauth_entry.data.get(CONF_AUTH_MODE, AUTH_MODE_OAUTH2))
+        if auth_mode == AUTH_MODE_PAT:
+            return await self.async_step_reauth_pat()
         return await super().async_step_reauth(entry_data)
+
+    async def async_step_reauth_pat(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Reauthenticate PAT by replacing the token."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            token = str(user_input.get(CONF_PAT_TOKEN, "")).strip()
+            if not token:
+                errors["base"] = "invalid_pat"
+            elif self._reauth_entry is None:
+                return self.async_abort(reason="reauth_failed")
+            else:
+                return self.async_update_reload_and_abort(
+                    self._reauth_entry,
+                    data_updates={
+                        CONF_AUTH_MODE: AUTH_MODE_PAT,
+                        CONF_PAT_TOKEN: token,
+                    },
+                )
+
+        schema = vol.Schema({vol.Required(CONF_PAT_TOKEN): str})
+        return self.async_show_form(step_id="reauth_pat", data_schema=schema, errors=errors)
 
     async def async_oauth_create_entry(self, data: dict[str, Any]) -> FlowResult:
         """Create (or update) entry once OAuth callback is complete."""
@@ -59,18 +121,21 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
             if self.source != "reauth":
                 self._abort_if_unique_id_configured()
 
+        oauth_data = dict(data)
+        oauth_data[CONF_AUTH_MODE] = AUTH_MODE_OAUTH2
+
         if self.source == "reauth":
             if self._reauth_entry is not None:
                 if unique_id and self._reauth_entry.unique_id and self._reauth_entry.unique_id != unique_id:
                     return self.async_abort(reason="wrong_account")
                 return self.async_update_reload_and_abort(
                     self._reauth_entry,
-                    data_updates=data,
+                    data_updates=oauth_data,
                 )
 
         return self.async_create_entry(
             title="Teltonika RMS",
-            data=data,
+            data=oauth_data,
             options=dict(DEFAULT_OPTIONS),
         )
 
@@ -154,3 +219,7 @@ def _extract_subject_from_token(data: dict[str, Any]) -> str | None:
         return None
     subject = payload.get("sub")
     return str(subject) if subject is not None else None
+
+
+def _token_fingerprint(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()[:16]

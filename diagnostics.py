@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 
 from . import TeltonikaRmsRuntime
 
-TO_REDACT = {"access_token", "refresh_token", "token", "client_secret"}
+TO_REDACT = {"access_token", "refresh_token", "token", "client_secret", "pat_token"}
 
 
 async def async_get_config_entry_diagnostics(
