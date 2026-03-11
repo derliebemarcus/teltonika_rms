@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from homeassistant.components.sensor import SensorEntity
+from datetime import datetime
+
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
@@ -26,7 +28,7 @@ async def async_setup_entry(
     def _add_new_entities() -> None:
         new_entities: list[SensorEntity] = []
         for device_id in bundle.inventory.data:
-            for key in ("model", "firmware", "serial"):
+            for key in ("model", "firmware", "serial", "last_seen"):
                 unique = f"{device_id}_{key}"
                 if unique in known:
                     continue
@@ -35,6 +37,8 @@ async def async_setup_entry(
                     new_entities.append(RmsModelSensor(bundle, device_id))
                 elif key == "firmware":
                     new_entities.append(RmsFirmwareSensor(bundle, device_id))
+                elif key == "last_seen":
+                    new_entities.append(RmsLastSeenSensor(bundle, device_id))
                 else:
                     new_entities.append(RmsSerialSensor(bundle, device_id))
         if new_entities:
@@ -82,3 +86,21 @@ class RmsSerialSensor(_BaseDiagnosticSensor):
 
     def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
         super().__init__(bundle, device_id, "serial")
+
+
+class RmsLastSeenSensor(TeltonikaRmsEntity, SensorEntity):
+    """Last update timestamp from RMS."""
+
+    _attr_translation_key = "last_seen"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:clock-check-outline"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
+        super().__init__(bundle, device_id)
+        self._attr_unique_id = f"{device_id}_last_seen"
+
+    @property
+    def native_value(self) -> datetime | None:
+        normalized = self._normalized
+        return normalized.last_seen if normalized else None

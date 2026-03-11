@@ -35,7 +35,6 @@ LOGGER = logging.getLogger(__name__)
 PLATFORMS: tuple[Platform, ...] = (
     Platform.BINARY_SENSOR,
     Platform.SENSOR,
-    Platform.DATETIME,
     Platform.DEVICE_TRACKER,
 )
 

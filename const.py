@@ -39,7 +39,7 @@ REQUEST_BUDGET_HEADROOM = 0.80
 
 SERVICE_REFRESH = "refresh"
 
-UPDATE_PLATFORMS: tuple[str, ...] = ("binary_sensor", "sensor", "datetime", "device_tracker")
+UPDATE_PLATFORMS: tuple[str, ...] = ("binary_sensor", "sensor", "device_tracker")
 
 DEFAULT_OPTIONS: dict[str, object] = {
     CONF_INVENTORY_INTERVAL: DEFAULT_INVENTORY_INTERVAL,

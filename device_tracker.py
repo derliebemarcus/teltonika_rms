@@ -26,6 +26,9 @@ async def async_setup_entry(
     def _add_new_entities() -> None:
         new_entities: list[RmsDeviceTracker] = []
         for device_id in bundle.inventory.data:
+            normalized = bundle.merged_device(device_id)
+            if normalized is None or normalized.latitude is None or normalized.longitude is None:
+                continue
             unique = f"{device_id}_location"
             if unique in known:
                 continue
@@ -36,6 +39,7 @@ async def async_setup_entry(
 
     _add_new_entities()
     entry.async_on_unload(bundle.inventory.async_add_listener(_add_new_entities))
+    entry.async_on_unload(bundle.state.async_add_listener(_add_new_entities))
 
 
 class RmsDeviceTracker(TeltonikaRmsEntity, TrackerEntity):
@@ -48,6 +52,13 @@ class RmsDeviceTracker(TeltonikaRmsEntity, TrackerEntity):
     def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
         super().__init__(bundle, device_id)
         self._attr_unique_id = f"{device_id}_location"
+
+    @property
+    def available(self) -> bool:
+        normalized = self._normalized
+        if normalized is None:
+            return False
+        return normalized.latitude is not None and normalized.longitude is not None
 
     @property
     def latitude(self) -> float | None:

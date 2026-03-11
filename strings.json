@@ -57,9 +57,7 @@
       },
       "serial": {
         "name": "Serial"
-      }
-    },
-    "datetime": {
+      },
       "last_seen": {
         "name": "Last Seen"
       }
