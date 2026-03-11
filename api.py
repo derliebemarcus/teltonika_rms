@@ -9,7 +9,7 @@ import logging
 import random
 from typing import Any
 
-from aiohttp import ClientError, ClientResponse, ClientSession
+from aiohttp import ClientError, ClientResponse
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session
 
@@ -30,11 +30,9 @@ class RmsApiClient:
     def __init__(
         self,
         oauth_session: OAuth2Session,
-        session: ClientSession,
         endpoint_matrix: EndpointMatrix,
     ) -> None:
         self._oauth_session = oauth_session
-        self._session = session
         self._matrix = endpoint_matrix
         self._request_counter = 0
         self._request_window_start = datetime.now(tz=UTC)

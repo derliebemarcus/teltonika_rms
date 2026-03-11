@@ -1,0 +1,12 @@
+{
+  "name": "Teltonika RMS",
+  "content_in_root": true,
+  "domains": [
+    "teltonika_rms"
+  ],
+  "country": [
+    "LT"
+  ],
+  "homeassistant": "2025.1.0",
+  "render_readme": true
+}

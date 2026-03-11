@@ -4,9 +4,11 @@
   "codeowners": [
     "@marcus"
   ],
+  "integration_type": "service",
   "config_flow": true,
   "documentation": "https://developers.rms.teltonika-networks.com/",
   "iot_class": "cloud_polling",
+  "homeassistant": "2025.1.0",
   "loggers": [
     "custom_components.teltonika_rms"
   ],
@@ -15,7 +17,7 @@
   ],
   "requirements": [
     "python-socketio==5.11.2",
-    "PyYAML==6.0.2"
+    "pyyaml==6.0.2"
   ],
   "version": "0.1.0"
 }

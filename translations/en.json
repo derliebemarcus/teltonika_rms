@@ -26,7 +26,7 @@
           "estimated_devices": "Estimated number of devices",
           "tags": "Device tags filter (comma-separated)",
           "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path",
+          "spec_path": "Compiled OpenAPI YAML path (optional)",
           "enable_location": "Enable GPS location tracker entities"
         }
       }

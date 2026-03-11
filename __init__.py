@@ -12,7 +12,6 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import config_entry_oauth2_flow
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import RmsApiClient
 from .const import (
@@ -67,7 +66,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: TeltonikaRmsConfigEntry)
 
     api = RmsApiClient(
         oauth_session=oauth_session,
-        session=async_get_clientsession(hass),
         endpoint_matrix=endpoint_matrix,
     )
     status_manager = RmsStatusChannelManager(api)
