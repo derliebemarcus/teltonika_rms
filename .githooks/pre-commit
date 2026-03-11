@@ -1,12 +1,54 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"
 REPORT_FILE="$(mktemp "${TMPDIR:-/tmp}/teltonika-rms-pytest-XXXXXX.xml")"
-PYTHON_BIN="python3"
-if [ -x "$ROOT/.venv/bin/python" ]; then
-  PYTHON_BIN="$ROOT/.venv/bin/python"
+VENV_DIR="$ROOT/.venv-test"
+
+pick_bootstrap_python() {
+  if command -v python3.13 >/dev/null 2>&1; then
+    echo "python3.13"
+    return
+  fi
+  if command -v python3 >/dev/null 2>&1; then
+    echo "python3"
+    return
+  fi
+  if command -v python >/dev/null 2>&1; then
+    echo "python"
+    return
+  fi
+  echo "[pre-commit] No Python interpreter found (python3.13/python3/python)." >&2
+  exit 1
+}
+
+BOOTSTRAP_PYTHON="$(pick_bootstrap_python)"
+
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  echo "[pre-commit] Creating local test environment at $VENV_DIR using $BOOTSTRAP_PYTHON."
+  "$BOOTSTRAP_PYTHON" -m venv "$VENV_DIR"
 fi
+
+PYTHON_BIN="$VENV_DIR/bin/python"
+
+module_exists() {
+  local module="$1"
+  "$PYTHON_BIN" -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('$module') else 1)"
+}
+
+ensure_package() {
+  local module="$1"
+  shift
+  if module_exists "$module"; then
+    return
+  fi
+  echo "[pre-commit] Installing missing dependency for '$module': $*"
+  "$PYTHON_BIN" -m pip install --disable-pip-version-check "$@"
+  if ! module_exists "$module"; then
+    echo "[pre-commit] Dependency '$module' is still unavailable after installation." >&2
+    exit 1
+  fi
+}
 
 cleanup() {
   rm -f "$REPORT_FILE"
@@ -15,8 +57,24 @@ trap cleanup EXIT
 
 cd "$ROOT" || exit 1
 
-echo "[pre-commit] Running full test suite..."
-"$PYTHON_BIN" -m pytest --maxfail=0 --junitxml "$REPORT_FILE"
+ensure_package "pytest" "pytest>=8,<10"
+ensure_package "socketio" "python-socketio==5.11.2"
+
+HAS_HA_TESTS=0
+if [ -d "$ROOT/tests/ha" ]; then
+  HAS_HA_TESTS=1
+  ensure_package "homeassistant" "homeassistant>=2025.1.0"
+fi
+
+TEST_TARGETS=("tests/unit")
+if [ "$HAS_HA_TESTS" -eq 1 ]; then
+  TEST_TARGETS+=("tests/ha")
+  echo "[pre-commit] Running test suite: unit + HA."
+else
+  echo "[pre-commit] Running test suite: unit only."
+fi
+
+"$PYTHON_BIN" -m pytest --maxfail=0 "${TEST_TARGETS[@]}" --junitxml "$REPORT_FILE"
 PYTEST_EXIT=$?
 
 "$PYTHON_BIN" tools/print_pytest_summary.py "$REPORT_FILE"
