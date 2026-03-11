@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.4.0 - 2026-03-11
+
+- Updated integration metadata documentation URL:
+  - Home Assistant "help/documentation" link now points to the project repository:
+    - `https://github.com/derliebemarcus/teltonika_rms`
+
 ## 0.3.1 - 2026-03-11
 
 - Refined test execution split:
