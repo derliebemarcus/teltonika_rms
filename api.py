@@ -144,8 +144,8 @@ class RmsApiClient:
     async def async_list_devices(
         self,
         *,
-        tags: list[str] | None,
-        device_status: str | None,
+        tags: list[str] | None = None,
+        device_status: str | None = None,
         page_size: int = 50,
         max_pages: int = 20,
     ) -> list[dict[str, Any]]:
