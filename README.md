@@ -102,7 +102,8 @@ python3 tools/check_translations.py
 ```
 
 - Test suite follows HA-style layout under:
-  - `tests/components/teltonika_rms/`
+  - `tests/unit/` (runs without Home Assistant dependencies)
+  - `tests/ha/` (requires Home Assistant Python dependencies)
 
 - Run tests with:
 
@@ -110,8 +111,8 @@ python3 tools/check_translations.py
 python3 -m pytest
 ```
 
-Hinweis: Für den vollständigen Testlauf wird eine Home-Assistant-Entwicklungsumgebung benötigt
-(siehe Developer Docs), da Integrationsmodule `homeassistant.*` importieren.
+Hinweis: HA-nahe Tests unter `tests/ha/` werden nur in einer passenden Home-Assistant-
+Entwicklungsumgebung ausgeführt (siehe Developer Docs).
 
 - Release notes are tracked in:
   - `CHANGELOG.md`
@@ -126,13 +127,14 @@ tools/install_git_hooks.sh
 
 `pre-commit` hook behavior:
 
-- Runs the full test suite (`python3 -m pytest --maxfail=0`)
+- Runs always with `--maxfail=0`:
+  - without `homeassistant`: `tests/unit`
+  - with `homeassistant`: `tests/unit` + `tests/ha`
 - Always prints per-test summary with:
   - test name
   - duration
   - result
 - Blocks commit when at least one test fails
-- Requires a test environment where integration imports resolve (Home Assistant dev dependencies installed)
 
 `pre-push` hook behavior:
 

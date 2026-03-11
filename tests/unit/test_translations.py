@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 STRINGS = ROOT / "strings.json"
 TRANSLATIONS_DIR = ROOT / "translations"
 

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from const import UPDATE_PLATFORMS
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "manifest.json"
 
 

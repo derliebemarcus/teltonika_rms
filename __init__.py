@@ -5,16 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
-from homeassistant.helpers import config_entry_oauth2_flow
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-
-from .api import OAuth2RmsAuthClient, PatRmsAuthClient, RmsApiClient
 from .const import (
     AUTH_MODE_OAUTH2,
     AUTH_MODE_PAT,
@@ -26,37 +18,47 @@ from .const import (
     DOMAIN,
     SERVICE_REFRESH,
 )
-from .coordinator import CoordinatorBundle, InventoryCoordinator, StateCoordinator, async_refresh_all
-from .endpoint_matrix import load_endpoint_matrix
-from .status_channel import RmsStatusChannelManager
+
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
 
 LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: tuple[Platform, ...] = (
-    Platform.BINARY_SENSOR,
-    Platform.SENSOR,
-    Platform.DEVICE_TRACKER,
-)
+try:
+    from homeassistant.const import Platform
+
+    PLATFORMS: tuple[str, ...] = (
+        Platform.BINARY_SENSOR,
+        Platform.SENSOR,
+        Platform.DEVICE_TRACKER,
+    )
+except ModuleNotFoundError:
+    PLATFORMS = ("binary_sensor", "sensor", "device_tracker")
 
 
 @dataclass(slots=True)
 class TeltonikaRmsRuntime:
     """Runtime data attached to config entry."""
 
-    bundle: CoordinatorBundle
+    bundle: Any
     remove_service_listener: Callable[[], None] | None = None
-
-
-TeltonikaRmsConfigEntry = ConfigEntry[TeltonikaRmsRuntime]
-
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Set up integration domain."""
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: TeltonikaRmsConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
     """Set up Teltonika RMS from config entry."""
+    from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+    from homeassistant.helpers import config_entry_oauth2_flow
+    from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+    from .api import OAuth2RmsAuthClient, PatRmsAuthClient, RmsApiClient
+    from .coordinator import CoordinatorBundle, InventoryCoordinator, StateCoordinator
+    from .endpoint_matrix import load_endpoint_matrix
+    from .status_channel import RmsStatusChannelManager
+
     auth_mode = str(entry.data.get(CONF_AUTH_MODE, AUTH_MODE_OAUTH2))
     if auth_mode == AUTH_MODE_PAT:
         pat_token = str(entry.data.get(CONF_PAT_TOKEN, "")).strip()
@@ -112,7 +114,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: TeltonikaRmsConfigEntry)
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: TeltonikaRmsConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: Any) -> bool:
     """Unload Teltonika RMS entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if not unload_ok:
@@ -123,13 +125,15 @@ async def async_unload_entry(hass: HomeAssistant, entry: TeltonikaRmsConfigEntry
     return True
 
 
-async def async_reload_entry(hass: HomeAssistant, entry: TeltonikaRmsConfigEntry) -> None:
+async def async_reload_entry(hass: HomeAssistant, entry: Any) -> None:
     """Reload config entry when options change."""
     await hass.config_entries.async_reload(entry.entry_id)
 
 
 def _build_refresh_handler(hass: HomeAssistant):
-    async def _async_handle_refresh(call: ServiceCall) -> None:
+    from .coordinator import async_refresh_all
+
+    async def _async_handle_refresh(call: Any) -> None:
         entries = hass.config_entries.async_entries(DOMAIN)
         for entry in entries:
             runtime: TeltonikaRmsRuntime | None = getattr(entry, "runtime_data", None)
@@ -140,7 +144,7 @@ def _build_refresh_handler(hass: HomeAssistant):
     return _async_handle_refresh
 
 
-def _merged_options(entry: ConfigEntry) -> dict[str, Any]:
+def _merged_options(entry: Any) -> dict[str, Any]:
     merged = dict(DEFAULT_OPTIONS)
     merged.update(entry.options)
     return merged

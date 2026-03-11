@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.3.1 - 2026-03-11
+
+- Refined test execution split:
+  - Added `tests/unit/` for pure unit tests that run without Home Assistant dependencies.
+  - Added `tests/ha/` for Home Assistant-dependent tests.
+- Updated `pre-commit` hook behavior:
+  - Without `homeassistant` installed: runs all unit tests.
+  - With `homeassistant` installed: runs unit + HA test suites.
+  - Keeps `--maxfail=0` and blocks commit only after all selected tests completed.
+- Added HA-test marker configuration in `pytest.ini`.
+- Refactored integration module imports in `__init__.py` to avoid importing heavy HA/runtime dependencies at module import time, improving testability outside HA.
+
 ## 0.3.0 - 2026-03-11
 
 - Added versioned repository Git hooks (`.githooks`):
