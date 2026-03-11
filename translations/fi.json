@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Tili on jo määritetty.",
+      "wrong_account": "Uudelleentodennus käytti toista RMS tiliä.",
+      "reauth_failed": "Uudelleentodennusistunto on virheellinen."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Henkilökohtainen käyttöoikeustunnus ei voi olla tyhjä."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Yhdistä Teltonika RMS",
+        "description": "Valitse todennustapa Teltonika RMS:lla.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (suositus)",
+          "pat": "Henkilökohtainen käyttötunnus (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Ota yhteyttä PAT",
+        "description": "Liitä Teltonika RMS henkilökohtainen käyttötunnuksesi.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Henkilökohtainen pääsytunnus"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Yhdistä uudelleen Teltonika RMS",
+        "description": "Tunnus Teltonika RMS on vanhentunut tai peruutettu."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Päivitä PAT tunnus",
+        "description": "Anna korvaava Teltonika RMS henkilökohtainen käyttötunnus.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Henkilökohtainen pääsytunnus"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Vaihtoehdot",
+        "description": "Säädä äänestyskäyttäytymistä ja API-pyyntöbudjettia.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Varaston kyselyn aikaväli (sekuntia)",
+          "state_interval": "Osavaltion äänestysväli (sekuntia)",
+          "estimated_devices": "Laitteiden arvioitu määrä",
+          "tags": "Laitetunnisteiden suodatin (pilkuilla erotettu)",
+          "device_status": "Laitteen tilasuodatin",
+          "spec_path": "Käännetty OpenAPI YAML polku (valinnainen)",
+          "enable_location": "Ota käyttöön GPS sijainninseurantayksikkö"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Määritetyt aikavälit ylittävät RMS kuukausittaisen pyynnön budjettivaran."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "verkossa"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Malli"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Laiteohjelmisto"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Sarja"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Viimeksi nähty"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Sijainti"
       }
     }
   }

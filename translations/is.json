@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Reikningurinn er þegar stilltur.",
+      "wrong_account": "Endurvottun notaði annan RMS reikning.",
+      "reauth_failed": "Endurvottunarlota er ógild."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Persónulegur aðgangslykill má ekki vera tómur."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Tengdu Teltonika RMS",
+        "description": "Veldu hvernig á að auðkenna með Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (mælt með)",
+          "pat": "Persónulegur aðgangslykill (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Tengstu við PAT",
+        "description": "Límdu Teltonika RMS persónulega aðgangslykilinn þinn.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Persónulegur aðgangslykill"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Tengdu aftur Teltonika RMS",
+        "description": "Teltonika RMS táknið þitt rann út eða var afturkallað."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Uppfærðu PAT tákn",
+        "description": "Gefðu upp Teltonika RMS persónulegan aðgangslykil í staðinn.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Persónulegur aðgangslykill"
         }
       }
     }
@@ -40,32 +40,32 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Valkostir",
+        "description": "Stilltu könnunarhegðun og kostnaðarhámark API-beiðna.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Tímabil birgðakannana (sekúndur)",
+          "state_interval": "Tímabil ríkiskönnunar (sekúndur)",
+          "estimated_devices": "Áætlaður fjöldi tækja",
+          "tags": "Tækjamerkisía (aðskilin með kommum)",
+          "device_status": "Stöðusía tækis",
+          "spec_path": "Samsett OpenAPI YAML slóð (valfrjálst)",
+          "enable_location": "Virkja GPS staðsetningarrakningareiningar"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Stillt tímabil fara yfir RMS mánaðarlegt kostnaðarhámark."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Á netinu"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Fyrirmynd"
       },
       "firmware": {
         "name": "Firmware"
@@ -74,12 +74,12 @@
         "name": "Serial"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Síðast séð"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Staðsetning"
       }
     }
   }

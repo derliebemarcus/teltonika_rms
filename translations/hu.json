@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "A fiók már konfigurálva van.",
+      "wrong_account": "Az újrahitelesítés másik RMS fiókot használt.",
+      "reauth_failed": "Az újrahitelesítési munkamenet érvénytelen."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "A személyes hozzáférési token nem lehet üres."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Csatlakozás Teltonika RMS",
+        "description": "Válassza ki a hitelesítés módját a Teltonika RMS segítségével.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (ajánlott)",
+          "pat": "Személyes hozzáférési token (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Kapcsolatfelvétel a következővel: PAT",
+        "description": "Illessze be Teltonika RMS személyes hozzáférési tokenjét.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Személyes hozzáférési token"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Csatlakozzon újra Teltonika RMS",
+        "description": "Az Ön Teltonika RMS tokenje lejárt vagy visszavonták."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Frissítse a PAT tokent",
+        "description": "Csere Teltonika RMS személyes hozzáférési tokent.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Személyes hozzáférési token"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Opciók",
+        "description": "Hangolja be a lekérdezési viselkedést és az API-kérés költségkeretét.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Készletlekérdezési intervallum (másodperc)",
+          "state_interval": "Államlekérdezési intervallum (másodperc)",
+          "estimated_devices": "Az eszközök becsült száma",
+          "tags": "Eszközcímkék szűrője (vesszővel elválasztva)",
+          "device_status": "Eszköz állapotszűrő",
+          "spec_path": "Összeállított OpenAPI YAML elérési út (opcionális)",
+          "enable_location": "Engedélyezze GPS helykövető entitást"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "A konfigurált időközök meghaladják a RMS havi kérés költségkeretét."
     }
   },
   "entity": {
@@ -65,21 +65,21 @@
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modell"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Sorozatszám"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Utoljára látott"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Elhelyezkedés"
       }
     }
   }

@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Ο λογαριασμός έχει ήδη διαμορφωθεί.",
+      "wrong_account": "Ο εκ νέου έλεγχος ταυτότητας χρησιμοποίησε διαφορετικό λογαριασμό RMS.",
+      "reauth_failed": "Η περίοδος λειτουργίας επαναληπτικού ελέγχου ταυτότητας δεν είναι έγκυρη."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Το διακριτικό προσωπικής πρόσβασης δεν μπορεί να είναι κενό."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Σύνδεση Teltonika RMS",
+        "description": "Επιλέξτε τον τρόπο ελέγχου ταυτότητας με Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (συνιστάται)",
+          "pat": "Προσωπικό διακριτικό πρόσβασης (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Συνδεθείτε με PAT",
+        "description": "Επικολλήστε το Teltonika RMS προσωπικό σας διακριτικό πρόσβασης.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Προσωπικό διακριτικό πρόσβασης"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Επανασύνδεση Teltonika RMS",
+        "description": "Το διακριτικό σας Teltonika RMS έληξε ή ανακλήθηκε."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Ενημέρωση PAT διακριτικού",
+        "description": "Παρέχετε ένα αντικατάσταση Teltonika RMS κουπόνι προσωπικής πρόσβασης.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Προσωπικό διακριτικό πρόσβασης"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Επιλογές",
+        "description": "Συντονίστε τη συμπεριφορά δημοσκοπήσεων και τον προϋπολογισμό αιτήματος API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Διάστημα δημοσκόπησης αποθέματος (δευτερόλεπτα)",
+          "state_interval": "Διάστημα ψηφοφορίας στην πολιτεία (δευτερόλεπτα)",
+          "estimated_devices": "Εκτιμώμενος αριθμός συσκευών",
+          "tags": "Φίλτρο ετικετών συσκευής (χωρισμένο με κόμμα)",
+          "device_status": "Φίλτρο κατάστασης συσκευής",
+          "spec_path": "Μεταγλώττιση OpenAPI YAML διαδρομή (προαιρετικό)",
+          "enable_location": "Ενεργοποιήστε GPS οντότητες παρακολούθησης τοποθεσίας"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Τα διαμορφωμένα διαστήματα υπερβαίνουν το RMS μηνιαίο εύρος προϋπολογισμού αιτήματος."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Διαδικτυακά"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Μοντέλο"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Υλικολογισμικό"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Σειράς"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Τελευταία επίσκεψη"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Τοποθεσία"
       }
     }
   }

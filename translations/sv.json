@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Kontot är redan konfigurerat.",
+      "wrong_account": "Omautentisering använde ett annat RMS konto.",
+      "reauth_failed": "Återautentiseringssessionen är ogiltig."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Personlig åtkomsttoken kan inte vara tom."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Anslut Teltonika RMS",
+        "description": "Välj hur du ska autentisera med Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (rekommenderas)",
+          "pat": "Personlig åtkomsttoken (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Anslut med PAT",
+        "description": "Klistra in din Teltonika RMS personliga åtkomsttoken.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Personlig åtkomsttoken"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Återanslut Teltonika RMS",
+        "description": "Ditt Teltonika RMS token har löpt ut eller har återkallats."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Uppdatera PAT token",
+        "description": "Ge en ersättnings Teltonika RMS personlig åtkomsttoken.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Personlig åtkomsttoken"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Alternativ",
+        "description": "Justera pollingbeteende och API-begäranbudget.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Inventeringsundersökningsintervall (sekunder)",
+          "state_interval": "Tillståndsundersökningsintervall (sekunder)",
+          "estimated_devices": "Uppskattat antal enheter",
+          "tags": "Filter för enhetstaggar (kommaseparerad)",
+          "device_status": "Enhetsstatusfilter",
+          "spec_path": "Sammanställd OpenAPI YAML sökväg (valfritt)",
+          "enable_location": "Aktivera GPS platsspårningsenheter"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Konfigurerade intervall överstiger RMS budgetutrymme för månadsförfrågan."
     }
   },
   "entity": {
@@ -65,21 +65,21 @@
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modell"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Serie"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Senast sett"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Plats"
       }
     }
   }

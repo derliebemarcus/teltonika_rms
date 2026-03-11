@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Račun je već konfiguriran.",
+      "wrong_account": "Ponovna autentifikacija je koristila drugi RMS nalog.",
+      "reauth_failed": "Sesija ponovne autentifikacije je nevažeća."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Lični token za pristup ne može biti prazan."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Poveži Teltonika RMS",
+        "description": "Odaberite način autentifikacije pomoću Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (preporučeno)",
+          "pat": "Lični pristupni token (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Povežite se sa PAT",
+        "description": "Zalijepite svoj Teltonika RMS token ličnog pristupa.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Lični pristupni token"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Ponovo povežite Teltonika RMS",
+        "description": "Vaš token Teltonika RMS je istekao ili je opozvan."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Ažurirajte PAT token",
+        "description": "Navedite zamjenski Teltonika RMS lični token za pristup.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Lični pristupni token"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Opcije",
+        "description": "Podesite ponašanje anketiranja i budžet zahtjeva za API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Interval anketiranja inventara (sekunde)",
+          "state_interval": "Interval državnog glasanja (sekunde)",
+          "estimated_devices": "Procijenjeni broj uređaja",
+          "tags": "Filter oznaka uređaja (odvojen zarezima)",
+          "device_status": "Filter statusa uređaja",
+          "spec_path": "Sastavljena OpenAPI YAML staza (opciono)",
+          "enable_location": "Omogućite GPS entitete za praćenje lokacije"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Konfigurirani intervali premašuju RMS mjesečni iznos budžeta zahtjeva."
     }
   },
   "entity": {
@@ -79,7 +79,7 @@
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Lokacija"
       }
     }
   }

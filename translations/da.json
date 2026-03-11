@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Kontoen er allerede konfigureret.",
+      "wrong_account": "Genautentificering brugte en anden RMS konto.",
+      "reauth_failed": "Gengodkendelsessession er ugyldig."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Personligt adgangstoken må ikke være tomt."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Tilslut Teltonika RMS",
+        "description": "Vælg, hvordan du godkender med Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (anbefales)",
+          "pat": "Personligt adgangstoken (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Forbind med PAT",
+        "description": "Indsæt dit Teltonika RMS personlige adgangstoken.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Personligt adgangstoken"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Gentilslut Teltonika RMS",
+        "description": "Dit Teltonika RMS token udløb eller blev tilbagekaldt."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Opdater PAT token",
+        "description": "Angiv en erstatnings Teltonika RMS personlig adgangstoken.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Personligt adgangstoken"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Valgmuligheder",
+        "description": "Juster afstemningsadfærd og API-anmodningsbudget.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Afstemningsinterval for beholdning (sekunder)",
+          "state_interval": "Tilstandsundersøgelsesinterval (sekunder)",
+          "estimated_devices": "Anslået antal enheder",
+          "tags": "Filter for enhedstags (kommasepareret)",
+          "device_status": "Enhedsstatusfilter",
+          "spec_path": "Kompileret OpenAPI YAML sti (valgfrit)",
+          "enable_location": "Aktiver GPS lokationssporingsenheder"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Konfigurerede intervaller overstiger RMS månedligt budgetrum for anmodning."
     }
   },
   "entity": {
@@ -71,15 +71,15 @@
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Seriel"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Sidst set"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Beliggenhed"
       }
     }
   }

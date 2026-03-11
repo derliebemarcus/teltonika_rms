@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Konts jau ir konfigurēts.",
+      "wrong_account": "Atkārtoti autentificējot tika izmantots cits RMS konts.",
+      "reauth_failed": "Atkārtotas autentifikācijas sesija nav derīga."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Personiskās piekļuves pilnvaras lauks nedrīkst būt tukšs."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Savienot Teltonika RMS",
+        "description": "Izvēlieties, kā autentificēties ar Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (ieteicams)",
+          "pat": "Personiskās piekļuves pilnvara (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Sazinieties ar PAT",
+        "description": "Ielīmējiet savu Teltonika RMS personīgo piekļuves pilnvaru.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Personiskā piekļuves pilnvara"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Atkārtoti savienot Teltonika RMS",
+        "description": "Jūsu Teltonika RMS pilnvaras derīguma termiņš beidzās vai tas tika atsaukts."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Atjauniniet PAT marķieri",
+        "description": "Nodrošiniet aizstājēju Teltonika RMS personiskās piekļuves pilnvaru.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Personiskā piekļuves pilnvara"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Iespējas",
+        "description": "Pielāgojiet aptaujas darbību un API pieprasījumu budžetu.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Krājumu aptaujas intervāls (sekundēs)",
+          "state_interval": "Štata aptaujas intervāls (sekundēs)",
+          "estimated_devices": "Paredzamais ierīču skaits",
+          "tags": "Ierīces tagu filtrs (atdalīts ar komatu)",
+          "device_status": "Ierīces statusa filtrs",
+          "spec_path": "Apkopotais OpenAPI YAML ceļš (neobligāti)",
+          "enable_location": "Iespējot GPS atrašanās vietas izsekošanas entītijas"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Konfigurētie intervāli pārsniedz RMS mēneša pieprasījuma budžeta iespējas."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Tiešsaistē"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modelis"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Programmaparatūra"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Seriāls"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Pēdējo reizi redzēts"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Atrašanās vieta"
       }
     }
   }

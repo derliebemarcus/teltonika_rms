@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Account is al geconfigureerd.",
+      "wrong_account": "Bij de herauthenticatie werd een ander RMS-account gebruikt.",
+      "reauth_failed": "Herauthenticatiesessie is ongeldig."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Persoonlijk toegangstoken mag niet leeg zijn."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Verbind Teltonika RMS",
+        "description": "Kies hoe u zich wilt authenticeren met Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (aanbevolen)",
+          "pat": "Persoonlijk toegangstoken (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Maak verbinding met PAT",
+        "description": "Plak uw Teltonika RMS persoonlijke toegangstoken.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Persoonlijk toegangstoken"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Opnieuw verbinden Teltonika RMS",
+        "description": "Uw Teltonika RMS-token is verlopen of is ingetrokken."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Update PAT-token",
+        "description": "Geef een vervangend persoonlijk toegangstoken Teltonika RMS op.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Persoonlijk toegangstoken"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Opties",
+        "description": "Stem het pollinggedrag en het API-aanvraagbudget af.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Polling-interval voor inventaris (seconden)",
+          "state_interval": "Status polling-interval (seconden)",
+          "estimated_devices": "Geschat aantal apparaten",
+          "tags": "Filter apparaattags (door komma's gescheiden)",
+          "device_status": "Apparaatstatusfilter",
+          "spec_path": "Gecompileerd OpenAPI YAML pad (optioneel)",
+          "enable_location": "Schakel GPS locatietracker-entiteiten in"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Geconfigureerde intervallen overschrijden RMS maandelijkse budgetruimte voor aanvragen."
     }
   },
   "entity": {
@@ -71,15 +71,15 @@
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Serieel"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Laatst gezien"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Locatie"
       }
     }
   }

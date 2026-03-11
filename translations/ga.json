@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Tá an cuntas cumraithe cheana féin.",
+      "wrong_account": "D’úsáid athfhíordheimhniú cuntas RMS eile.",
+      "reauth_failed": "Tá an seisiún athfhíordheimhnithe neamhbhailí."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Ní féidir le comhartha rochtana pearsanta a bheith folamh."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Ceangail Teltonika RMS",
+        "description": "Roghnaigh conas a fhíordheimhniú le Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (molta)",
+          "pat": "Comhartha rochtana pearsanta (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Ceangail le PAT",
+        "description": "Greamaigh do Teltonika RMS chomhartha rochtana pearsanta.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Comhartha rochtana pearsanta"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Athcheangail Teltonika RMS",
+        "description": "Chuaigh do chomhartha Teltonika RMS in éag nó cúlghaireadh é."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Nuashonraigh PAT comhartha",
+        "description": "Cuir comhartha rochtana pearsanta Teltonika RMS athsholáthair ar fáil.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Comhartha rochtana pearsanta"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Roghanna",
+        "description": "Tuin iompar vótaíochta agus buiséad iarratais API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Eatramh vótaíochta fardail (soicindí)",
+          "state_interval": "Eatramh vótaíochta stáit (soicindí)",
+          "estimated_devices": "An líon feistí measta",
+          "tags": "Scagaire clibeanna gléis (scartha le camóg)",
+          "device_status": "Scagaire stádais gléis",
+          "spec_path": "Conair OpenAPI YAML tiomsaithe (roghnach)",
+          "enable_location": "Cumasaigh GPS aonáin rianaithe suímh"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Sáraíonn eatraimh chumraithe RMS spás cloiginn buiséid d’iarratais mhíosúla."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Ar líne"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Múnla"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "sraitheach"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Feicthe go Deiridh"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Suíomh"
       }
     }
   }

@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Konto jest już skonfigurowane.",
+      "wrong_account": "Do ponownego uwierzytelnienia użyto innego konta RMS.",
+      "reauth_failed": "Sesja ponownego uwierzytelniania jest nieprawidłowa."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Osobisty token dostępu nie może być pusty."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Połącz Teltonika RMS",
+        "description": "Wybierz sposób uwierzytelniania za pomocą Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (zalecane)",
+          "pat": "Osobisty token dostępu (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Połącz się z PAT",
+        "description": "Wklej swój Teltonika RMS osobisty token dostępu.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Osobisty token dostępu"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Połącz ponownie Teltonika RMS",
+        "description": "Twój token Teltonika RMS wygasł lub został unieważniony."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
+        "title": "Zaktualizuj token PAT.",
         "description": "Provide a replacement Teltonika RMS personal access token.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Osobisty token dostępu"
         }
       }
     }
@@ -40,16 +40,16 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Opcje",
+        "description": "Dostosuj zachowanie odpytywania i budżet żądań API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Interwał sondowania zapasów (sekundy)",
+          "state_interval": "Interwał odpytywania stanu (sekundy)",
+          "estimated_devices": "Szacunkowa liczba urządzeń",
+          "tags": "Filtr tagów urządzeń (rozdzielany przecinkami)",
+          "device_status": "Filtr stanu urządzenia",
+          "spec_path": "Skompilowana ścieżka OpenAPI YAML (opcjonalnie)",
+          "enable_location": "Włącz GPS jednostki śledzenia lokalizacji"
         }
       }
     },
@@ -60,7 +60,7 @@
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "W Internecie"
       }
     },
     "sensor": {
@@ -68,18 +68,18 @@
         "name": "Model"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Oprogramowanie sprzętowe"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Seryjny"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Ostatnio widziany"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Lokalizacja"
       }
     }
   }

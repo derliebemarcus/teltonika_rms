@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Le compte est déjà configuré.",
+      "wrong_account": "La réauthentification a utilisé un autre compte RMS.",
+      "reauth_failed": "La session de réauthentification n'est pas valide."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Le jeton d'accès personnel ne peut pas être vide."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Connectez Teltonika RMS",
+        "description": "Choisissez comment vous authentifier avec Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (recommandé)",
+          "pat": "Jeton d'accès personnel (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Connectez-vous avec PAT",
+        "description": "Collez votre jeton d'accès personnel Teltonika RMS.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Jeton d'accès personnel"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Reconnecter Teltonika RMS",
+        "description": "Votre jeton Teltonika RMS a expiré ou a été révoqué."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Mettre à jour le jeton PAT",
+        "description": "Fournissez un jeton d'accès personnel de remplacement Teltonika RMS.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Jeton d'accès personnel"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMSOptions",
+        "description": "Ajustez le comportement des sondages et le budget des requêtes API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Intervalle d'interrogation de l'inventaire (secondes)",
+          "state_interval": "Intervalle d'interrogation de l'état (secondes)",
+          "estimated_devices": "Nombre estimé d'appareils",
+          "tags": "Filtre de balises d'appareil (séparées par des virgules)",
+          "device_status": "Filtre d'état de l'appareil",
+          "spec_path": "Chemin OpenAPI YAML compilé (facultatif)",
+          "enable_location": "Activer GPS entités de suivi de localisation"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Les intervalles configurés dépassent RMS marge de budget de demande mensuelle."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "En ligne"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modèle"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Micrologiciel"
       },
       "serial": {
-        "name": "Serial"
+        "name": "En série"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Vu pour la dernière fois"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Emplacement"
       }
     }
   }

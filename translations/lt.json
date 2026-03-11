@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Paskyra jau sukonfigūruota.",
+      "wrong_account": "Pakartotiniam autentifikavimui buvo naudojama kita RMS paskyra.",
+      "reauth_failed": "Pakartotinio autentifikavimo seansas netinkamas."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Asmeninės prieigos prieigos rakto laukas negali būti tuščias."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Prisijunkite Teltonika RMS",
+        "description": "Pasirinkite, kaip autentifikuoti naudojant Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (rekomenduojama)",
+          "pat": "Asmeninis prieigos raktas (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Susisiekite su PAT",
+        "description": "Įklijuokite savo Teltonika RMS asmeninį prieigos raktą.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Asmeninis prieigos raktas"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Prisijunkite iš naujo Teltonika RMS",
+        "description": "Jūsų Teltonika RMS prieigos raktas baigėsi arba buvo atšauktas."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Atnaujinti PAT prieigos raktą",
+        "description": "Pateikite pakaitinį Teltonika RMS asmeninį prieigos raktą.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Asmeninis prieigos raktas"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Parinktys",
+        "description": "Sureguliuokite apklausos elgesį ir API užklausos biudžetą.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Atsargų apklausos intervalas (sekundėmis)",
+          "state_interval": "Valstijos apklausos intervalas (sekundėmis)",
+          "estimated_devices": "Numatomas įrenginių skaičius",
+          "tags": "Įrenginio žymų filtras (atskirtas kableliais)",
+          "device_status": "Įrenginio būsenos filtras",
+          "spec_path": "Sukompiliuotas OpenAPI YAML kelias (neprivaloma)",
+          "enable_location": "Įgalinti GPS vietos stebėjimo objektus"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Sukonfigūruoti intervalai viršija RMS mėnesio užklausos biudžeto laisvą."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Prisijungę"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modelis"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Serialas"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Paskutinį kartą matytas"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Vieta"
       }
     }
   }

@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Сметката е веќе конфигурирана.",
+      "wrong_account": "Повторната автентикација користеше друга сметка RMS.",
+      "reauth_failed": "Сесијата за повторна автентикација е неважечка."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Токенот за личен пристап не може да биде празен."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Поврзете Teltonika RMS",
+        "description": "Изберете како да се автентицира со Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (препорачано)",
+          "pat": "Токен за личен пристап (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Поврзете се со PAT",
+        "description": "Залепете го вашиот Teltonika RMS токен за личен пристап.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Токен за личен пристап"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Поврзете се повторно Teltonika RMS",
+        "description": "Вашиот токен Teltonika RMS истече или беше отповикан."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Ажурирајте го PAT токен",
+        "description": "Обезбедете замена за Teltonika RMS токен за личен пристап.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Токен за личен пристап"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Опции",
+        "description": "Прилагодете го однесувањето на анкетата и буџетот за барање API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Интервал на анкетирање на залихи (секунди)",
+          "state_interval": "Државниот интервал на гласање (секунди)",
+          "estimated_devices": "Проценет број на уреди",
+          "tags": "Филтер за ознаки на уредот (одделен со запирка)",
+          "device_status": "Филтер за статус на уредот",
+          "spec_path": "Составена OpenAPI YAML патека (изборно)",
+          "enable_location": "Овозможете GPS ентитети за следење локација"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Конфигурираните интервали надминуваат RMS месечни барања за буџет."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Онлајн"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Модел"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Фирмвер"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Сериски"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Последно виден"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Локација"
       }
     }
   }

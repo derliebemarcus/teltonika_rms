@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "L'account è già configurato.",
+      "wrong_account": "La riautenticazione ha utilizzato un account RMS diverso.",
+      "reauth_failed": "La sessione di riautenticazione non è valida."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Il token di accesso personale non può essere vuoto."
     },
     "step": {
       "user": {
         "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "description": "Scegli come autenticarti con Teltonika RMS.",
         "menu_options": {
           "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "pat": "Token di accesso personale (PAT)"
         }
       },
       "pat": {
         "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "description": "Incolla il tuo Teltonika RMS token di accesso personale.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Token di accesso personale"
         }
       },
       "reauth_confirm": {
         "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "description": "Il tuo token Teltonika RMS è scaduto o è stato revocato."
       },
       "reauth_pat": {
         "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "description": "Fornire un token di accesso personale sostitutivo Teltonika RMS.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Token di accesso personale"
         }
       }
     }
@@ -41,45 +41,45 @@
     "step": {
       "init": {
         "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "description": "Ottimizza il comportamento del polling e il budget delle richieste API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Intervallo di polling dell'inventario (secondi)",
+          "state_interval": "Intervallo di polling dello stato (secondi)",
+          "estimated_devices": "Numero stimato di dispositivi",
+          "tags": "Filtro tag dispositivo (separati da virgole)",
+          "device_status": "Filtro stato dispositivo",
+          "spec_path": "Percorso OpenAPI YAML compilato (facoltativo)",
+          "enable_location": "Abilita GPS entità di rilevamento della posizione"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Gli intervalli configurati superano RMS margine di budget della richiesta mensile."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "In linea"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modello"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Seriale"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Visto l'ultima volta"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Posizione"
       }
     }
   }

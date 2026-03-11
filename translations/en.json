@@ -1,7 +1,7 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
+      "already_configured": "Account is already configured.",
       "wrong_account": "Reauthentication used a different RMS account.",
       "reauth_failed": "Reauthentication session is invalid."
     },

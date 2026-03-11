@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Účet je již nakonfigurován.",
+      "wrong_account": "Při opětovné autentizaci byl použit jiný RMS účet.",
+      "reauth_failed": "Relace opětovného ověření je neplatná."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Osobní přístupový token nemůže být prázdný."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Připojit Teltonika RMS",
+        "description": "Vyberte způsob ověření pomocí Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (doporučeno)",
+          "pat": "Osobní přístupový token (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Spojte se s PAT",
+        "description": "Vložte svůj osobní přístupový token Teltonika RMS.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Osobní přístupový token"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Znovu připojit Teltonika RMS",
+        "description": "Platnost vašeho Teltonika RMS tokenu vypršela nebo byl odvolán."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Aktualizujte PAT token",
+        "description": "Poskytněte náhradní Teltonika RMS osobní přístupový token.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Osobní přístupový token"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Možnosti",
+        "description": "Vylaďte chování dotazování a rozpočet požadavku API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Interval dotazování inventáře (v sekundách)",
+          "state_interval": "Interval dotazování státu (v sekundách)",
+          "estimated_devices": "Odhadovaný počet zařízení",
+          "tags": "Filtr značek zařízení (oddělené čárkami)",
+          "device_status": "Filtr stavu zařízení",
+          "spec_path": "Kompilovaná cesta OpenAPI YAML (volitelné)",
+          "enable_location": "Povolit GPS entity sledování polohy"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Nakonfigurované intervaly překračují RMS měsíční rezervu rozpočtu požadavků."
     }
   },
   "entity": {
@@ -71,15 +71,15 @@
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Seriál"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Naposledy viděno"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Umístění"
       }
     }
   }

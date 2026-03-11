@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Konto on juba konfigureeritud.",
+      "wrong_account": "Taasautentimisel kasutati teist RMS kontot.",
+      "reauth_failed": "Taasautentimise seanss on kehtetu."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Isikliku juurdepääsu luba ei tohi olla tühi."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Ühendage Teltonika RMS",
+        "description": "Valige, kuidas autentida Teltonika RMS abil.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (soovitatav)",
+          "pat": "Isiklik juurdepääsuluba (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Ühendage kasutajaga PAT",
+        "description": "Kleepige oma Teltonika RMS isiklik juurdepääsuluba.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Isiklik juurdepääsuluba"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Ühendage uuesti Teltonika RMS",
+        "description": "Teie tunnus Teltonika RMS aegus või tühistati."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Värskenda märgi PAT",
+        "description": "Esitage asendus Teltonika RMS isiklik juurdepääsuluba.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Isiklik juurdepääsuluba"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Valikud",
+        "description": "Häälestage küsitluse käitumist ja API taotluse eelarvet.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Varude küsitluse intervall (sekundites)",
+          "state_interval": "Osariigi küsitluse intervall (sekundites)",
+          "estimated_devices": "Seadmete hinnanguline arv",
+          "tags": "Seadme siltide filter (komadega eraldatud)",
+          "device_status": "Seadme olekufilter",
+          "spec_path": "Koostatud OpenAPI YAML tee (valikuline)",
+          "enable_location": "Luba GPS asukoha jälgimise üksused"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Konfigureeritud intervallid ületavad RMS igakuise taotluse eelarveruumi."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Internetis"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Mudel"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Püsivara"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Sari"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Viimati nähtud"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Asukoht"
       }
     }
   }

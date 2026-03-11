@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Hesap zaten yapılandırılmış.",
+      "wrong_account": "Yeniden kimlik doğrulama farklı bir RMS hesap kullandı.",
+      "reauth_failed": "Yeniden kimlik doğrulama oturumu geçersiz."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Kişisel erişim belirteci boş olamaz."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Teltonika RMS'a bağlan",
+        "description": "Teltonika RMS ile kimlik doğrulamanın nasıl yapılacağını seçin.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (önerilir)",
+          "pat": "Kişisel erişim belirteci (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "PAT ile bağlan",
+        "description": "Teltonika RMS kişisel erişim belirtecinizi yapıştırın.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Kişisel erişim belirteci"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Teltonika RMS'ı yeniden bağla",
+        "description": "Teltonika RMS jetonunuzun süresi doldu veya iptal edildi."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "PAT jetonunu güncelle",
+        "description": "Yeni bir Teltonika RMS kişisel erişim jetonu sağlayın.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Kişisel erişim belirteci"
         }
       }
     }
@@ -40,46 +40,46 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Seçenekler",
+        "description": "Yoklama davranışını ve API istek bütçesini ayarlayın.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Envanter yoklama aralığı (saniye)",
+          "state_interval": "Durum yoklama aralığı (saniye)",
+          "estimated_devices": "Tahmini cihaz sayısı",
+          "tags": "Cihaz etiketleri filtresi (virgülle ayrılmış)",
+          "device_status": "Cihaz durumu filtresi",
+          "spec_path": "Derlenmiş OpenAPI YAML yolu (isteğe bağlı)",
+          "enable_location": "GPS konum izleyici varlığını etkinleştir"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Yapılandırılmış aralıklar RMS aylık istek bütçe tavanını aşıyor."
     }
   },
   "entity": {
     "binary_sensor": {
       "online": {
-        "name": "Online"
+        "name": "Çevrimiçi"
       }
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Modeli"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Seri"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Son Görülme"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Konum"
       }
     }
   }

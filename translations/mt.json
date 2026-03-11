@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Il-kont huwa diġà kkonfigurat.",
+      "wrong_account": "L-awtentikazzjoni mill-ġdid użat kont RMS differenti.",
+      "reauth_failed": "Is-sessjoni ta' awtentikazzjoni mill-ġdid mhix valida."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "It-token ta' aċċess personali ma jistax ikun vojt."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Qabbad Teltonika RMS",
+        "description": "Agħżel kif tivverifika b'Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (rakkomandat)",
+          "pat": "Token ta' aċċess personali (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Qabbad ma' PAT",
+        "description": "Paste Teltonika RMS token ta' aċċess personali tiegħek.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Token ta' aċċess personali"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Erġa' qabbad Teltonika RMS",
+        "description": "Il-Teltonika RMS token tiegħek skada jew ġie revokat."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Aġġorna PAT token",
+        "description": "Ipprovdi Teltonika RMS token ta' aċċess personali sostitut.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Token ta' aċċess personali"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Għażliet",
+        "description": "Agħfas l-imġiba tal-votazzjoni u l-baġit tat-talba tal-API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Intervall tal-votazzjoni tal-inventarju (sekondi)",
+          "state_interval": "Intervall tal-votazzjoni tal-istat (sekondi)",
+          "estimated_devices": "Numru stmat ta' apparati",
+          "tags": "Filtru tat-tikketti tat-tagħmir (separati bil-virgola)",
+          "device_status": "Filtru tal-istatus tal-apparat",
+          "spec_path": "OpenAPI YAML mogħdija kkumpilata (mhux obbligatorja)",
+          "enable_location": "Ippermetti GPS entitajiet li jsegwu l-lokazzjoni"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "L-intervalli kkonfigurati jaqbżu RMS limitu massimu ta' baġit ta' talba ta' kull xahar."
     }
   },
   "entity": {
@@ -65,21 +65,21 @@
     },
     "sensor": {
       "model": {
-        "name": "Model"
+        "name": "Mudell"
       },
       "firmware": {
         "name": "Firmware"
       },
       "serial": {
-        "name": "Serial"
+        "name": "Serjali"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Dehru l-aħħar"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Post"
       }
     }
   }

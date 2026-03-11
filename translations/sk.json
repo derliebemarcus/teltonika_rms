@@ -1,38 +1,38 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Account is already configured",
-      "wrong_account": "Reauthentication used a different RMS account.",
-      "reauth_failed": "Reauthentication session is invalid."
+      "already_configured": "Účet je už nakonfigurovaný.",
+      "wrong_account": "Opätovná autentifikácia použila iný RMS účet.",
+      "reauth_failed": "Relácia opätovnej autentifikácie je neplatná."
     },
     "error": {
-      "invalid_pat": "Personal access token cannot be empty."
+      "invalid_pat": "Osobný prístupový token nemôže byť prázdny."
     },
     "step": {
       "user": {
-        "title": "Connect Teltonika RMS",
-        "description": "Choose how to authenticate with Teltonika RMS.",
+        "title": "Pripojiť Teltonika RMS",
+        "description": "Vyberte spôsob overenia pomocou Teltonika RMS.",
         "menu_options": {
-          "oauth2": "OAuth2 (recommended)",
-          "pat": "Personal access token (PAT)"
+          "oauth2": "OAuth2 (odporúčané)",
+          "pat": "Osobný prístupový token (PAT)"
         }
       },
       "pat": {
-        "title": "Connect with PAT",
-        "description": "Paste your Teltonika RMS personal access token.",
+        "title": "Spojte sa s PAT",
+        "description": "Prilepte svoj osobný prístupový token Teltonika RMS.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Osobný prístupový token"
         }
       },
       "reauth_confirm": {
-        "title": "Reconnect Teltonika RMS",
-        "description": "Your Teltonika RMS token expired or was revoked."
+        "title": "Znovu pripojiť Teltonika RMS",
+        "description": "Platnosť vášho Teltonika RMS tokenu vypršala alebo bol odvolaný."
       },
       "reauth_pat": {
-        "title": "Update PAT token",
-        "description": "Provide a replacement Teltonika RMS personal access token.",
+        "title": "Aktualizujte PAT token",
+        "description": "Poskytnite náhradný Teltonika RMS osobný prístupový token.",
         "data": {
-          "pat_token": "Personal access token"
+          "pat_token": "Osobný prístupový token"
         }
       }
     }
@@ -40,21 +40,21 @@
   "options": {
     "step": {
       "init": {
-        "title": "Teltonika RMS Options",
-        "description": "Tune polling behavior and API request budget.",
+        "title": "Teltonika RMS Možnosti",
+        "description": "Vylaďte správanie pri hlasovaní a rozpočet požiadaviek API.",
         "data": {
-          "inventory_interval": "Inventory polling interval (seconds)",
-          "state_interval": "State polling interval (seconds)",
-          "estimated_devices": "Estimated number of devices",
-          "tags": "Device tags filter (comma-separated)",
-          "device_status": "Device status filter",
-          "spec_path": "Compiled OpenAPI YAML path (optional)",
-          "enable_location": "Enable GPS location tracker entities"
+          "inventory_interval": "Interval prieskumu inventára (sekundy)",
+          "state_interval": "Interval dotazovania štátu (sekundy)",
+          "estimated_devices": "Odhadovaný počet zariadení",
+          "tags": "Filter značiek zariadení (oddelené čiarkami)",
+          "device_status": "Filter stavu zariadenia",
+          "spec_path": "Kompilovaná cesta OpenAPI YAML (voliteľné)",
+          "enable_location": "Povoliť GPS entity sledovania polohy"
         }
       }
     },
     "error": {
-      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+      "request_budget_exceeded": "Nakonfigurované intervaly prekračujú RMS mesačnú rezervu rozpočtu požiadaviek."
     }
   },
   "entity": {
@@ -68,18 +68,18 @@
         "name": "Model"
       },
       "firmware": {
-        "name": "Firmware"
+        "name": "Firmvér"
       },
       "serial": {
         "name": "Serial"
       },
       "last_seen": {
-        "name": "Last Seen"
+        "name": "Naposledy videný"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Poloha"
       }
     }
   }
