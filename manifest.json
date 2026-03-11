@@ -1,0 +1,21 @@
+{
+  "domain": "teltonika_rms",
+  "name": "Teltonika RMS",
+  "codeowners": [
+    "@marcus"
+  ],
+  "config_flow": true,
+  "documentation": "https://developers.rms.teltonika-networks.com/",
+  "iot_class": "cloud_polling",
+  "loggers": [
+    "custom_components.teltonika_rms"
+  ],
+  "dependencies": [
+    "application_credentials"
+  ],
+  "requirements": [
+    "python-socketio==5.11.2",
+    "PyYAML==6.0.2"
+  ],
+  "version": "0.1.0"
+}

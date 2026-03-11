@@ -1,0 +1,57 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Account is already configured",
+      "wrong_account": "Reauthentication used a different RMS account."
+    },
+    "step": {
+      "user": {
+        "title": "Connect Teltonika RMS",
+        "description": "Authenticate against Teltonika RMS with OAuth2."
+      },
+      "reauth_confirm": {
+        "title": "Reconnect Teltonika RMS",
+        "description": "Your Teltonika RMS token expired or was revoked."
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Teltonika RMS Options",
+        "description": "Tune polling behavior and API request budget."
+      }
+    },
+    "error": {
+      "request_budget_exceeded": "Configured intervals exceed RMS monthly request budget headroom."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "online": {
+        "name": "Online"
+      }
+    },
+    "sensor": {
+      "model": {
+        "name": "Model"
+      },
+      "firmware": {
+        "name": "Firmware"
+      },
+      "serial": {
+        "name": "Serial"
+      }
+    },
+    "datetime": {
+      "last_seen": {
+        "name": "Last Seen"
+      }
+    },
+    "device_tracker": {
+      "location": {
+        "name": "Location"
+      }
+    }
+  }
+}

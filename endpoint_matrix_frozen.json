@@ -1,0 +1,37 @@
+{
+  "endpoints": {
+    "device_detail": {
+      "path": "/devices/{id}",
+      "polling": "safe",
+      "scopes": []
+    },
+    "device_location": {
+      "path": "/v3/devices/{id}/location",
+      "polling": "high-cost",
+      "scopes": [
+        "device_location:read"
+      ]
+    },
+    "device_state_aggregate": {
+      "path": "/v3/devices/status",
+      "polling": "async-channel",
+      "scopes": [
+        "devices:read"
+      ]
+    },
+    "device_state_single": {
+      "path": "/v3/devices/{id}/status",
+      "polling": "async-channel",
+      "scopes": [
+        "devices:read"
+      ]
+    },
+    "devices_list": {
+      "path": "/devices",
+      "polling": "safe",
+      "scopes": []
+    }
+  },
+  "generated_from": "compiled.yaml",
+  "version": 1
+}
