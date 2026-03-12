@@ -44,12 +44,17 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
    - Open [RMS](https://rms.teltonika-networks.com/).
    - Sign in with the RMS account that owns the devices you want to monitor.
    - Complete two-factor authentication if your account requires it.
-2. Create an OAuth application in [RMS Developers](https://developers.rms.teltonika-networks.com/).
-3. Configure callback URL:
+2. Create an OAuth application in [RMS Account Settings](https://account.rms.teltonika-networks.com/settings/application).
+3. Grant at least these scopes to the application:
+   - `devices:read`
+4. Add these scopes if needed:
+   - `device_location:read` for GPS tracker entities
+   - `device_actions:read` for broader status/channel visibility
+5. Configure callback URL:
    - `https://<your-home-assistant-url>/auth/external/callback`
-4. In Home Assistant, go to:
+6. In Home Assistant, go to:
    - `Settings -> Devices & Services -> Application Credentials`
-5. Add `Teltonika RMS` credentials (client ID + client secret).
+7. Add `Teltonika RMS` credentials (client ID + client secret).
 
 ### Personal Access Token (PAT)
 

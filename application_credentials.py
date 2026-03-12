@@ -33,9 +33,9 @@ async def async_get_auth_implementation(
         hass,
         auth_domain,
         credential.client_id,
-        credential.client_secret,
         AUTHORIZE_URL,
         TOKEN_URL,
+        credential.client_secret,
     )
 
 
