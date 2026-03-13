@@ -189,6 +189,8 @@ This will:
 - push the current branch and tags to GitHub
 - let GitHub Actions create or update the matching entry on the GitHub Releases page after `Quality Gates` and `Tests and Coverage` both succeed
 
+If a tag was pushed successfully but the GitHub release needs manual repair, open `Actions -> Publish Release -> Run workflow` and enter the existing tag, for example `v0.6.1`.
+
 <br/>
 
 ---
