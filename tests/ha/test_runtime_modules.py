@@ -450,6 +450,29 @@ def test_poe_switch_updates_port_configuration_and_surfaces_scope_error() -> Non
         asyncio.run(switch.async_turn_on())
 
 
+def test_poe_switch_handles_missing_port_and_setup_skips_invalid_ports() -> None:
+    bundle = _bundle(_normalized())
+    missing = RmsPoeSwitch(bundle, "dev-1", "missing-port")
+
+    assert missing.available is False
+    assert missing.is_on is False
+    assert missing.extra_state_attributes["port_id"] == "missing-port"
+
+    bundle.port_config.data = {
+        "dev-1": [
+            {"poe_enable": "1"},
+            {"id": "sfp1", "enabled": "1"},
+        ]
+    }
+    runtime = TeltonikaRmsRuntime(bundle=bundle)
+    entry = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
+    added_switch: list[Any] = []
+
+    asyncio.run(switch_setup(None, entry, added_switch.extend))
+
+    assert added_switch == []
+
+
 def test_coordinator_bundle_and_budget_validation() -> None:
     inventory = FakeListenerCoordinator({"dev-1": {"id": "dev-1", "name": "Router"}})
     state = FakeListenerCoordinator({"dev-1": {"state": {"online": True}, "location": {"latitude": 1, "longitude": 2}}})
