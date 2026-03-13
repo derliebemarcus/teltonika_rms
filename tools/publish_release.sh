@@ -15,11 +15,6 @@ if [ ! -f "$CHANGELOG" ]; then
   exit 1
 fi
 
-if ! command -v gh >/dev/null 2>&1; then
-  echo "GitHub CLI ('gh') is required to publish releases."
-  exit 1
-fi
-
 VERSION="$(
   python3 - "$MANIFEST" <<'PY'
 import json
@@ -61,34 +56,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-awk -v version="$VERSION" '
-  $0 ~ "^## " version " - " {capture=1; next}
-  capture && /^## / {exit}
-  capture {print}
-' "$CHANGELOG" >"$RELEASE_NOTES_FILE"
+python3 "$ROOT/tools/extract_release_notes.py" "$MANIFEST" "$CHANGELOG" "$RELEASE_NOTES_FILE" >/dev/null
 
-if [ ! -s "$RELEASE_NOTES_FILE" ]; then
-  echo "Could not extract release notes for version $VERSION from CHANGELOG.md."
-  exit 1
-fi
+git push origin "$BRANCH"
+git push origin "$TAG"
 
-for heading in "### New Features" "### Improvements" "### Changes" "### Bugfixes"; do
-  if ! grep -Fqx "$heading" "$RELEASE_NOTES_FILE"; then
-    echo "Release notes for $VERSION must contain heading: $heading"
-    exit 1
-  fi
-done
-
-git push origin "$BRANCH" --follow-tags
-
-if gh release view "$TAG" >/dev/null 2>&1; then
-  gh release edit "$TAG" \
-    --title "Release $TAG" \
-    --notes-file "$RELEASE_NOTES_FILE"
-  echo "Updated GitHub release $TAG"
-else
-  gh release create "$TAG" \
-    --title "Release $TAG" \
-    --notes-file "$RELEASE_NOTES_FILE"
-  echo "Created GitHub release $TAG"
-fi
+echo "Pushed $BRANCH and $TAG."
+echo "GitHub Actions will create or update release $TAG after all required checks succeed."

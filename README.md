@@ -177,7 +177,7 @@ tools/install_git_hooks.sh
 - Ensures a version tag `v<manifest.version>` exists before push
 - Ensures the tag is part of current branch history
 
-Publish the current version as a GitHub release:
+Publish the current version for automated GitHub release creation:
 
 ```bash
 tools/publish_release.sh
@@ -187,7 +187,7 @@ This will:
 
 - create the local version tag if it does not exist yet
 - push the current branch and tags to GitHub
-- create or update the matching entry on the GitHub Releases page
+- let GitHub Actions create or update the matching entry on the GitHub Releases page after `Quality Gates` and `Tests and Coverage` both succeed
 
 <br/>
 
