@@ -8,6 +8,7 @@
   "firmware": "RUT9XX_R_00.06.05.3",
   "clients_count": "3",
   "router_uptime": 3060,
+  "temperature": 360,
   "signal": -81,
   "wan_state": "Mobile",
   "connection_state": "connected",

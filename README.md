@@ -8,7 +8,7 @@
 
 ## Summary
 
-A custom Home Assistant integration for read-only monitoring of devices managed with Teltonika RMS.
+A custom Home Assistant integration for monitoring devices managed with Teltonika RMS, with an optional reboot action from Home Assistant.
 
 The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, timestamps, and optional location tracking.
 
@@ -20,11 +20,13 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
   - additional `sensor` entities when RMS provides the data:
     - clients count
     - router uptime
+    - temperature
     - signal strength
     - WAN state
     - connection state
     - connection type
     - SIM slot
+  - `button`: per-device reboot action
   - `device_tracker` (optional): GPS location only for devices that provide coordinates, including detailed location attributes (`location_detail`, `coordinates`, `google_maps_url`)
 - Service:
   - `teltonika_rms.refresh` to trigger immediate refresh
@@ -73,6 +75,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 6. Add these scopes if needed:
    - `device_location:read` for GPS tracker entities
    - `device_actions:read` for broader status/channel visibility
+   - `device_actions:write` for the reboot button
 7. In Home Assistant, go to:
    - `Settings -> Devices & Services` then click on the three dots in the upper right corner and select `Application Credentials`
 8. Add `Teltonika RMS` credentials (client ID + client secret).
@@ -97,6 +100,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 4. Add these if needed:
    - `device_location:read` for GPS tracker entities
    - `device_actions:read` for broader status/channel visibility
+   - `device_actions:write` for the reboot button
 
 ## Configuration in Home Assistant
 
@@ -105,7 +109,8 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 3. Choose auth mode:
    - `OAuth2 (recommended)` or `Personal access token (PAT)`.
 4. Finish authentication.
-5. Open integration options to tune:
+5. If you want to use the reboot button with OAuth2 and you authenticated before version `0.6.0`, reauthenticate once so Home Assistant can request `device_actions:write`.
+6. Open integration options to tune:
    - Inventory polling interval
    - State polling interval
    - Device count estimate

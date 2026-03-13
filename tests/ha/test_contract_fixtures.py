@@ -19,6 +19,7 @@ def test_device_full_fixture_normalizes_expected_runtime_fields() -> None:
     assert normalized.firmware == "RUT9XX_R_00.06.05.3"
     assert normalized.clients_count == 3
     assert normalized.router_uptime == 3060
+    assert normalized.temperature == 360
     assert normalized.signal_strength == -81
     assert normalized.connection_type == "LTE"
 

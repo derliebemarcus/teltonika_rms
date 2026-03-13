@@ -9,11 +9,13 @@ All notable changes to this project are documented in this file.
 - Added new optional RMS sensors that are created only when the API actually provides the value:
   - clients count
   - router uptime
+  - temperature
   - signal strength
   - WAN state
   - connection state
   - connection type
   - SIM slot
+- Added a per-device reboot button so supported devices can be restarted directly from Home Assistant.
 - Added representative RMS contract fixtures derived from the compiled API schema to validate payload handling against more realistic examples.
 
 ### Improvements
@@ -25,6 +27,7 @@ All notable changes to this project are documented in this file.
 ### Changes
 
 - Updated README to document the new RMS sensors and clarify that they are only exposed when RMS provides the underlying value.
+- Updated OAuth2/PAT scope documentation to include `device_actions:write` for the reboot button.
 - Added repository-level governance tooling:
   - `tools/check_commit_messages.py`
   - `tools/check_release_notes.py`

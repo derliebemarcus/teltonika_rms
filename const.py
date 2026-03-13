@@ -18,6 +18,7 @@ OAUTH2_SCOPES: tuple[str, ...] = (
     "devices:read",
     "device_location:read",
     "device_actions:read",
+    "device_actions:write",
 )
 
 CONF_INVENTORY_INTERVAL = "inventory_interval"
@@ -38,8 +39,9 @@ MAX_MONTHLY_REQUESTS = 100_000
 REQUEST_BUDGET_HEADROOM = 0.80
 
 SERVICE_REFRESH = "refresh"
+SERVICE_REBOOT = "reboot"
 
-UPDATE_PLATFORMS: tuple[str, ...] = ("binary_sensor", "sensor", "device_tracker")
+UPDATE_PLATFORMS: tuple[str, ...] = ("binary_sensor", "sensor", "device_tracker", "button")
 
 DEFAULT_OPTIONS: dict[str, object] = {
     CONF_INVENTORY_INTERVAL: DEFAULT_INVENTORY_INTERVAL,

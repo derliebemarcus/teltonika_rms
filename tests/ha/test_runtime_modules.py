@@ -10,11 +10,12 @@ from typing import Any
 
 import pytest
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from teltonika_rms import TeltonikaRmsRuntime
 from teltonika_rms.binary_sensor import RmsOnlineBinarySensor, async_setup_entry as binary_setup
+from teltonika_rms.button import RmsRebootButton, async_setup_entry as button_setup
 from teltonika_rms.coordinator import (
     CoordinatorBundle,
     InventoryCoordinator,
@@ -39,6 +40,7 @@ from teltonika_rms.sensor import (
     RmsSerialSensor,
     RmsSignalStrengthSensor,
     RmsSimSlotSensor,
+    RmsTemperatureSensor,
     RmsWanStateSensor,
     async_setup_entry as sensor_setup,
 )
@@ -83,6 +85,7 @@ def _normalized(
         last_seen=datetime(2026, 3, 13, 12, 0, tzinfo=UTC),
         clients_count=4,
         router_uptime=3600,
+        temperature=360,
         signal_strength=-81,
         wan_state="Mobile",
         connection_state="connected",
@@ -101,6 +104,7 @@ def _bundle(normalized: NormalizedDevice | None) -> Any:
     return SimpleNamespace(
         inventory=inventory,
         state=state,
+        api=SimpleNamespace(async_reboot_device=lambda device_id: asyncio.sleep(0, result={"id": device_id})),
         merged_device=lambda device_id: normalized if device_id == "dev-1" else None,
     )
 
@@ -128,11 +132,13 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     last_seen = RmsLastSeenSensor(bundle, "dev-1")
     clients = RmsClientsCountSensor(bundle, "dev-1")
     uptime = RmsRouterUptimeSensor(bundle, "dev-1")
+    temperature = RmsTemperatureSensor(bundle, "dev-1")
     signal = RmsSignalStrengthSensor(bundle, "dev-1")
     wan_state = RmsWanStateSensor(bundle, "dev-1")
     connection_state = RmsConnectionStateSensor(bundle, "dev-1")
     connection_type = RmsConnectionTypeSensor(bundle, "dev-1")
     sim_slot = RmsSimSlotSensor(bundle, "dev-1")
+    reboot = RmsRebootButton(bundle, "dev-1")
     tracker = RmsDeviceTracker(bundle, "dev-1")
 
     assert base.available is True
@@ -144,11 +150,13 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     assert last_seen.native_value is not None
     assert clients.native_value == 4
     assert uptime.native_value == 3600
+    assert temperature.native_value == 360
     assert signal.native_value == -81
     assert wan_state.native_value == "Mobile"
     assert connection_state.native_value == "connected"
     assert connection_type.native_value == "LTE"
     assert sim_slot.native_value == 1
+    assert reboot.available is True
     assert tracker.available is True
     assert tracker.latitude == 47.0
     assert tracker.longitude == 8.0
@@ -176,15 +184,48 @@ def test_platform_setup_entry_adds_expected_entities() -> None:
     entry = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
     added_binary: list[Any] = []
     added_sensor: list[Any] = []
+    added_button: list[Any] = []
     added_tracker: list[Any] = []
 
     asyncio.run(binary_setup(None, entry, added_binary.extend))
     asyncio.run(sensor_setup(None, entry, added_sensor.extend))
+    asyncio.run(button_setup(None, entry, added_button.extend))
     asyncio.run(tracker_setup(None, entry, added_tracker.extend))
 
     assert len(added_binary) == 1
-    assert len(added_sensor) == 11
+    assert len(added_sensor) == 12
+    assert len(added_button) == 1
     assert len(added_tracker) == 1
+
+
+def test_reboot_button_executes_action_and_refreshes_state() -> None:
+    calls: list[str] = []
+    bundle = _bundle(_normalized())
+
+    async def _async_reboot_device(device_id: str) -> dict[str, str]:
+        calls.append(device_id)
+        return {"id": device_id}
+
+    bundle.api = SimpleNamespace(async_reboot_device=_async_reboot_device)
+    button = RmsRebootButton(bundle, "dev-1")
+
+    asyncio.run(button.async_press())
+
+    assert calls == ["dev-1"]
+    assert bundle.state.refresh_calls == 1
+
+
+def test_reboot_button_surfaces_scope_error() -> None:
+    bundle = _bundle(_normalized())
+
+    async def _async_reboot_device(device_id: str) -> None:
+        raise ConfigEntryAuthFailed("denied")
+
+    bundle.api = SimpleNamespace(async_reboot_device=_async_reboot_device)
+    button = RmsRebootButton(bundle, "dev-1")
+
+    with pytest.raises(HomeAssistantError, match="device_actions:write"):
+        asyncio.run(button.async_press())
 
 
 def test_coordinator_bundle_and_budget_validation() -> None:

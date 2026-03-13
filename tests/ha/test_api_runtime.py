@@ -260,6 +260,29 @@ def test_api_request_resolves_meta_channel() -> None:
     assert result == {"device-1": {"id": "device-1", "online": True}}
 
 
+def test_api_reboot_device_posts_action_payload() -> None:
+    response = FakeResponse(200, {"success": True, "data": {"queued": True}, "meta": {}})
+    auth = FakeAuthClient([response])
+    client = RmsApiClient(auth, _matrix())
+
+    result = asyncio.run(client.async_reboot_device("42"))
+
+    assert result == {"queued": True}
+    assert auth.calls[0]["method"] == "POST"
+    assert auth.calls[0]["url"].endswith("/v3/devices/actions")
+    assert auth.calls[0]["json"] == {"action": "reboot", "device_id": [42]}
+
+
+def test_api_execute_device_action_keeps_non_numeric_ids() -> None:
+    response = FakeResponse(200, {"success": True, "data": {"queued": True}, "meta": {}})
+    auth = FakeAuthClient([response])
+    client = RmsApiClient(auth, _matrix())
+
+    asyncio.run(client.async_execute_device_action("reboot", ["dev-a"]))
+
+    assert auth.calls[0]["json"] == {"action": "reboot", "device_id": ["dev-a"]}
+
+
 def test_api_meta_channel_resolution_handles_fallback_variants() -> None:
     client = RmsApiClient(FakeAuthClient([]), _matrix())
 

@@ -31,9 +31,10 @@ try:
         Platform.BINARY_SENSOR,
         Platform.SENSOR,
         Platform.DEVICE_TRACKER,
+        Platform.BUTTON,
     )
 except ModuleNotFoundError:
-    PLATFORMS = ("binary_sensor", "sensor", "device_tracker")
+    PLATFORMS = ("binary_sensor", "sensor", "device_tracker", "button")
 
 
 @dataclass(slots=True)

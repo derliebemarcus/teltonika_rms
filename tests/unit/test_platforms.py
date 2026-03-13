@@ -16,6 +16,7 @@ BRAND_ICON = ROOT / "brand" / "icon.png"
 
 def test_datetime_platform_removed() -> None:
     assert "datetime" not in UPDATE_PLATFORMS
+    assert "button" in UPDATE_PLATFORMS
 
 
 def test_manifest_version_present() -> None:

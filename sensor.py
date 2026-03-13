@@ -38,6 +38,7 @@ async def async_setup_entry(
                 RmsLastSeenSensor,
                 RmsClientsCountSensor,
                 RmsRouterUptimeSensor,
+                RmsTemperatureSensor,
                 RmsSignalStrengthSensor,
                 RmsWanStateSensor,
                 RmsConnectionStateSensor,
@@ -157,6 +158,15 @@ class RmsRouterUptimeSensor(_OptionalDiagnosticSensor):
     _attr_name = "Router Uptime"
     _attr_icon = "mdi:timer-outline"
     _attr_native_unit_of_measurement = UnitOfTime.SECONDS
+
+    def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
+        super().__init__(bundle, device_id, self.entity_key)
+
+
+class RmsTemperatureSensor(_OptionalDiagnosticSensor):
+    entity_key = "temperature"
+    _attr_name = "Temperature"
+    _attr_icon = "mdi:thermometer"
 
     def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
         super().__init__(bundle, device_id, self.entity_key)

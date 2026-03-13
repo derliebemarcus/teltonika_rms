@@ -97,6 +97,7 @@ def test_normalize_device_handles_missing_id_datetime_and_string_coordinates() -
     assert normalized.last_seen == naive.replace(tzinfo=UTC)
     assert normalized.clients_count is None
     assert normalized.router_uptime is None
+    assert normalized.temperature is None
     assert normalized.latitude == 47.37
     assert normalized.longitude == 8.55
     assert normalized.location_label == "47.370000, 8.550000"
@@ -107,6 +108,7 @@ def test_normalize_device_parses_optional_runtime_metrics() -> None:
         {"id": "a1", "clients_count": "3"},
         state={
             "router_uptime": 7200,
+            "temperature": 360,
             "signal": "-79",
             "wan_state": "Mobile",
             "connection_state": "connected",
@@ -118,6 +120,7 @@ def test_normalize_device_parses_optional_runtime_metrics() -> None:
     assert normalized is not None
     assert normalized.clients_count == 3
     assert normalized.router_uptime == 7200
+    assert normalized.temperature == 360
     assert normalized.signal_strength == -79
     assert normalized.wan_state == "Mobile"
     assert normalized.connection_state == "connected"

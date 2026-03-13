@@ -22,6 +22,7 @@ LOGGER = logging.getLogger(__name__)
 _DEFAULT_TIMEOUT = 30
 _MAX_RETRIES = 4
 _RETRIABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+_DEVICE_ACTIONS_PATH = "/v3/devices/actions"
 
 
 class RmsAuthClient(Protocol):
@@ -204,6 +205,23 @@ class RmsApiClient:
         if isinstance(data, dict):
             return data
         return {}
+
+    async def async_execute_device_action(
+        self,
+        action: str,
+        device_ids: list[str],
+    ) -> Any:
+        """Execute a device action and resolve async-channel results when available."""
+        payload = {
+            "action": action,
+            "device_id": [_normalize_device_identifier(device_id) for device_id in device_ids],
+        }
+        data, meta = await self.async_request("POST", _DEVICE_ACTIONS_PATH, json_body=payload)
+        return await self._resolve_meta_channel(meta, data)
+
+    async def async_reboot_device(self, device_id: str) -> Any:
+        """Trigger a reboot for one RMS device."""
+        return await self.async_execute_device_action("reboot", [device_id])
 
     async def async_get_states_for_devices(
         self,
@@ -460,3 +478,11 @@ def chunked(iterable: Iterable[str], size: int) -> list[list[str]]:
     if chunk:
         chunks.append(chunk)
     return chunks
+
+
+def _normalize_device_identifier(device_id: str) -> int | str:
+    """Use integer identifiers for RMS actions when possible."""
+    try:
+        return int(device_id)
+    except (TypeError, ValueError):
+        return device_id
