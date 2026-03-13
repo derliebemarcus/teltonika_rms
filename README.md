@@ -1,5 +1,10 @@
 # Teltonika RMS Home Assistant Integration
 
+[![HACS Badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![GitHub Release](https://img.shields.io/github/v/release/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
+[![License](https://img.shields.io/github/license/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/derliebemarcus/teltonika_rms/total?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
+
 Custom Home Assistant integration for read-only monitoring of Teltonika RMS managed devices.
 
 The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, timestamps, and optional location tracking.
@@ -40,21 +45,30 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 
 ### OAuth2 (recommended)
 
-1. Log in to RMS.
+1. Ensure [my.home-assistant.io](https://my.home-assistant.io/) is linked to your current Home Assistant instance.
+   - Open [my.home-assistant.io](https://my.home-assistant.io/).
+   - Confirm it resolves to the Home Assistant instance where you want to add this integration.
+   - If it does not open the correct instance, fix that first before creating the RMS OAuth application.
+2. Log in to RMS.
    - Open [RMS](https://rms.teltonika-networks.com/).
    - Sign in with the RMS account that owns the devices you want to monitor.
    - Complete two-factor authentication if your account requires it.
-2. Create an OAuth application in [RMS Account Settings](https://account.rms.teltonika-networks.com/settings/application).
-3. Grant at least these scopes to the application:
+3. Create an OAuth application in [RMS Account Settings](https://account.rms.teltonika-networks.com/settings/application).
+4. Grant at least these scopes to the application:
    - `devices:read`
-4. Add these scopes if needed:
+5. Add these scopes if needed:
    - `device_location:read` for GPS tracker entities
    - `device_actions:read` for broader status/channel visibility
-5. Configure callback URL:
-   - `https://<your-home-assistant-url>/auth/external/callback`
-6. In Home Assistant, go to:
+6. Configure redirect URL:
+   - `https://my.home-assistant.io/redirect/oauth`
+7. In Home Assistant, go to:
    - `Settings -> Devices & Services -> Application Credentials`
-7. Add `Teltonika RMS` credentials (client ID + client secret).
+8. Add `Teltonika RMS` credentials (client ID + client secret).
+9. Go to `Settings -> Devices & Services -> Add Integration`.
+10. Select `Teltonika RMS`.
+11. When the integration asks for the authentication mode, select `OAuth2 (recommended)` again.
+12. Confirm the dialog that opens to link the Teltonika OAuth application with Home Assistant.
+13. After successful authorization, Home Assistant imports the RMS devices and lets you assign them to areas.
 
 ### Personal Access Token (PAT)
 

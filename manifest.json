@@ -9,7 +9,7 @@
   "documentation": "https://github.com/derliebemarcus/teltonika_rms",
   "issue_tracker": "https://github.com/derliebemarcus/teltonika_rms/issues",
   "iot_class": "cloud_polling",
-  "homeassistant": "2025.1.0",
+  "homeassistant": "2026.3.0",
   "loggers": [
     "custom_components.teltonika_rms"
   ],
@@ -19,5 +19,5 @@
   "requirements": [
     "python-socketio==5.11.2"
   ],
-  "version": "0.4.0"
+  "version": "0.5.0"
 }

@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.5.0 - 2026-03-13
+
+- Added README badges for HACS, GitHub releases, license, and downloads.
+- Expanded OAuth setup documentation:
+  - `my.home-assistant.io` link requirement is now documented explicitly.
+  - RMS OAuth redirect URL is documented as `https://my.home-assistant.io/redirect/oauth`.
+  - Post-credential setup steps in Home Assistant are documented more clearly.
+- Simplified integration branding assets to a single local icon:
+  - kept `brand/icon.png`
+  - removed unused logo and dark-variant files
+- Raised the minimum supported Home Assistant version to `2026.3.0`:
+  - aligns with local brand icon support for custom integrations
+  - mirrored in both `manifest.json` and `hacs.json`
+- Added a metadata consistency test to keep `manifest.json` and `hacs.json` aligned.
+
 ## 0.4.0 - 2026-03-11
 
 - Updated integration metadata documentation URL:
