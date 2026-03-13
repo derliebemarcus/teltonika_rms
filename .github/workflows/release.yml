@@ -123,9 +123,10 @@ jobs:
           VERSION="$(
             python3 -c 'import json, sys; from pathlib import Path; print(str(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")).get("version", "")).strip())' manifest.json
           )"
+          TAG="${{ steps.tag.outputs.tag }}"
 
-          if [ "v$VERSION" != "${{ steps.tag.outputs.tag }}" ]; then
-            echo "Tag ${{ steps.tag.outputs.tag }} does not match manifest version $VERSION."
+          if [ "v$VERSION" != "$TAG" ]; then
+            echo "Tag $TAG does not match manifest version $VERSION."
             exit 1
           fi
 
