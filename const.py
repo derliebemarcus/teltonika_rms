@@ -31,6 +31,7 @@ CONF_ENABLE_LOCATION = "enable_location"
 
 DEFAULT_INVENTORY_INTERVAL = 15 * 60
 DEFAULT_STATE_INTERVAL = 2 * 60
+DEFAULT_PORT_SCAN_INTERVAL = 6 * 60 * 60
 DEFAULT_ESTIMATED_DEVICES = 20
 DEFAULT_ENABLE_LOCATION = True
 DEFAULT_SPEC_PATH = ""
@@ -41,7 +42,13 @@ REQUEST_BUDGET_HEADROOM = 0.80
 SERVICE_REFRESH = "refresh"
 SERVICE_REBOOT = "reboot"
 
-UPDATE_PLATFORMS: tuple[str, ...] = ("binary_sensor", "sensor", "device_tracker", "button")
+UPDATE_PLATFORMS: tuple[str, ...] = (
+    "binary_sensor",
+    "sensor",
+    "device_tracker",
+    "button",
+    "update",
+)
 
 DEFAULT_OPTIONS: dict[str, object] = {
     CONF_INVENTORY_INTERVAL: DEFAULT_INVENTORY_INTERVAL,

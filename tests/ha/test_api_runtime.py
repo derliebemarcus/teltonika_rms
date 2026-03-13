@@ -17,6 +17,7 @@ from teltonika_rms.api import (
     _async_retry_sleep,
     _coerce_list,
     _coerce_state_map,
+    _extract_ethernet_ports,
     _has_next_page,
     _parse_envelope,
     _retry_delay,
@@ -331,6 +332,50 @@ def test_api_get_device_state_and_location_handle_missing_paths_and_non_dict_res
     assert asyncio.run(client.async_get_device_location("1")) == {}
 
 
+def test_api_get_device_ethernet_ports_handles_status_channel_and_missing_values() -> None:
+    class FakeChannelManager:
+        async def async_wait_for_channel(self, channel_id: str) -> dict[str, Any]:
+            assert channel_id == "port-scan"
+            return {
+                "42": [
+                    {
+                        "status": "completed",
+                        "type": "port_scan",
+                        "ports": [
+                            {"id": 1, "name": "port1", "devices": [{"ip": "192.168.1.5"}]},
+                            {"id": 2, "name": "port2", "devices": []},
+                        ],
+                    }
+                ]
+            }
+
+    client = RmsApiClient(
+        FakeAuthClient([FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-scan"}})]),
+        _matrix(),
+    )
+    client.set_status_channel_manager(FakeChannelManager())
+
+    ports = asyncio.run(client.async_get_device_ethernet_ports("42"))
+
+    assert ports == [
+        {"id": 1, "name": "port1", "devices": [{"ip": "192.168.1.5"}]},
+        {"id": 2, "name": "port2", "devices": []},
+    ]
+
+    client = RmsApiClient(FakeAuthClient([FakeResponse(404, {"missing": True})]), _matrix())
+    assert asyncio.run(client.async_get_device_ethernet_ports("42")) is None
+
+
+def test_api_extract_ethernet_ports_covers_direct_and_empty_payload_shapes() -> None:
+    assert _extract_ethernet_ports("42", None) is None
+    assert _extract_ethernet_ports("42", {"42": [{"ports": ["bad", {"id": 1}]}]}) == [{"id": 1}]
+    assert _extract_ethernet_ports("42", {"ports": [{"id": 2}, "bad"]}) == [{"id": 2}]
+    assert _extract_ethernet_ports("42", {"42": [{"status": "completed"}]}) == []
+    assert _extract_ethernet_ports("42", {"42": {"status": "completed"}}) == []
+    assert _extract_ethernet_ports("42", {"42": ["bad"]}) == []
+    assert _extract_ethernet_ports("42", "bad") is None
+
+
 def test_api_get_states_for_devices_uses_round_robin_without_aggregate(monkeypatch: pytest.MonkeyPatch) -> None:
     client = RmsApiClient(FakeAuthClient([]), _matrix(aggregate=False))
 
@@ -344,6 +389,21 @@ def test_api_get_states_for_devices_uses_round_robin_without_aggregate(monkeypat
 
     assert set(first) == {"a", "b"}
     assert set(second) == {"a", "c"}
+
+
+def test_api_get_states_for_devices_handles_empty_and_unbounded_batches(monkeypatch: pytest.MonkeyPatch) -> None:
+    client = RmsApiClient(FakeAuthClient([]), _matrix(aggregate=False))
+
+    async def _state(device_id: str) -> dict[str, Any]:
+        return {"id": device_id}
+
+    monkeypatch.setattr(client, "async_get_device_state", _state)
+
+    assert asyncio.run(client.async_get_states_for_devices([], max_per_cycle=None)) == {}
+    assert asyncio.run(client.async_get_states_for_devices(["a", "b"], max_per_cycle=0)) == {
+        "a": {"id": "a"},
+        "b": {"id": "b"},
+    }
 
 
 def test_api_get_states_for_devices_handles_aggregate_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -32,9 +32,10 @@ try:
         Platform.SENSOR,
         Platform.DEVICE_TRACKER,
         Platform.BUTTON,
+        Platform.UPDATE,
     )
 except ModuleNotFoundError:
-    PLATFORMS = ("binary_sensor", "sensor", "device_tracker", "button")
+    PLATFORMS = ("binary_sensor", "sensor", "device_tracker", "button", "update")
 
 
 @dataclass(slots=True)
@@ -56,7 +57,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
     from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
     from .api import OAuth2RmsAuthClient, PatRmsAuthClient, RmsApiClient
-    from .coordinator import CoordinatorBundle, InventoryCoordinator, StateCoordinator
+    from .coordinator import CoordinatorBundle, InventoryCoordinator, PortScanCoordinator, StateCoordinator
     from .endpoint_matrix import load_endpoint_matrix
     from .status_channel import RmsStatusChannelManager
 
@@ -88,9 +89,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
 
     inventory = InventoryCoordinator(hass, api, _merged_options(entry))
     state = StateCoordinator(hass, api, inventory, _merged_options(entry))
+    port_scan = PortScanCoordinator(hass, api, inventory)
     bundle = CoordinatorBundle(
         inventory=inventory,
         state=state,
+        port_scan=port_scan,
         status_channels=status_manager,
         api=api,
     )
@@ -101,6 +104,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
         await api.async_validate_connection()
         await inventory.async_config_entry_first_refresh()
         await state.async_config_entry_first_refresh()
+        await port_scan.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed:
         raise
     except Exception as err:

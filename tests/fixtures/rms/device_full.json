@@ -6,6 +6,17 @@
   "status": 1,
   "updated_at": "2020-02-20 09:10:59",
   "firmware": "RUT9XX_R_00.06.05.3",
+  "firmware_information": {
+    "latest": {
+      "name": "RUT9XX_R_00.06.05.4"
+    },
+    "stable": {
+      "name": "RUT9XX_R_00.06.05.3"
+    },
+    "current": {
+      "released_at": "2020-02-20"
+    }
+  },
   "clients_count": "3",
   "router_uptime": 3060,
   "temperature": 360,

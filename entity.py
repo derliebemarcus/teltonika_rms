@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
@@ -16,8 +17,14 @@ class TeltonikaRmsEntity(CoordinatorEntity):
 
     _attr_has_entity_name = True
 
-    def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
-        super().__init__(bundle.state)
+    def __init__(
+        self,
+        bundle: CoordinatorBundle,
+        device_id: str,
+        *,
+        coordinator: DataUpdateCoordinator | None = None,
+    ) -> None:
+        super().__init__(coordinator or bundle.state)
         self._bundle = bundle
         self._device_id = device_id
 
@@ -48,4 +55,3 @@ class TeltonikaRmsEntity(CoordinatorEntity):
             "serial_number": normalized.serial,
         }
         return info
-

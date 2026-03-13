@@ -10,7 +10,7 @@
 
 A custom Home Assistant integration for monitoring devices managed with Teltonika RMS, with an optional reboot action from Home Assistant.
 
-The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, timestamps, and optional location tracking.
+The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, firmware availability, Ethernet port usage, timestamps, and optional location tracking.
 
 ## What This Component Provides
 
@@ -26,7 +26,10 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
     - connection state
     - connection type
     - SIM slot
+    - used Ethernet ports
+    - used Ethernet port names
   - `button`: per-device reboot action
+  - `update`: firmware availability view with installed and latest RMS firmware versions
   - `device_tracker` (optional): GPS location only for devices that provide coordinates, including detailed location attributes (`location_detail`, `coordinates`, `google_maps_url`)
 - Service:
   - `teltonika_rms.refresh` to trigger immediate refresh
@@ -36,6 +39,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 - Device polling with request-budget safeguards (RMS monthly quota aware)
 - API envelope parsing (`success`, `data`, `errors`, `meta`)
 - Status-channel handling (`meta.channel`) with Socket.IO first, HTTP polling fallback
+- Low-frequency Ethernet port scans to surface which ports are in use and which named ports currently have connected devices
 
 ## Installation
 
@@ -74,7 +78,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
    - `devices:read`
 6. Add these scopes if needed:
    - `device_location:read` for GPS tracker entities
-   - `device_actions:read` for broader status/channel visibility
+   - `device_actions:read` for broader status/channel visibility and Ethernet port scan sensors
    - `device_actions:write` for the reboot button
 7. In Home Assistant, go to:
    - `Settings -> Devices & Services` then click on the three dots in the upper right corner and select `Application Credentials`
@@ -99,7 +103,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
       - `devices:read`
    3. Add these if needed:
       - `device_location:read` for GPS tracker entities
-      - `device_actions:read` for broader status/channel visibility
+      - `device_actions:read` for broader status/channel visibility and Ethernet port scan sensors
       - `device_actions:write` for the reboot button
 
 ## Configuration in Home Assistant

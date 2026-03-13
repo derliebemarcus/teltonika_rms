@@ -206,6 +206,20 @@ class RmsApiClient:
             return data
         return {}
 
+    async def async_get_device_ethernet_ports(self, device_id: str) -> list[dict[str, Any]] | None:
+        """Fetch Ethernet port usage data for one device."""
+        data, meta = await self.async_request(
+            "GET",
+            f"/devices/{device_id}/port-scan/",
+            params={"type": "ethernet"},
+            allow_not_found=True,
+        )
+        if data is None and not meta:
+            return None
+
+        resolved = await self._resolve_meta_channel(meta, data)
+        return _extract_ethernet_ports(device_id, resolved)
+
     async def async_execute_device_action(
         self,
         action: str,
@@ -486,3 +500,30 @@ def _normalize_device_identifier(device_id: str) -> int | str:
         return int(device_id)
     except (TypeError, ValueError):
         return device_id
+
+
+def _extract_ethernet_ports(device_id: str, payload: Any) -> list[dict[str, Any]] | None:
+    """Extract Ethernet ports from direct or status-channel payloads."""
+    if payload is None:
+        return None
+
+    items: Any = payload
+    if isinstance(payload, dict):
+        items = payload.get(str(device_id), payload.get(_normalize_device_identifier(device_id), payload))
+
+    if isinstance(items, list):
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            ports = item.get("ports")
+            if isinstance(ports, list):
+                return [port for port in ports if isinstance(port, dict)]
+        return []
+
+    if isinstance(items, dict):
+        ports = items.get("ports")
+        if isinstance(ports, list):
+            return [port for port in ports if isinstance(port, dict)]
+        return []
+
+    return None

@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.7.0 - 2026-03-13
+
+### New Features
+
+- Added a read-only firmware `update` entity per device so Home Assistant now shows the installed firmware alongside the latest version RMS reports for that device.
+- Added Ethernet diagnostics sensors that expose how many Ethernet ports are currently in use and which named ports have active downstream devices.
+
+### Improvements
+
+- Reused RMS inventory firmware metadata directly for update availability, so firmware visibility works without extra file-catalog setup.
+- Added a dedicated low-frequency port-scan coordinator so Ethernet visibility is available without materially increasing the RMS request budget.
+
+### Changes
+
+- Extended the integration setup and runtime bundle with an `update` platform and an Ethernet port-scan coordinator.
+- Updated README scope guidance so `device_actions:read` is called out explicitly for Ethernet port scan sensors.
+
+### Bugfixes
+
+- None.
+
 ## 0.6.1 - 2026-03-13
 
 ### New Features

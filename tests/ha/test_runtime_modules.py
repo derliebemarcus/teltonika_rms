@@ -19,6 +19,7 @@ from teltonika_rms.button import RmsRebootButton, async_setup_entry as button_se
 from teltonika_rms.coordinator import (
     CoordinatorBundle,
     InventoryCoordinator,
+    PortScanCoordinator,
     StateCoordinator,
     async_refresh_all,
     validate_request_budget,
@@ -41,7 +42,10 @@ from teltonika_rms.sensor import (
     RmsSignalStrengthSensor,
     RmsSimSlotSensor,
     RmsTemperatureSensor,
+    RmsUsedEthernetPortNamesSensor,
+    RmsUsedEthernetPortsSensor,
     RmsWanStateSensor,
+    _connected_devices,
     async_setup_entry as sensor_setup,
 )
 from teltonika_rms.status_channel import (
@@ -49,6 +53,7 @@ from teltonika_rms.status_channel import (
     _coerce_payload,
     _is_terminal,
 )
+from teltonika_rms.update import RmsFirmwareUpdateEntity, async_setup_entry as update_setup
 
 pytestmark = pytest.mark.ha
 
@@ -80,6 +85,9 @@ def _normalized(
         name="Router",
         model="RUTX",
         firmware="1.0",
+        latest_firmware="1.1",
+        stable_firmware="1.0",
+        firmware_update_available=True,
         serial="SERIAL",
         online=online,
         last_seen=datetime(2026, 3, 13, 12, 0, tzinfo=UTC),
@@ -101,9 +109,18 @@ def _normalized(
 def _bundle(normalized: NormalizedDevice | None) -> Any:
     inventory = FakeListenerCoordinator({"dev-1": {"id": "dev-1"}})
     state = FakeListenerCoordinator({"dev-1": {"state": {"online": True}}})
+    port_scan = FakeListenerCoordinator(
+        {
+            "dev-1": [
+                {"id": 0, "name": "port1", "type": "ETH", "devices": [{"ip": "192.168.1.5"}]},
+                {"id": 1, "name": "port2", "type": "ETH", "devices": []},
+            ]
+        }
+    )
     return SimpleNamespace(
         inventory=inventory,
         state=state,
+        port_scan=port_scan,
         api=SimpleNamespace(async_reboot_device=lambda device_id: asyncio.sleep(0, result={"id": device_id})),
         merged_device=lambda device_id: normalized if device_id == "dev-1" else None,
     )
@@ -138,7 +155,10 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     connection_state = RmsConnectionStateSensor(bundle, "dev-1")
     connection_type = RmsConnectionTypeSensor(bundle, "dev-1")
     sim_slot = RmsSimSlotSensor(bundle, "dev-1")
+    used_ports = RmsUsedEthernetPortsSensor(bundle, "dev-1")
+    used_port_names = RmsUsedEthernetPortNamesSensor(bundle, "dev-1")
     reboot = RmsRebootButton(bundle, "dev-1")
+    firmware_update = RmsFirmwareUpdateEntity(bundle, "dev-1")
     tracker = RmsDeviceTracker(bundle, "dev-1")
 
     assert base.available is True
@@ -156,6 +176,11 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     assert connection_state.native_value == "connected"
     assert connection_type.native_value == "LTE"
     assert sim_slot.native_value == 1
+    assert used_ports.native_value == 1
+    assert used_ports.extra_state_attributes["port_names"] == ["port1"]
+    assert used_port_names.native_value == "port1"
+    assert firmware_update.installed_version == "1.0"
+    assert firmware_update.latest_version == "1.1"
     assert reboot.available is True
     assert tracker.available is True
     assert tracker.latitude == 47.0
@@ -189,6 +214,80 @@ def test_uptime_sensor_returns_none_without_runtime_value() -> None:
     assert uptime.available is False
 
 
+def test_new_sensor_and_update_edge_paths() -> None:
+    normalized = _normalized()
+    normalized.latest_firmware = "2.0"
+    normalized.stable_firmware = "1.9"
+    bundle = _bundle(normalized)
+    update_with_summary = RmsFirmwareUpdateEntity(bundle, "dev-1")
+    assert update_with_summary.release_summary == "Latest: 2.0; Stable: 1.9"
+
+    names = RmsUsedEthernetPortNamesSensor(bundle, "dev-1")
+    assert names.extra_state_attributes == {
+        "ports": [
+            {
+                "id": 0,
+                "name": "port1",
+                "type": "ETH",
+                "connected_device_count": 1,
+                "connected_devices": [{"ip": "192.168.1.5"}],
+            }
+        ]
+    }
+
+    bundle_no_names = _bundle(_normalized())
+    bundle_no_names.port_scan.data = {
+        "dev-1": [
+            {"id": 0, "type": "ETH", "devices": [{"ip": "192.168.1.5"}]},
+            {"id": 1, "name": "port2", "type": "ETH", "devices": []},
+        ]
+    }
+    used_ports = RmsUsedEthernetPortsSensor(bundle_no_names, "dev-1")
+    used_names = RmsUsedEthernetPortNamesSensor(bundle_no_names, "dev-1")
+    assert used_ports.extra_state_attributes == {"port_names": []}
+    assert used_names.available is False
+    assert used_names.native_value is None
+    assert used_names.extra_state_attributes == {
+        "ports": [
+            {
+                "id": 0,
+                "name": None,
+                "type": "ETH",
+                "connected_device_count": 1,
+                "connected_devices": [{"ip": "192.168.1.5"}],
+            }
+        ]
+    }
+
+    bundle_missing_ports = _bundle(_normalized())
+    del bundle_missing_ports.port_scan.data["dev-1"]
+    missing_ports = RmsUsedEthernetPortsSensor(bundle_missing_ports, "dev-1")
+    assert missing_ports.available is False
+    assert missing_ports.native_value is None
+
+    unknown_device = RmsModelSensor(bundle, "missing")
+    assert unknown_device.native_value is None
+
+    missing_update = RmsFirmwareUpdateEntity(bundle, "missing")
+    assert missing_update.latest_version is None
+    assert missing_update.release_summary is None
+
+    no_summary_device = _normalized()
+    no_summary_device.stable_firmware = no_summary_device.latest_firmware
+    no_summary_bundle = _bundle(no_summary_device)
+    no_summary = RmsFirmwareUpdateEntity(no_summary_bundle, "dev-1")
+    assert no_summary.release_summary is None
+    assert RmsFirmwareUpdateEntity.should_create(_normalized()) is True
+    assert RmsFirmwareUpdateEntity.should_create(no_summary_device) is True
+    no_firmware = _normalized()
+    no_firmware.latest_firmware = None
+    no_firmware.stable_firmware = None
+    assert RmsFirmwareUpdateEntity.should_create(no_firmware) is False
+    assert RmsFirmwareUpdateEntity.should_create(None) is False
+
+    assert _connected_devices({"devices": "bad"}) == []
+
+
 def test_platform_setup_entry_adds_expected_entities() -> None:
     bundle = _bundle(_normalized())
     runtime = TeltonikaRmsRuntime(bundle=bundle)
@@ -196,17 +295,64 @@ def test_platform_setup_entry_adds_expected_entities() -> None:
     added_binary: list[Any] = []
     added_sensor: list[Any] = []
     added_button: list[Any] = []
+    added_update: list[Any] = []
     added_tracker: list[Any] = []
 
     asyncio.run(binary_setup(None, entry, added_binary.extend))
     asyncio.run(sensor_setup(None, entry, added_sensor.extend))
     asyncio.run(button_setup(None, entry, added_button.extend))
+    asyncio.run(update_setup(None, entry, added_update.extend))
     asyncio.run(tracker_setup(None, entry, added_tracker.extend))
 
     assert len(added_binary) == 1
-    assert len(added_sensor) == 12
+    assert len(added_sensor) == 14
     assert len(added_button) == 1
+    assert len(added_update) == 1
     assert len(added_tracker) == 1
+
+
+def test_sensor_and_update_setup_skip_duplicates_and_optional_entities() -> None:
+    normalized = _normalized()
+    normalized.latest_firmware = None
+    normalized.stable_firmware = None
+    bundle = _bundle(normalized)
+    bundle.port_scan.data = {}
+    runtime = TeltonikaRmsRuntime(bundle=bundle)
+    unloaders: list[Any] = []
+    entry = SimpleNamespace(
+        runtime_data=runtime,
+        async_on_unload=unloaders.append,
+    )
+    added_sensor: list[Any] = []
+    added_update: list[Any] = []
+
+    asyncio.run(sensor_setup(None, entry, added_sensor.extend))
+    asyncio.run(update_setup(None, entry, added_update.extend))
+
+    assert not any(isinstance(entity, RmsUsedEthernetPortsSensor) for entity in added_sensor)
+    assert not any(isinstance(entity, RmsUsedEthernetPortNamesSensor) for entity in added_sensor)
+    assert added_update == []
+
+    for listener in bundle.inventory.listeners + bundle.state.listeners + bundle.port_scan.listeners:
+        listener()
+
+    assert added_update == []
+    assert not any(isinstance(entity, RmsUsedEthernetPortsSensor) for entity in added_sensor)
+    assert len(added_sensor) == len({entity.unique_id for entity in added_sensor})
+    assert len(unloaders) == 4
+
+    bundle_with_update = _bundle(_normalized())
+    runtime_with_update = TeltonikaRmsRuntime(bundle=bundle_with_update)
+    entry_with_update = SimpleNamespace(
+        runtime_data=runtime_with_update,
+        async_on_unload=lambda cb: None,
+    )
+    added_update_once: list[Any] = []
+    asyncio.run(update_setup(None, entry_with_update, added_update_once.extend))
+    assert len(added_update_once) == 1
+    for listener in bundle_with_update.inventory.listeners:
+        listener()
+    assert len(added_update_once) == 1
 
 
 def test_reboot_button_executes_action_and_refreshes_state() -> None:
@@ -245,6 +391,7 @@ def test_coordinator_bundle_and_budget_validation() -> None:
     bundle = CoordinatorBundle(
         inventory=inventory,  # type: ignore[arg-type]
         state=state,  # type: ignore[arg-type]
+        port_scan=FakeListenerCoordinator(),  # type: ignore[arg-type]
         status_channels=SimpleNamespace(),
         api=SimpleNamespace(),
     )
@@ -287,6 +434,11 @@ def test_coordinator_constructors_cover_default_option_parsing(monkeypatch: pyte
         inventory,
         {"enable_location": False, "estimated_devices": 5, "state_interval": 30},
     )
+    port_scan = PortScanCoordinator(
+        hass,  # type: ignore[arg-type]
+        api,  # type: ignore[arg-type]
+        inventory,
+    )
 
     assert inventory._tags == ["alpha", "beta"]
     assert inventory._device_status == "online"
@@ -294,6 +446,7 @@ def test_coordinator_constructors_cover_default_option_parsing(monkeypatch: pyte
     assert state._enable_location is False
     assert state._estimated_devices == 5
     assert int(state.update_interval.total_seconds()) == 60
+    assert int(port_scan.update_interval.total_seconds()) == 21600
 
 
 def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -365,6 +518,27 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     state_empty._inventory = SimpleNamespace(data={}, update_interval=timedelta(seconds=900))
     assert asyncio.run(state_empty._async_update_data()) == {}
 
+    port_scan = object.__new__(PortScanCoordinator)
+    port_scan._api = SimpleNamespace(
+        async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(0, result=[{"name": "port1"}])
+    )
+    port_scan._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}})
+
+    assert asyncio.run(port_scan._async_update_data()) == {"dev-1": [{"name": "port1"}]}
+
+    async def _raise_ports(device_id: str) -> Any:
+        raise RmsApiError("bad ports")
+
+    port_scan._api.async_get_device_ethernet_ports = _raise_ports
+    assert asyncio.run(port_scan._async_update_data()) == {}
+
+    empty_port_scan = object.__new__(PortScanCoordinator)
+    empty_port_scan._api = SimpleNamespace(
+        async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(0, result=[{"name": "unused"}])
+    )
+    empty_port_scan._inventory = SimpleNamespace(data={})
+    assert asyncio.run(empty_port_scan._async_update_data()) == {}
+
 
 def test_coordinator_handles_auth_failed_and_refresh_all() -> None:
     inventory = object.__new__(InventoryCoordinator)
@@ -378,10 +552,15 @@ def test_coordinator_handles_auth_failed_and_refresh_all() -> None:
     with pytest.raises(ConfigEntryAuthFailed):
         asyncio.run(inventory._async_update_data())
 
-    bundle = SimpleNamespace(inventory=FakeListenerCoordinator(), state=FakeListenerCoordinator())
+    bundle = SimpleNamespace(
+        inventory=FakeListenerCoordinator(),
+        state=FakeListenerCoordinator(),
+        port_scan=FakeListenerCoordinator(),
+    )
     asyncio.run(async_refresh_all(bundle))
     assert bundle.inventory.refresh_calls == 1
     assert bundle.state.refresh_calls == 1
+    assert bundle.port_scan.refresh_calls == 1
 
 
 def test_state_coordinator_handles_location_errors(monkeypatch: pytest.MonkeyPatch) -> None:

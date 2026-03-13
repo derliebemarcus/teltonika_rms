@@ -98,6 +98,9 @@ def test_normalize_device_handles_missing_id_datetime_and_string_coordinates() -
     assert normalized.clients_count is None
     assert normalized.router_uptime is None
     assert normalized.temperature is None
+    assert normalized.latest_firmware is None
+    assert normalized.stable_firmware is None
+    assert normalized.firmware_update_available is None
     assert normalized.latitude == 47.37
     assert normalized.longitude == 8.55
     assert normalized.location_label == "47.370000, 8.550000"
@@ -105,7 +108,15 @@ def test_normalize_device_handles_missing_id_datetime_and_string_coordinates() -
 
 def test_normalize_device_parses_optional_runtime_metrics() -> None:
     normalized = normalize_device(
-        {"id": "a1", "clients_count": "3"},
+        {
+            "id": "a1",
+            "clients_count": "3",
+            "firmware": "RUT_R_00.07.20.3",
+            "firmware_information": {
+                "latest": {"name": "RUT_R_00.07.21.2"},
+                "stable": {"name": "RUT_R_00.07.20.3"},
+            },
+        },
         state={
             "router_uptime": 7200,
             "temperature": 360,
@@ -121,6 +132,9 @@ def test_normalize_device_parses_optional_runtime_metrics() -> None:
     assert normalized.clients_count == 3
     assert normalized.router_uptime == 7200
     assert normalized.temperature == 360
+    assert normalized.latest_firmware == "RUT_R_00.07.21.2"
+    assert normalized.stable_firmware == "RUT_R_00.07.20.3"
+    assert normalized.firmware_update_available is True
     assert normalized.signal_strength == -79
     assert normalized.wan_state == "Mobile"
     assert normalized.connection_state == "connected"

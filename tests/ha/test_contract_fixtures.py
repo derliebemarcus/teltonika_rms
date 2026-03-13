@@ -17,6 +17,9 @@ def test_device_full_fixture_normalizes_expected_runtime_fields() -> None:
 
     assert normalized is not None
     assert normalized.firmware == "RUT9XX_R_00.06.05.3"
+    assert normalized.latest_firmware == "RUT9XX_R_00.06.05.4"
+    assert normalized.stable_firmware == "RUT9XX_R_00.06.05.3"
+    assert normalized.firmware_update_available is True
     assert normalized.clients_count == 3
     assert normalized.router_uptime == 3060
     assert normalized.temperature == 360

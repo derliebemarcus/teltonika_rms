@@ -17,6 +17,9 @@ class NormalizedDevice:
     name: str
     model: str | None
     firmware: str | None
+    latest_firmware: str | None
+    stable_firmware: str | None
+    firmware_update_available: bool | None
     serial: str | None
     online: bool | None
     last_seen: datetime | None
@@ -154,7 +157,13 @@ def normalize_device(
 
     model = first_value(merged, "model", "product.model", "hardware.model")
     firmware = first_value(merged, "firmware", "fw_version", "software.version")
+    latest_firmware = first_value(merged, "firmware_information.latest.name")
+    stable_firmware = first_value(merged, "firmware_information.stable.name")
     serial = first_value(merged, "serial", "serial_number", "sn")
+    comparison_firmware = latest_firmware or stable_firmware
+    firmware_update_available = None
+    if firmware is not None and comparison_firmware is not None:
+        firmware_update_available = str(firmware) != str(comparison_firmware)
 
     online = parse_online(
         first_value(merged, "online", "status", "connection.online", "state.online")
@@ -238,6 +247,9 @@ def normalize_device(
         name=str(name),
         model=str(model) if model is not None else None,
         firmware=str(firmware) if firmware is not None else None,
+        latest_firmware=str(latest_firmware) if latest_firmware is not None else None,
+        stable_firmware=str(stable_firmware) if stable_firmware is not None else None,
+        firmware_update_available=firmware_update_available,
         serial=str(serial) if serial is not None else None,
         online=online,
         last_seen=last_seen,
