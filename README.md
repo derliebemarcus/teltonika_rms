@@ -4,7 +4,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
 [![License](https://img.shields.io/github/license/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/derliebemarcus/teltonika_rms/total?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
-[![Coverage](https://img.shields.io/codecov/c/github/derliebemarcus/teltonika_rms?style=for-the-badge)](https://app.codecov.io/gh/derliebemarcus/teltonika_rms)
+[![Coverage Status](https://coveralls.io/repos/github/derliebemarcus/teltonika_rms/badge.svg?branch=main)](https://coveralls.io/github/derliebemarcus/teltonika_rms)
 
 Custom Home Assistant integration for read-only monitoring of Teltonika RMS managed devices.
 

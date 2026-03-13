@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   tests:
@@ -42,9 +41,8 @@ jobs:
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
         with:
-          files: coverage.xml
-          use_oidc: true
-          fail_ci_if_error: true
+          file: coverage.xml
+          github-token: ${{ secrets.GITHUB_TOKEN }}
