@@ -1,0 +1,327 @@
+"""High-value runtime tests for the RMS API client."""
+
+from __future__ import annotations
+
+import asyncio
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
+import pytest
+from aiohttp import ClientError
+from homeassistant.exceptions import ConfigEntryAuthFailed
+
+from teltonika_rms.api import (
+    OAuth2RmsAuthClient,
+    PatRmsAuthClient,
+    RmsApiClient,
+    _coerce_list,
+    _coerce_state_map,
+    _has_next_page,
+    _parse_envelope,
+    _safe_json,
+    _async_retry_sleep,
+    chunked,
+    estimate_monthly_requests,
+    normalize_tags,
+)
+from teltonika_rms.endpoint_matrix import EndpointMatrix, EndpointSpec
+from teltonika_rms.exceptions import RmsApiError, RmsAuthError
+
+pytestmark = pytest.mark.ha
+
+
+class FakeResponse:
+    def __init__(
+        self,
+        status: int,
+        payload: Any = None,
+        *,
+        text: str = "payload",
+        headers: dict[str, str] | None = None,
+        json_error: Exception | None = None,
+    ) -> None:
+        self.status = status
+        self._payload = payload
+        self._text = text
+        self.headers = headers or {}
+        self._json_error = json_error
+        self.released = False
+
+    async def json(self, content_type: Any = None) -> Any:
+        if self._json_error is not None:
+            raise self._json_error
+        return self._payload
+
+    async def text(self) -> str:
+        return self._text
+
+    def release(self) -> None:
+        self.released = True
+
+
+class FakeAuthClient:
+    def __init__(self, responses: list[Any], token: str | None = "token") -> None:
+        self._responses = list(responses)
+        self._token = token
+        self.calls: list[dict[str, Any]] = []
+
+    async def async_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: dict[str, Any] | None,
+        json: dict[str, Any] | None,
+        timeout: int,
+    ) -> FakeResponse:
+        self.calls.append(
+            {
+                "method": method,
+                "url": url,
+                "params": params,
+                "json": json,
+                "timeout": timeout,
+            }
+        )
+        response = self._responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        return response
+
+    async def async_get_access_token(self) -> str | None:
+        return self._token
+
+
+class FakeSession:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+
+    async def request(self, method: str, url: str, **kwargs: Any) -> FakeResponse:
+        self.calls.append({"method": method, "url": url, **kwargs})
+        return FakeResponse(200, {"ok": True})
+
+
+class FakeOAuthSession:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+        self.token: dict[str, Any] = {"access_token": "oauth-token"}
+        self.ensure_calls = 0
+
+    async def async_request(self, method: str, url: str, **kwargs: Any) -> FakeResponse:
+        self.calls.append({"method": method, "url": url, **kwargs})
+        return FakeResponse(200, {"ok": True})
+
+    async def async_ensure_token_valid(self) -> None:
+        self.ensure_calls += 1
+
+
+def _matrix(*, aggregate: bool = True) -> EndpointMatrix:
+    endpoints = {
+        "devices_list": EndpointSpec("/v3/devices", tuple(), "safe"),
+        "device_detail": EndpointSpec("/v3/devices/{id}", tuple(), "safe"),
+        "device_state_single": EndpointSpec("/v3/devices/{id}/status", tuple(), "async-channel"),
+        "device_location": EndpointSpec("/v3/devices/{id}/location", tuple(), "high-cost"),
+    }
+    if aggregate:
+        endpoints["device_state_aggregate"] = EndpointSpec(
+            "/v3/devices/status",
+            tuple(),
+            "async-channel",
+        )
+    return EndpointMatrix(source="test", endpoints=endpoints)
+
+
+def test_pat_auth_client_adds_bearer_token() -> None:
+    session = FakeSession()
+    client = PatRmsAuthClient(session, " secret-token ")
+
+    asyncio.run(client.async_request("GET", "https://example.test", params={"a": 1}, json=None, timeout=30))
+
+    assert session.calls[0]["headers"]["Authorization"] == "Bearer secret-token"
+    assert asyncio.run(client.async_get_access_token()) == "secret-token"
+
+
+def test_oauth2_auth_client_uses_session_and_exposes_access_token() -> None:
+    session = FakeOAuthSession()
+    client = OAuth2RmsAuthClient(session)  # type: ignore[arg-type]
+
+    asyncio.run(client.async_request("POST", "https://example.test", params=None, json={"a": 1}, timeout=30))
+
+    assert session.calls[0]["method"] == "POST"
+    assert asyncio.run(client.async_get_access_token()) == "oauth-token"
+    assert session.ensure_calls == 1
+
+
+def test_api_request_parses_envelope_and_releases_response() -> None:
+    response = FakeResponse(200, {"success": True, "data": {"value": 1}, "meta": {"x": 1}})
+    client = RmsApiClient(FakeAuthClient([response]), _matrix())
+
+    data, meta = asyncio.run(client.async_request("GET", "/v3/devices"))
+
+    assert data == {"value": 1}
+    assert meta == {"x": 1}
+    assert response.released is True
+
+
+def test_api_request_retries_on_retry_after(monkeypatch: pytest.MonkeyPatch) -> None:
+    sleeps: list[float] = []
+
+    async def _sleep(delay: float) -> None:
+        sleeps.append(delay)
+
+    monkeypatch.setattr("teltonika_rms.api.asyncio.sleep", _sleep)
+    first = FakeResponse(429, {"retry": True}, headers={"Retry-After": "0"})
+    second = FakeResponse(200, {"success": True, "data": {"ok": True}, "meta": {}})
+    client = RmsApiClient(FakeAuthClient([first, second]), _matrix())
+
+    data, _meta = asyncio.run(client.async_request("GET", "/v3/devices"))
+
+    assert data == {"ok": True}
+    assert sleeps == [0.0]
+    assert client.request_counter == 2
+
+
+def test_api_request_handles_not_found_when_allowed() -> None:
+    client = RmsApiClient(FakeAuthClient([FakeResponse(404, {"missing": True})]), _matrix())
+
+    data, meta = asyncio.run(client.async_request("GET", "/v3/devices/42", allow_not_found=True))
+
+    assert data is None
+    assert meta == {}
+
+
+def test_api_request_raises_auth_failed_on_scope_error() -> None:
+    client = RmsApiClient(FakeAuthClient([FakeResponse(403, {"error": "denied"})]), _matrix())
+
+    with pytest.raises(ConfigEntryAuthFailed):
+        asyncio.run(client.async_request("GET", "/v3/devices"))
+
+
+def test_api_request_wraps_network_error_after_retries(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _sleep(delay: float) -> None:
+        return None
+
+    monkeypatch.setattr("teltonika_rms.api.asyncio.sleep", _sleep)
+    client = RmsApiClient(FakeAuthClient([ClientError("boom")] * 5), _matrix())
+
+    with pytest.raises(RmsApiError, match="network error"):
+        asyncio.run(client.async_request("GET", "/v3/devices"))
+
+
+def test_api_request_resolves_meta_channel() -> None:
+    class FakeChannelManager:
+        async def async_wait_for_channel(self, channel_id: str) -> dict[str, Any]:
+            assert channel_id == "abc"
+            return {"data": [{"id": "device-1", "online": True}]}
+
+    response = FakeResponse(
+        200,
+        {
+            "success": True,
+            "data": {},
+            "meta": {"channel": "abc"},
+        },
+    )
+    client = RmsApiClient(FakeAuthClient([response]), _matrix())
+    client.set_status_channel_manager(FakeChannelManager())
+
+    result = asyncio.run(client.async_get_states_for_devices(["device-1"], max_per_cycle=None))
+
+    assert result == {"device-1": {"id": "device-1", "online": True}}
+
+
+def test_api_get_device_state_falls_back_to_detail_on_error() -> None:
+    auth = FakeAuthClient(
+        [
+            FakeResponse(500, {"error": "bad"}),
+            FakeResponse(200, {"success": True, "data": {"id": "1", "name": "router"}, "meta": {}}),
+        ]
+    )
+    client = RmsApiClient(auth, _matrix())
+
+    result = asyncio.run(client.async_get_device_state("1"))
+
+    assert result == {"id": "1", "name": "router"}
+
+
+def test_api_get_states_for_devices_uses_round_robin_without_aggregate(monkeypatch: pytest.MonkeyPatch) -> None:
+    client = RmsApiClient(FakeAuthClient([]), _matrix(aggregate=False))
+
+    async def _state(device_id: str) -> dict[str, Any]:
+        return {"id": device_id}
+
+    monkeypatch.setattr(client, "async_get_device_state", _state)
+
+    first = asyncio.run(client.async_get_states_for_devices(["a", "b", "c"], max_per_cycle=2))
+    second = asyncio.run(client.async_get_states_for_devices(["a", "b", "c"], max_per_cycle=2))
+
+    assert set(first) == {"a", "b"}
+    assert set(second) == {"a", "c"}
+
+
+def test_api_location_and_status_channel_polling() -> None:
+    auth = FakeAuthClient(
+        [
+            FakeResponse(200, {"success": True, "data": {"lat": 1}, "meta": {}}),
+            FakeResponse(200, {"success": True, "data": {"done": True}, "meta": {}}),
+        ]
+    )
+    client = RmsApiClient(auth, _matrix())
+
+    location = asyncio.run(client.async_get_device_location("1"))
+    channel = asyncio.run(client.async_poll_status_channel("ch-1"))
+
+    assert location == {"lat": 1}
+    assert channel == {"done": True}
+
+
+def test_api_request_counter_resets_after_30_days() -> None:
+    client = RmsApiClient(FakeAuthClient([]), _matrix())
+    client._request_counter = 99
+    client._request_window_start = datetime.now(tz=UTC) - timedelta(days=31)
+
+    client._increment_request_counter()
+
+    assert client.request_counter == 1
+
+
+def test_api_helper_functions_cover_error_paths(monkeypatch: pytest.MonkeyPatch) -> None:
+    assert _coerce_list({"devices": [{"id": 1}, "bad"]}) == [{"id": 1}]
+    assert _coerce_state_map({"x": {"id": 1}}) == {"x": {"id": 1}}
+    assert _coerce_state_map([{"deviceId": "x", "v": 1}, {"device_id": "y", "v": 2}]) == {
+        "x": {"deviceId": "x", "v": 1},
+        "y": {"device_id": "y", "v": 2},
+    }
+    assert _has_next_page([], {"pagination": {"page": 1, "pages": 2}}, 50) is True
+    assert normalize_tags(" a, ,b ") == ["a", "b"]
+    assert estimate_monthly_requests(
+        inventory_interval=60,
+        state_interval=120,
+        estimated_devices=10,
+        aggregate_state_supported=False,
+    ) > 0
+    assert chunked(["a", "b", "c"], 2) == [["a", "b"], ["c"]]
+    assert _parse_envelope({"plain": True}) == ({"plain": True}, {})
+
+    with pytest.raises(RmsApiError):
+        _parse_envelope({"success": False, "errors": ["bad"]})
+
+    response = FakeResponse(200, text="raw-body", json_error=ValueError("bad json"))
+    assert asyncio.run(_safe_json(response)) == {"raw": "raw-body"}
+
+    delays: list[float] = []
+
+    async def _sleep(delay: float) -> None:
+        delays.append(delay)
+
+    monkeypatch.setattr("teltonika_rms.api.asyncio.sleep", _sleep)
+    asyncio.run(_async_retry_sleep(FakeResponse(429, headers={"Retry-After": "x"}), 0))
+    assert len(delays) == 1
+
+
+def test_estimate_max_calls_per_cycle_has_floor() -> None:
+    assert RmsApiClient.estimate_max_calls_per_cycle(60) >= 1
+
+
+def test_rms_auth_error_is_subclass_of_api_error() -> None:
+    assert issubclass(RmsAuthError, RmsApiError)
