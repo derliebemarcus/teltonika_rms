@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.1 - 2026-03-13
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Optional Ethernet port scan and PoE port-configuration refreshes now start in the background after setup, so the core integration becomes available immediately even when RMS status channels are slow or the socket falls back to HTTP polling.
+
+### Changes
+
+- Initialized optional port-scan and port-configuration coordinators with empty data so entity setup stays safe before the first background refresh completes.
+
+### Bugfixes
+
+- Fixed a setup-path regression in `0.8.0` where Home Assistant could remain stuck on `Loading next step for Teltonika RMS` while waiting for optional port-scan or port-configuration first refreshes to finish.
+
 ## 0.8.0 - 2026-03-13
 
 ### New Features

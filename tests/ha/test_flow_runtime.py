@@ -91,9 +91,14 @@ class FakeHass:
     def __init__(self) -> None:
         self.services = FakeServices()
         self.config_entries = FakeConfigEntries()
+        self.created_tasks: list[Any] = []
 
     async def async_add_executor_job(self, func: Any, *args: Any) -> Any:
         return func(*args)
+
+    def async_create_task(self, coro: Any) -> Any:
+        self.created_tasks.append(coro)
+        return coro
 
 
 def _test_matrix(aggregate: bool = True) -> EndpointMatrix:
@@ -390,8 +395,15 @@ def test_integration_setup_entry_pat_and_oauth_error(monkeypatch: pytest.MonkeyP
         def __init__(self, *_args: Any, **_kwargs: Any) -> None:
             self.data: dict[str, Any] = {}
             self.update_interval = timedelta(seconds=120)
+            self.first_refresh_calls = 0
+            self.request_refresh_calls = 0
 
         async def async_config_entry_first_refresh(self) -> None:
+            self.first_refresh_calls += 1
+            return None
+
+        async def async_request_refresh(self) -> None:
+            self.request_refresh_calls += 1
             return None
 
     class FakeStatusManager:
@@ -424,6 +436,8 @@ def test_integration_setup_entry_pat_and_oauth_error(monkeypatch: pytest.MonkeyP
     )
 
     assert asyncio.run(integration.async_setup_entry(hass, entry)) is True
+    for task in hass.created_tasks:
+        asyncio.run(task)
     assert entry.runtime_data is not None
     assert hass.config_entries.forwarded
     assert ("teltonika_rms", "refresh") in hass.services.registered
@@ -466,6 +480,9 @@ def test_integration_setup_entry_wraps_refresh_errors(monkeypatch: pytest.Monkey
             self.update_interval = timedelta(seconds=120)
 
         async def async_config_entry_first_refresh(self) -> None:
+            raise RuntimeError("boom")
+
+        async def async_request_refresh(self) -> None:
             raise RuntimeError("boom")
 
     monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
@@ -511,6 +528,9 @@ def test_integration_setup_entry_propagates_auth_failures(monkeypatch: pytest.Mo
         async def async_config_entry_first_refresh(self) -> None:
             return None
 
+        async def async_request_refresh(self) -> None:
+            return None
+
     monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
     monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
     monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
@@ -538,3 +558,92 @@ def test_integration_setup_entry_propagates_auth_failures(monkeypatch: pytest.Mo
 def test_integration_setup_returns_true() -> None:
     with tempfile.TemporaryDirectory() as _tmp:
         assert asyncio.run(integration.async_setup(SimpleNamespace(), {})) is True
+
+
+def test_integration_setup_entry_does_not_block_on_optional_port_refreshes(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeApi:
+        def __init__(self, auth: Any, endpoint_matrix: Any) -> None:
+            self.endpoint_matrix = endpoint_matrix
+
+        def set_status_channel_manager(self, manager: Any) -> None:
+            return None
+
+        async def async_validate_connection(self) -> None:
+            return None
+
+    created: dict[str, Any] = {}
+
+    class RequiredCoordinator:
+        def __init__(self, *_args: Any, **_kwargs: Any) -> None:
+            self.data = {}
+            self.update_interval = timedelta(seconds=120)
+            self.first_refresh_calls = 0
+            self.request_refresh_calls = 0
+
+        async def async_config_entry_first_refresh(self) -> None:
+            self.first_refresh_calls += 1
+
+        async def async_request_refresh(self) -> None:
+            self.request_refresh_calls += 1
+
+    class OptionalCoordinator:
+        def __init__(self, name: str) -> None:
+            self.name = name
+            self.data = {}
+            self.update_interval = timedelta(seconds=120)
+            self.first_refresh_calls = 0
+            self.request_refresh_calls = 0
+
+        async def async_config_entry_first_refresh(self) -> None:
+            self.first_refresh_calls += 1
+            raise AssertionError("optional first refresh must not be awaited during setup")
+
+        async def async_request_refresh(self) -> None:
+            self.request_refresh_calls += 1
+
+    def _inventory(*_args: Any, **_kwargs: Any) -> Any:
+        created["inventory"] = RequiredCoordinator()
+        return created["inventory"]
+
+    def _state(*_args: Any, **_kwargs: Any) -> Any:
+        created["state"] = RequiredCoordinator()
+        return created["state"]
+
+    def _port_scan(*_args: Any, **_kwargs: Any) -> Any:
+        created["port_scan"] = OptionalCoordinator("port_scan")
+        return created["port_scan"]
+
+    def _port_config(*_args: Any, **_kwargs: Any) -> Any:
+        created["port_config"] = OptionalCoordinator("port_config")
+        return created["port_config"]
+
+    monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
+    monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
+    monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
+    monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", _inventory)
+    monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", _state)
+    monkeypatch.setattr("teltonika_rms.coordinator.PortScanCoordinator", _port_scan)
+    monkeypatch.setattr("teltonika_rms.coordinator.PortConfigCoordinator", _port_config)
+    monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
+    monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
+
+    hass = FakeHass()
+    hass.config_entries.entries_result = [object()]
+    entry = SimpleNamespace(
+        data={CONF_AUTH_MODE: AUTH_MODE_PAT, CONF_PAT_TOKEN: "pat-token"},
+        options={},
+        runtime_data=None,
+        entry_id="entry-1",
+        add_update_listener=lambda listener: "listener-token",
+        async_on_unload=lambda cb: None,
+    )
+
+    assert asyncio.run(integration.async_setup_entry(hass, entry)) is True
+    assert created["inventory"].first_refresh_calls == 1
+    assert created["state"].first_refresh_calls == 1
+    assert created["port_scan"].first_refresh_calls == 0
+    assert created["port_config"].first_refresh_calls == 0
+    for task in hass.created_tasks:
+        asyncio.run(task)
+    assert created["port_scan"].request_refresh_calls == 1
+    assert created["port_config"].request_refresh_calls == 1

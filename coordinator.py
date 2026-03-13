@@ -199,6 +199,7 @@ class PortScanCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]
             name="Teltonika RMS ethernet port scan",
             update_interval=timedelta(seconds=DEFAULT_PORT_SCAN_INTERVAL),
         )
+        self.data = {}
 
     async def _async_update_data(self) -> dict[str, list[dict[str, Any]]]:
         device_ids = list(self._inventory.data.keys())
@@ -243,6 +244,7 @@ class PortConfigCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]
             name="Teltonika RMS port configuration",
             update_interval=timedelta(seconds=DEFAULT_PORT_CONFIG_INTERVAL),
         )
+        self.data = {}
 
     async def _async_update_data(self) -> dict[str, list[dict[str, Any]]]:
         device_ids = list(self._inventory.data.keys())

@@ -113,8 +113,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
         await api.async_validate_connection()
         await inventory.async_config_entry_first_refresh()
         await state.async_config_entry_first_refresh()
-        await port_scan.async_config_entry_first_refresh()
-        await port_config.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed:
         raise
     except Exception as err:
@@ -122,6 +120,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+    hass.async_create_task(_async_refresh_optional_coordinator("ethernet port scan", port_scan))
+    hass.async_create_task(_async_refresh_optional_coordinator("port configuration", port_config))
 
     if not hass.services.has_service(DOMAIN, SERVICE_REFRESH):
         hass.services.async_register(DOMAIN, SERVICE_REFRESH, _build_refresh_handler(hass))
@@ -163,3 +163,11 @@ def _merged_options(entry: Any) -> dict[str, Any]:
     merged = dict(DEFAULT_OPTIONS)
     merged.update(entry.options)
     return merged
+
+
+async def _async_refresh_optional_coordinator(name: str, coordinator: Any) -> None:
+    """Refresh optional data sources without blocking config-entry setup."""
+    try:
+        await coordinator.async_request_refresh()
+    except Exception as err:  # pragma: no cover - defensive background guard
+        LOGGER.debug("Optional Teltonika RMS %s refresh failed after setup: %s", name, err)
