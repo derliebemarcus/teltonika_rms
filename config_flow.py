@@ -9,11 +9,9 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-
-from homeassistant.config_entries import ConfigEntry, OptionsFlow
+from homeassistant.config_entries import ConfigEntry, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_entry_oauth2_flow
 
 from .api import estimate_monthly_requests, normalize_tags
@@ -59,15 +57,15 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
         """Append OAuth scopes during authorize step."""
         return {"scope": " ".join(OAUTH2_SCOPES)}
 
-    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Offer authentication mode selection."""
         return self.async_show_menu(step_id="user", menu_options=["oauth2", "pat"])
 
-    async def async_step_oauth2(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_oauth2(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Start OAuth2 authentication."""
         return await super().async_step_user(user_input)
 
-    async def async_step_pat(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_pat(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Create entry using PAT token authentication."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -90,7 +88,7 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
         schema = vol.Schema({vol.Required(CONF_PAT_TOKEN): str})
         return self.async_show_form(step_id="pat", data_schema=schema, errors=errors)
 
-    async def async_step_reauth(self, entry_data: dict[str, Any]) -> FlowResult:
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
         """Begin reauthentication for the existing auth mode."""
         self._reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
         if self._reauth_entry is None:
@@ -100,7 +98,9 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
             return await self.async_step_reauth_pat()
         return await self.async_step_pick_implementation()
 
-    async def async_step_reauth_pat(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_reauth_pat(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         """Reauthenticate PAT by replacing the token."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -121,7 +121,7 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
         schema = vol.Schema({vol.Required(CONF_PAT_TOKEN): str})
         return self.async_show_form(step_id="reauth_pat", data_schema=schema, errors=errors)
 
-    async def async_oauth_create_entry(self, data: dict[str, Any]) -> FlowResult:
+    async def async_oauth_create_entry(self, data: dict[str, Any]) -> ConfigFlowResult:
         """Create (or update) entry once OAuth callback is complete."""
         unique_id = _extract_subject_from_token(data)
         if unique_id:
@@ -134,7 +134,11 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
 
         if self.source == "reauth":
             if self._reauth_entry is not None:
-                if unique_id and self._reauth_entry.unique_id and self._reauth_entry.unique_id != unique_id:
+                if (
+                    unique_id
+                    and self._reauth_entry.unique_id
+                    and self._reauth_entry.unique_id != unique_id
+                ):
                     return self.async_abort(reason="wrong_account")
                 return self.async_update_reload_and_abort(
                     self._reauth_entry,
@@ -160,7 +164,7 @@ class TeltonikaRmsOptionsFlow(OptionsFlow):
     def __init__(self, config_entry: ConfigEntry) -> None:
         self._config_entry = config_entry
 
-    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
             normalized = dict(user_input)
@@ -190,15 +194,15 @@ class TeltonikaRmsOptionsFlow(OptionsFlow):
         merged.update(self._config_entry.options)
         schema = vol.Schema(
             {
-                vol.Required(CONF_INVENTORY_INTERVAL, default=merged[CONF_INVENTORY_INTERVAL]): vol.All(
-                    vol.Coerce(int), vol.Range(min=60, max=3600)
-                ),
+                vol.Required(
+                    CONF_INVENTORY_INTERVAL, default=merged[CONF_INVENTORY_INTERVAL]
+                ): vol.All(vol.Coerce(int), vol.Range(min=60, max=3600)),
                 vol.Required(CONF_STATE_INTERVAL, default=merged[CONF_STATE_INTERVAL]): vol.All(
                     vol.Coerce(int), vol.Range(min=60, max=3600)
                 ),
-                vol.Required(CONF_ESTIMATED_DEVICES, default=merged[CONF_ESTIMATED_DEVICES]): vol.All(
-                    vol.Coerce(int), vol.Range(min=1, max=500)
-                ),
+                vol.Required(
+                    CONF_ESTIMATED_DEVICES, default=merged[CONF_ESTIMATED_DEVICES]
+                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=500)),
                 vol.Required(CONF_TAGS, default=merged[CONF_TAGS]): str,
                 vol.Required(CONF_DEVICE_STATUS, default=merged[CONF_DEVICE_STATUS]): str,
                 vol.Required(CONF_SPEC_PATH, default=merged[CONF_SPEC_PATH]): str,

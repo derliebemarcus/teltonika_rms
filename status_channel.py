@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime, timedelta
 import logging
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from .const import STATUS_BASE_URL
@@ -82,7 +82,9 @@ class RmsStatusChannelManager:
             try:
                 await client.emit("subscribe", {"channel": channel_id})
             except Exception:  # pragma: no cover - server-specific
-                LOGGER.debug("RMS status socket subscribe event not acknowledged for %s", channel_id)
+                LOGGER.debug(
+                    "RMS status socket subscribe event not acknowledged for %s", channel_id
+                )
             return await asyncio.wait_for(future, timeout=timeout_seconds)
         except Exception as err:  # pragma: no cover - network dependent
             LOGGER.debug("RMS status socket fallback for %s: %s", channel_id, err)

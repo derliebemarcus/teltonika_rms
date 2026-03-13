@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
 import logging
-from pathlib import Path
 import re
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -83,7 +83,9 @@ def _load_frozen_matrix() -> EndpointMatrix:
             scopes=tuple(raw.get("scopes", [])),
             polling=raw.get("polling", "safe"),
         )
-    return EndpointMatrix(source=str(Path(__file__).with_name(_FROZEN_MATRIX_FILE)), endpoints=endpoints)
+    return EndpointMatrix(
+        source=str(Path(__file__).with_name(_FROZEN_MATRIX_FILE)), endpoints=endpoints
+    )
 
 
 def _matrix_from_openapi(spec: dict[str, Any], frozen: EndpointMatrix) -> dict[str, EndpointSpec]:

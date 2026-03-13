@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import json
 import importlib
+import json
 import tempfile
 from datetime import timedelta
 from types import SimpleNamespace
@@ -14,7 +14,6 @@ from typing import Any
 import pytest
 from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
-
 from teltonika_rms.config_flow import (
     OAuth2FlowHandler,
     TeltonikaRmsOptionsFlow,
@@ -43,7 +42,9 @@ integration = importlib.import_module("teltonika_rms")
 
 
 def _make_token(payload: dict[str, Any]) -> str:
-    encoded = base64.urlsafe_b64encode(json.dumps(payload).encode("utf-8")).decode("utf-8").rstrip("=")
+    encoded = (
+        base64.urlsafe_b64encode(json.dumps(payload).encode("utf-8")).decode("utf-8").rstrip("=")
+    )
     return f"header.{encoded}.signature"
 
 
@@ -109,7 +110,9 @@ def _test_matrix(aggregate: bool = True) -> EndpointMatrix:
         "device_location": EndpointSpec("/v3/devices/{id}/location", tuple(), "high-cost"),
     }
     if aggregate:
-        endpoints["device_state_aggregate"] = EndpointSpec("/v3/devices/status", tuple(), "async-channel")
+        endpoints["device_state_aggregate"] = EndpointSpec(
+            "/v3/devices/status", tuple(), "async-channel"
+        )
     return EndpointMatrix(source="test", endpoints=endpoints)
 
 
@@ -119,7 +122,9 @@ def test_flow_extra_authorize_data_contains_scopes() -> None:
     assert flow.logger.name.endswith("config_flow")
 
 
-def test_user_and_oauth2_steps_delegate_to_homeassistant_base(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_user_and_oauth2_steps_delegate_to_homeassistant_base(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     flow = OAuth2FlowHandler()
     flow.async_show_menu = lambda **kwargs: kwargs  # type: ignore[method-assign]
     result = asyncio.run(flow.async_step_user())
@@ -132,7 +137,10 @@ def test_user_and_oauth2_steps_delegate_to_homeassistant_base(monkeypatch: pytes
         "homeassistant.helpers.config_entry_oauth2_flow.AbstractOAuth2FlowHandler.async_step_user",
         _base_user,
     )
-    assert asyncio.run(flow.async_step_oauth2({"x": 1})) == {"type": "external", "user_input": {"x": 1}}
+    assert asyncio.run(flow.async_step_oauth2({"x": 1})) == {
+        "type": "external",
+        "user_input": {"x": 1},
+    }
 
 
 def test_pat_step_rejects_empty_token() -> None:
@@ -210,7 +218,10 @@ def test_reauth_step_routes_by_existing_auth_mode(monkeypatch: pytest.MonkeyPatc
 def test_reauth_pat_updates_token() -> None:
     flow = OAuth2FlowHandler()
     flow._reauth_entry = SimpleNamespace(unique_id="x")
-    flow.async_update_reload_and_abort = lambda entry, data_updates: {"entry": entry, "data": data_updates}  # type: ignore[method-assign]
+    flow.async_update_reload_and_abort = lambda entry, data_updates: {
+        "entry": entry,
+        "data": data_updates,
+    }  # type: ignore[method-assign]
 
     result = asyncio.run(flow.async_step_reauth_pat({CONF_PAT_TOKEN: "new-token"}))
 
@@ -260,7 +271,9 @@ def test_oauth_reauth_updates_matching_entry_and_exposes_options_flow() -> None:
     result = asyncio.run(flow.async_oauth_create_entry(token))
 
     assert result["data"][CONF_AUTH_MODE] == AUTH_MODE_OAUTH2
-    assert isinstance(OAuth2FlowHandler.async_get_options_flow(SimpleNamespace()), TeltonikaRmsOptionsFlow)
+    assert isinstance(
+        OAuth2FlowHandler.async_get_options_flow(SimpleNamespace()), TeltonikaRmsOptionsFlow
+    )
 
 
 def test_options_flow_handles_budget_and_normalizes_tags(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -268,7 +281,9 @@ def test_options_flow_handles_budget_and_normalizes_tags(monkeypatch: pytest.Mon
     flow.hass = FakeHass()  # type: ignore[assignment]
     flow.async_create_entry = lambda **kwargs: kwargs  # type: ignore[method-assign]
     flow.async_show_form = lambda **kwargs: kwargs  # type: ignore[method-assign]
-    monkeypatch.setattr("teltonika_rms.config_flow.load_endpoint_matrix", lambda path: _test_matrix())
+    monkeypatch.setattr(
+        "teltonika_rms.config_flow.load_endpoint_matrix", lambda path: _test_matrix()
+    )
 
     result = asyncio.run(
         flow.async_step_init(
@@ -373,7 +388,10 @@ def test_integration_unload_entry_stops_on_platform_unload_failure() -> None:
     hass.config_entries.async_unload_platforms = _unload_platforms  # type: ignore[method-assign]
     hass.services.registered[("teltonika_rms", "refresh")] = object()
 
-    assert asyncio.run(integration.async_unload_entry(hass, SimpleNamespace(entry_id="entry-1"))) is False
+    assert (
+        asyncio.run(integration.async_unload_entry(hass, SimpleNamespace(entry_id="entry-1")))
+        is False
+    )
     assert hass.services.removed == []
 
 
@@ -413,8 +431,12 @@ def test_integration_setup_entry_pat_and_oauth_error(monkeypatch: pytest.MonkeyP
     hass = FakeHass()
     hass.config_entries.entries_result = [object()]
 
-    monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
-    monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
+    monkeypatch.setattr(
+        "teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix()
+    )
+    monkeypatch.setattr(
+        "teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token)
+    )
     monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
     monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FakeCoordinator)
@@ -485,15 +507,23 @@ def test_integration_setup_entry_wraps_refresh_errors(monkeypatch: pytest.Monkey
         async def async_request_refresh(self) -> None:
             raise RuntimeError("boom")
 
-    monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
-    monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
+    monkeypatch.setattr(
+        "teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix()
+    )
+    monkeypatch.setattr(
+        "teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token)
+    )
     monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
     monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FailingCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FailingCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.PortScanCoordinator", FailingCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.PortConfigCoordinator", FailingCoordinator)
-    monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
-    monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
+    monkeypatch.setattr(
+        "teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api)
+    )
+    monkeypatch.setattr(
+        "homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session"
+    )
 
     hass = FakeHass()
     entry = SimpleNamespace(
@@ -531,15 +561,23 @@ def test_integration_setup_entry_propagates_auth_failures(monkeypatch: pytest.Mo
         async def async_request_refresh(self) -> None:
             return None
 
-    monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
-    monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
+    monkeypatch.setattr(
+        "teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix()
+    )
+    monkeypatch.setattr(
+        "teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token)
+    )
     monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
     monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.PortScanCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.PortConfigCoordinator", FakeCoordinator)
-    monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
-    monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
+    monkeypatch.setattr(
+        "teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api)
+    )
+    monkeypatch.setattr(
+        "homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session"
+    )
 
     hass = FakeHass()
     entry = SimpleNamespace(
@@ -560,7 +598,9 @@ def test_integration_setup_returns_true() -> None:
         assert asyncio.run(integration.async_setup(SimpleNamespace(), {})) is True
 
 
-def test_integration_setup_entry_does_not_block_on_optional_port_refreshes(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_integration_setup_entry_does_not_block_on_optional_port_refreshes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     class FakeApi:
         def __init__(self, auth: Any, endpoint_matrix: Any) -> None:
             self.endpoint_matrix = endpoint_matrix
@@ -617,15 +657,23 @@ def test_integration_setup_entry_does_not_block_on_optional_port_refreshes(monke
         created["port_config"] = OptionalCoordinator("port_config")
         return created["port_config"]
 
-    monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
-    monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
+    monkeypatch.setattr(
+        "teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix()
+    )
+    monkeypatch.setattr(
+        "teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token)
+    )
     monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
     monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", _inventory)
     monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", _state)
     monkeypatch.setattr("teltonika_rms.coordinator.PortScanCoordinator", _port_scan)
     monkeypatch.setattr("teltonika_rms.coordinator.PortConfigCoordinator", _port_config)
-    monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
-    monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
+    monkeypatch.setattr(
+        "teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api)
+    )
+    monkeypatch.setattr(
+        "homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session"
+    )
 
     hass = FakeHass()
     hass.config_entries.entries_result = [object()]

@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any
-
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
 from .const import DOMAIN
 from .coordinator import CoordinatorBundle
@@ -42,16 +40,16 @@ class TeltonikaRmsEntity(CoordinatorEntity):
         return self._normalized is not None
 
     @property
-    def device_info(self) -> dict[str, Any] | None:
+    def device_info(self) -> DeviceInfo | None:
         normalized = self._normalized
         if normalized is None:
             return None
-        info: dict[str, Any] = {
-            "identifiers": {(DOMAIN, self._device_id)},
-            "manufacturer": "Teltonika",
-            "name": normalized.name,
-            "model": normalized.model,
-            "sw_version": normalized.firmware,
-            "serial_number": normalized.serial,
-        }
+        info = DeviceInfo(
+            identifiers={(DOMAIN, self._device_id)},
+            manufacturer="Teltonika",
+            name=normalized.name,
+            model=normalized.model,
+            sw_version=normalized.firmware,
+            serial_number=normalized.serial,
+        )
         return info

@@ -26,7 +26,9 @@ def validate_message(message: str) -> str | None:
 
     if len(meaningful) == 1:
         if not CATEGORY_RE.match(meaningful[0]):
-            return "single-line commit messages must start with add:/change:/deprecate:/remove:/fix:"
+            return (
+                "single-line commit messages must start with add:/change:/deprecate:/remove:/fix:"
+            )
         return None
 
     summary = None

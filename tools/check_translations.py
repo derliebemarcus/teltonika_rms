@@ -4,9 +4,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import re
-import sys
+from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -48,14 +47,20 @@ def main() -> int:
         missing = sorted(reference_keys - keys)
         extra = sorted(keys - reference_keys)
         if missing:
-            errors.append(f"{file_path.name}: missing keys: {missing[:5]}{'...' if len(missing) > 5 else ''}")
+            errors.append(
+                f"{file_path.name}: missing keys: {missing[:5]}{'...' if len(missing) > 5 else ''}"
+            )
         if extra:
-            errors.append(f"{file_path.name}: extra keys: {extra[:5]}{'...' if len(extra) > 5 else ''}")
+            errors.append(
+                f"{file_path.name}: extra keys: {extra[:5]}{'...' if len(extra) > 5 else ''}"
+            )
 
         for key, text in flattened.items():
             for pattern in PLACEHOLDER_PATTERNS:
                 if pattern.search(text):
-                    errors.append(f"{file_path.name}:{key}: unresolved placeholder pattern in '{text}'")
+                    errors.append(
+                        f"{file_path.name}:{key}: unresolved placeholder pattern in '{text}'"
+                    )
                     break
 
     if errors:

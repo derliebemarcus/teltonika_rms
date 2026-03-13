@@ -34,7 +34,9 @@ async def async_get_config_entry_diagnostics(
             "request_counter": runtime.bundle.api.request_counter,
             "inventory_devices": len(runtime.bundle.inventory.data),
             "state_devices": len(runtime.bundle.state.data),
-            "aggregate_state_available": getattr(runtime.bundle.api, "_aggregate_state_available", None),
+            "aggregate_state_available": getattr(
+                runtime.bundle.api, "_aggregate_state_available", None
+            ),
             "monthly_request_estimate": getattr(
                 runtime.bundle.state,
                 "monthly_request_estimate",

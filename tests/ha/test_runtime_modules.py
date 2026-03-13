@@ -12,10 +12,11 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import UpdateFailed
-
 from teltonika_rms import TeltonikaRmsRuntime
-from teltonika_rms.binary_sensor import RmsOnlineBinarySensor, async_setup_entry as binary_setup
-from teltonika_rms.button import RmsRebootButton, async_setup_entry as button_setup
+from teltonika_rms.binary_sensor import RmsOnlineBinarySensor
+from teltonika_rms.binary_sensor import async_setup_entry as binary_setup
+from teltonika_rms.button import RmsRebootButton
+from teltonika_rms.button import async_setup_entry as button_setup
 from teltonika_rms.coordinator import (
     CoordinatorBundle,
     InventoryCoordinator,
@@ -25,7 +26,8 @@ from teltonika_rms.coordinator import (
     async_refresh_all,
     validate_request_budget,
 )
-from teltonika_rms.device_tracker import RmsDeviceTracker, async_setup_entry as tracker_setup
+from teltonika_rms.device_tracker import RmsDeviceTracker
+from teltonika_rms.device_tracker import async_setup_entry as tracker_setup
 from teltonika_rms.diagnostics import TO_REDACT, async_get_config_entry_diagnostics
 from teltonika_rms.endpoint_matrix import EndpointMatrix, EndpointSpec
 from teltonika_rms.entity import TeltonikaRmsEntity
@@ -47,6 +49,8 @@ from teltonika_rms.sensor import (
     RmsUsedEthernetPortsSensor,
     RmsWanStateSensor,
     _connected_devices,
+)
+from teltonika_rms.sensor import (
     async_setup_entry as sensor_setup,
 )
 from teltonika_rms.status_channel import (
@@ -54,8 +58,10 @@ from teltonika_rms.status_channel import (
     _coerce_payload,
     _is_terminal,
 )
-from teltonika_rms.switch import RmsPoeSwitch, async_setup_entry as switch_setup
-from teltonika_rms.update import RmsFirmwareUpdateEntity, async_setup_entry as update_setup
+from teltonika_rms.switch import RmsPoeSwitch
+from teltonika_rms.switch import async_setup_entry as switch_setup
+from teltonika_rms.update import RmsFirmwareUpdateEntity
+from teltonika_rms.update import async_setup_entry as update_setup
 
 pytestmark = pytest.mark.ha
 
@@ -147,7 +153,9 @@ def _bundle(normalized: NormalizedDevice | None) -> Any:
         state=state,
         port_scan=port_scan,
         port_config=port_config,
-        api=SimpleNamespace(async_reboot_device=lambda device_id: asyncio.sleep(0, result={"id": device_id})),
+        api=SimpleNamespace(
+            async_reboot_device=lambda device_id: asyncio.sleep(0, result={"id": device_id})
+        ),
         merged_device=lambda device_id: normalized if device_id == "dev-1" else None,
     )
 
@@ -160,7 +168,9 @@ def _matrix(aggregate: bool = True) -> EndpointMatrix:
         "device_location": EndpointSpec("/v3/devices/{id}/location", tuple(), "high-cost"),
     }
     if aggregate:
-        endpoints["device_state_aggregate"] = EndpointSpec("/v3/devices/status", tuple(), "async-channel")
+        endpoints["device_state_aggregate"] = EndpointSpec(
+            "/v3/devices/status", tuple(), "async-channel"
+        )
     return EndpointMatrix(source="test", endpoints=endpoints)
 
 
@@ -501,7 +511,9 @@ def test_poe_switch_handles_missing_port_and_setup_skips_invalid_ports() -> None
 
 def test_coordinator_bundle_and_budget_validation() -> None:
     inventory = FakeListenerCoordinator({"dev-1": {"id": "dev-1", "name": "Router"}})
-    state = FakeListenerCoordinator({"dev-1": {"state": {"online": True}, "location": {"latitude": 1, "longitude": 2}}})
+    state = FakeListenerCoordinator(
+        {"dev-1": {"state": {"online": True}, "location": {"latitude": 1, "longitude": 2}}}
+    )
     bundle = CoordinatorBundle(
         inventory=inventory,  # type: ignore[arg-type]
         state=state,  # type: ignore[arg-type]
@@ -515,17 +527,24 @@ def test_coordinator_bundle_and_budget_validation() -> None:
 
     assert merged is not None
     assert merged.online is True
-    assert validate_request_budget(
-        inventory_interval=900,
-        state_interval=120,
-        estimated_devices=10,
-        aggregate_state_supported=True,
-    ) is True
+    assert (
+        validate_request_budget(
+            inventory_interval=900,
+            state_interval=120,
+            estimated_devices=10,
+            aggregate_state_supported=True,
+        )
+        is True
+    )
     assert bundle.merged_device("missing") is None
 
 
-def test_coordinator_constructors_cover_default_option_parsing(monkeypatch: pytest.MonkeyPatch) -> None:
-    def _fake_super_init(self: Any, hass: Any, logger: Any, *, name: str, update_interval: timedelta) -> None:
+def test_coordinator_constructors_cover_default_option_parsing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _fake_super_init(
+        self: Any, hass: Any, logger: Any, *, name: str, update_interval: timedelta
+    ) -> None:
         self.hass = hass
         self.logger = logger
         self.name = name
@@ -537,7 +556,9 @@ def test_coordinator_constructors_cover_default_option_parsing(monkeypatch: pyte
     )
 
     hass = SimpleNamespace()
-    api = SimpleNamespace(endpoint_matrix=_matrix(), estimate_max_calls_per_cycle=lambda interval: 2)
+    api = SimpleNamespace(
+        endpoint_matrix=_matrix(), estimate_max_calls_per_cycle=lambda interval: 2
+    )
     inventory = InventoryCoordinator(
         hass,  # type: ignore[arg-type]
         api,  # type: ignore[arg-type]
@@ -573,7 +594,9 @@ def test_coordinator_constructors_cover_default_option_parsing(monkeypatch: pyte
 def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.MonkeyPatch) -> None:
     inventory = object.__new__(InventoryCoordinator)
     inventory._api = SimpleNamespace(
-        async_list_devices=lambda **kwargs: asyncio.sleep(0, result=[{"id": "dev-1", "name": "Router"}])
+        async_list_devices=lambda **kwargs: asyncio.sleep(
+            0, result=[{"id": "dev-1", "name": "Router"}]
+        )
     )
     inventory._tags = ["alpha"]
     inventory._device_status = None
@@ -582,7 +605,9 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     assert updated == {"dev-1": {"id": "dev-1", "name": "Router"}}
 
     failing_inventory = object.__new__(InventoryCoordinator)
-    failing_inventory._api = SimpleNamespace(async_list_devices=lambda **kwargs: asyncio.sleep(0, result=None))
+    failing_inventory._api = SimpleNamespace(
+        async_list_devices=lambda **kwargs: asyncio.sleep(0, result=None)
+    )
     failing_inventory._tags = []
     failing_inventory._device_status = None
 
@@ -595,7 +620,9 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
 
     inventory_skip = object.__new__(InventoryCoordinator)
     inventory_skip._api = SimpleNamespace(
-        async_list_devices=lambda **kwargs: asyncio.sleep(0, result=[{"id": "dev-1"}, {"name": "missing"}])
+        async_list_devices=lambda **kwargs: asyncio.sleep(
+            0, result=[{"id": "dev-1"}, {"name": "missing"}]
+        )
     )
     inventory_skip._tags = []
     inventory_skip._device_status = None
@@ -607,10 +634,14 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
         async_get_states_for_devices=lambda device_ids, max_per_cycle: asyncio.sleep(
             0, result={"dev-1": {"online": True}}
         ),
-        async_get_device_location=lambda device_id: asyncio.sleep(0, result={"latitude": 1.0, "longitude": 2.0}),
+        async_get_device_location=lambda device_id: asyncio.sleep(
+            0, result={"latitude": 1.0, "longitude": 2.0}
+        ),
         estimate_max_calls_per_cycle=lambda interval: 3,
     )
-    state._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}}, update_interval=timedelta(seconds=900))
+    state._inventory = SimpleNamespace(
+        data={"dev-1": {"id": "dev-1"}}, update_interval=timedelta(seconds=900)
+    )
     state._enable_location = True
     state._estimated_devices = 10
     state._state_interval = 120
@@ -641,7 +672,9 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
 
     port_scan = object.__new__(PortScanCoordinator)
     port_scan._api = SimpleNamespace(
-        async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(0, result=[{"name": "port1"}])
+        async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(
+            0, result=[{"name": "port1"}]
+        )
     )
     port_scan._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}})
 
@@ -667,7 +700,9 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
 
     empty_port_scan = object.__new__(PortScanCoordinator)
     empty_port_scan._api = SimpleNamespace(
-        async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(0, result=[{"name": "unused"}])
+        async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(
+            0, result=[{"name": "unused"}]
+        )
     )
     empty_port_scan._inventory = SimpleNamespace(data={})
     assert asyncio.run(empty_port_scan._async_update_data()) == {}
@@ -680,7 +715,9 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     )
     port_config._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}})
     port_config._scope_warning_logged = False
-    assert asyncio.run(port_config._async_update_data()) == {"dev-1": [{"id": "port1", "poe_enable": "1"}]}
+    assert asyncio.run(port_config._async_update_data()) == {
+        "dev-1": [{"id": "port1", "poe_enable": "1"}]
+    }
 
     async def _raise_bad_config(device_id: str) -> Any:
         raise RmsApiError("bad config")
@@ -742,11 +779,15 @@ def test_state_coordinator_handles_location_errors(monkeypatch: pytest.MonkeyPat
     state = object.__new__(StateCoordinator)
     state._api = SimpleNamespace(
         endpoint_matrix=_matrix(aggregate=False),
-        async_get_states_for_devices=lambda device_ids, max_per_cycle: asyncio.sleep(0, result={"dev-1": {"online": True}}),
+        async_get_states_for_devices=lambda device_ids, max_per_cycle: asyncio.sleep(
+            0, result={"dev-1": {"online": True}}
+        ),
         async_get_device_location=_raise_location,
         estimate_max_calls_per_cycle=lambda interval: 2,
     )
-    state._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}}, update_interval=timedelta(seconds=900))
+    state._inventory = SimpleNamespace(
+        data={"dev-1": {"id": "dev-1"}}, update_interval=timedelta(seconds=900)
+    )
     state._enable_location = True
     state._estimated_devices = 1
     state._state_interval = 120
@@ -871,7 +912,9 @@ def test_status_channel_socket_success_and_disconnect(monkeypatch: pytest.Monkey
     assert seen["disconnected"] is True
 
 
-def test_status_channel_socket_handles_connect_failures_and_emit_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_status_channel_socket_handles_connect_failures_and_emit_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     class FakeAsyncClient:
         def __init__(self, **kwargs: Any) -> None:
             self.connected = True

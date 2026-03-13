@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable
-from datetime import UTC, datetime
 import logging
 import random
+from collections.abc import Iterable
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
-from aiohttp import ClientError, ClientResponse, ClientSession
+from aiohttp import ClientError, ClientResponse, ClientSession, ClientTimeout
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session
 
@@ -98,7 +98,7 @@ class PatRmsAuthClient:
             url,
             params=params,
             json=json,
-            timeout=timeout,
+            timeout=ClientTimeout(total=timeout),
             headers=headers,
         )
 
@@ -111,7 +111,7 @@ class RmsApiClient:
 
     def __init__(
         self,
-        auth: "RmsAuthClient",
+        auth: RmsAuthClient,
         endpoint_matrix: EndpointMatrix,
     ) -> None:
         self._auth = auth
@@ -222,7 +222,9 @@ class RmsApiClient:
         resolved = await self._resolve_meta_channel(meta, data)
         return _extract_ethernet_ports(device_id, resolved)
 
-    async def async_get_device_port_configurations(self, device_id: str) -> list[dict[str, Any]] | None:
+    async def async_get_device_port_configurations(
+        self, device_id: str
+    ) -> list[dict[str, Any]] | None:
         """Fetch switch port configuration data for one device."""
         payload = {
             "device_id": _normalize_device_identifier(device_id),
@@ -292,10 +294,14 @@ class RmsApiClient:
         if aggregate_path and self._aggregate_state_available is not False:
             params = {"ids": ",".join(device_ids)}
             try:
-                data, meta = await self.async_request("GET", aggregate_path, params=params, allow_not_found=True)
+                data, meta = await self.async_request(
+                    "GET", aggregate_path, params=params, allow_not_found=True
+                )
                 if data is None:
                     self._aggregate_state_available = False
-                    return await self._async_per_device_state(device_ids, max_per_cycle=max_per_cycle)
+                    return await self._async_per_device_state(
+                        device_ids, max_per_cycle=max_per_cycle
+                    )
                 resolved = await self._resolve_meta_channel(meta, data)
                 state_map = _coerce_state_map(resolved)
                 if state_map:
@@ -550,7 +556,9 @@ def _extract_ethernet_ports(device_id: str, payload: Any) -> list[dict[str, Any]
 
     items: Any = payload
     if isinstance(payload, dict):
-        items = payload.get(str(device_id), payload.get(_normalize_device_identifier(device_id), payload))
+        items = payload.get(
+            str(device_id), payload.get(_normalize_device_identifier(device_id), payload)
+        )
 
     if isinstance(items, list):
         for item in items:
@@ -576,7 +584,9 @@ def _extract_port_configurations(payload: Any) -> list[dict[str, Any]] | None:
         return None
 
     if isinstance(payload, list):
-        if payload and all(isinstance(item, dict) and isinstance(item.get("data"), list) for item in payload):
+        if payload and all(
+            isinstance(item, dict) and isinstance(item.get("data"), list) for item in payload
+        ):
             rows: list[dict[str, Any]] = []
             for item in payload:
                 rows.extend(row for row in item["data"] if isinstance(row, dict))

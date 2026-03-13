@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,4 +46,6 @@ def test_translation_text_has_no_unresolved_placeholders() -> None:
         for key, text in flat.items():
             assert isinstance(text, str)
             for pattern in PLACEHOLDER_PATTERNS:
-                assert not pattern.search(text), f"{file_path.name}:{key} contains placeholder artifact"
+                assert not pattern.search(text), (
+                    f"{file_path.name}:{key} contains placeholder artifact"
+                )

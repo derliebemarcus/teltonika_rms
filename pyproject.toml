@@ -1,0 +1,57 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+exclude = [
+  ".venv",
+  ".venv-test",
+  "__pycache__",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.14"
+files = [
+  "__init__.py",
+  "api.py",
+  "application_credentials.py",
+  "binary_sensor.py",
+  "button.py",
+  "config_flow.py",
+  "const.py",
+  "coordinator.py",
+  "device_tracker.py",
+  "diagnostics.py",
+  "endpoint_matrix.py",
+  "entity.py",
+  "exceptions.py",
+  "models.py",
+  "sensor.py",
+  "status_channel.py",
+  "switch.py",
+  "update.py",
+]
+exclude = "(^tests/|^tools/)"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[tool.mutmut]
+paths_to_mutate = [
+  "api.py",
+  "models.py",
+  "status_channel.py",
+]
+pytest_add_cli_args_test_selection = [
+  "tests/unit/test_models.py",
+  "tests/ha/test_api_runtime.py",
+  "tests/ha/test_runtime_modules.py",
+]

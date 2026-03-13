@@ -47,7 +47,10 @@ async def async_setup_entry(
                 RmsUsedEthernetPortsSensor,
                 RmsUsedEthernetPortNamesSensor,
             ):
-                if issubclass(entity_cls, _BasePortScanSensor) and device_id not in bundle.port_scan.data:
+                if (
+                    issubclass(entity_cls, _BasePortScanSensor)
+                    and device_id not in bundle.port_scan.data
+                ):
                     continue
                 if entity_cls is RmsUsedEthernetPortNamesSensor and not any(
                     port.get("name") and _connected_devices(port)

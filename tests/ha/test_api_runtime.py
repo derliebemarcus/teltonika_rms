@@ -9,16 +9,15 @@ from typing import Any
 import pytest
 from aiohttp import ClientError
 from homeassistant.exceptions import ConfigEntryAuthFailed
-
 from teltonika_rms.api import (
     OAuth2RmsAuthClient,
     PatRmsAuthClient,
     RmsApiClient,
     _async_retry_sleep,
     _coerce_list,
-    _extract_port_configurations,
     _coerce_state_map,
     _extract_ethernet_ports,
+    _extract_port_configurations,
     _has_next_page,
     _parse_envelope,
     _retry_delay,
@@ -138,7 +137,9 @@ def test_pat_auth_client_adds_bearer_token() -> None:
     session = FakeSession()
     client = PatRmsAuthClient(session, " secret-token ")
 
-    asyncio.run(client.async_request("GET", "https://example.test", params={"a": 1}, json=None, timeout=30))
+    asyncio.run(
+        client.async_request("GET", "https://example.test", params={"a": 1}, json=None, timeout=30)
+    )
 
     assert session.calls[0]["headers"]["Authorization"] == "Bearer secret-token"
     assert asyncio.run(client.async_get_access_token()) == "secret-token"
@@ -157,7 +158,9 @@ def test_oauth2_auth_client_uses_session_and_exposes_access_token() -> None:
     session = FakeOAuthSession()
     client = OAuth2RmsAuthClient(session)  # type: ignore[arg-type]
 
-    asyncio.run(client.async_request("POST", "https://example.test", params=None, json={"a": 1}, timeout=30))
+    asyncio.run(
+        client.async_request("POST", "https://example.test", params=None, json={"a": 1}, timeout=30)
+    )
 
     assert session.calls[0]["method"] == "POST"
     assert asyncio.run(client.async_get_access_token()) == "oauth-token"
@@ -183,7 +186,9 @@ def test_api_request_raises_on_http_error_and_supports_absolute_urls() -> None:
     client = RmsApiClient(FakeAuthClient([response]), _matrix())
 
     with pytest.raises(RmsApiError, match="400"):
-        asyncio.run(client.async_request("GET", "https://status.example.test/channel/1", absolute_url=True))
+        asyncio.run(
+            client.async_request("GET", "https://status.example.test/channel/1", absolute_url=True)
+        )
 
     assert response.released is True
 
@@ -289,7 +294,9 @@ def test_api_meta_channel_resolution_handles_fallback_variants() -> None:
     client = RmsApiClient(FakeAuthClient([]), _matrix())
 
     assert asyncio.run(client._resolve_meta_channel({}, {"ok": True})) == {"ok": True}
-    assert asyncio.run(client._resolve_meta_channel({"channel": "abc"}, {"ok": True})) == {"ok": True}
+    assert asyncio.run(client._resolve_meta_channel({"channel": "abc"}, {"ok": True})) == {
+        "ok": True
+    }
 
     class FakeChannelManager:
         async def async_wait_for_channel(self, channel_id: str) -> dict[str, Any] | None:
@@ -298,8 +305,12 @@ def test_api_meta_channel_resolution_handles_fallback_variants() -> None:
             return {"completed": True}
 
     client.set_status_channel_manager(FakeChannelManager())
-    assert asyncio.run(client._resolve_meta_channel({"channel": "empty"}, {"ok": True})) == {"ok": True}
-    assert asyncio.run(client._resolve_meta_channel({"channel": "abc"}, {"ok": True})) == {"completed": True}
+    assert asyncio.run(client._resolve_meta_channel({"channel": "empty"}, {"ok": True})) == {
+        "ok": True
+    }
+    assert asyncio.run(client._resolve_meta_channel({"channel": "abc"}, {"ok": True})) == {
+        "completed": True
+    }
 
 
 def test_api_get_device_state_falls_back_to_detail_on_error() -> None:
@@ -351,7 +362,9 @@ def test_api_get_device_ethernet_ports_handles_status_channel_and_missing_values
             }
 
     client = RmsApiClient(
-        FakeAuthClient([FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-scan"}})]),
+        FakeAuthClient(
+            [FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-scan"}})]
+        ),
         _matrix(),
     )
     client.set_status_channel_manager(FakeChannelManager())
@@ -378,7 +391,12 @@ def test_api_get_device_port_configurations_handles_status_channel_and_missing_v
                         "rid": 0,
                         "type": "api_forward",
                         "data": [
-                            {"id": "port1", ".type": "switch_port", "poe_enable": "1", "description": "tado"},
+                            {
+                                "id": "port1",
+                                ".type": "switch_port",
+                                "poe_enable": "1",
+                                "description": "tado",
+                            },
                             {"id": "port2", ".type": "switch_port", "poe_enable": "0"},
                             {"id": "sfp1", ".type": "switch_port"},
                         ],
@@ -389,7 +407,9 @@ def test_api_get_device_port_configurations_handles_status_channel_and_missing_v
             }
 
     client = RmsApiClient(
-        FakeAuthClient([FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-config"}})]),
+        FakeAuthClient(
+            [FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-config"}})]
+        ),
         _matrix(),
     )
     client.set_status_channel_manager(FakeChannelManager())
@@ -436,7 +456,9 @@ def test_api_set_device_port_poe_posts_expected_payloads() -> None:
         ]
     }
 
-    assert asyncio.run(client.async_set_device_port_poe("device-a", "port3", False)) == {"queued": True}
+    assert asyncio.run(client.async_set_device_port_poe("device-a", "port3", False)) == {
+        "queued": True
+    }
     assert auth.calls[1]["json"] == {
         "configuration": [
             {
@@ -483,7 +505,9 @@ def test_api_extract_port_configurations_covers_status_payload_shapes() -> None:
     ) == [{"id": "port1", "poe_enable": "1"}, {"id": "port2", "poe_enable": "0"}]
 
 
-def test_api_get_states_for_devices_uses_round_robin_without_aggregate(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_api_get_states_for_devices_uses_round_robin_without_aggregate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     client = RmsApiClient(FakeAuthClient([]), _matrix(aggregate=False))
 
     async def _state(device_id: str) -> dict[str, Any]:
@@ -498,7 +522,9 @@ def test_api_get_states_for_devices_uses_round_robin_without_aggregate(monkeypat
     assert set(second) == {"a", "c"}
 
 
-def test_api_get_states_for_devices_handles_empty_and_unbounded_batches(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_api_get_states_for_devices_handles_empty_and_unbounded_batches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     client = RmsApiClient(FakeAuthClient([]), _matrix(aggregate=False))
 
     async def _state(device_id: str) -> dict[str, Any]:
@@ -513,13 +539,17 @@ def test_api_get_states_for_devices_handles_empty_and_unbounded_batches(monkeypa
     }
 
 
-def test_api_get_states_for_devices_handles_aggregate_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_api_get_states_for_devices_handles_aggregate_fallbacks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     client = RmsApiClient(
         FakeAuthClient([FakeResponse(404, {"missing": True})]),
         _matrix(),
     )
 
-    async def _per_device(device_ids: list[str], *, max_per_cycle: int | None) -> dict[str, dict[str, Any]]:
+    async def _per_device(
+        device_ids: list[str], *, max_per_cycle: int | None
+    ) -> dict[str, dict[str, Any]]:
         assert device_ids == ["a"]
         assert max_per_cycle == 1
         return {"a": {"id": "a", "fallback": True}}
@@ -542,11 +572,19 @@ def test_api_list_devices_paginates_and_applies_filters() -> None:
         [
             FakeResponse(
                 200,
-                {"success": True, "data": [{"id": "1"}], "meta": {"pagination": {"page": 1, "pages": 2}}},
+                {
+                    "success": True,
+                    "data": [{"id": "1"}],
+                    "meta": {"pagination": {"page": 1, "pages": 2}},
+                },
             ),
             FakeResponse(
                 200,
-                {"success": True, "data": [{"id": "2"}], "meta": {"pagination": {"page": 2, "pages": 2}}},
+                {
+                    "success": True,
+                    "data": [{"id": "2"}],
+                    "meta": {"pagination": {"page": 2, "pages": 2}},
+                },
             ),
         ]
     )
@@ -634,12 +672,15 @@ def test_api_helper_functions_cover_error_paths(monkeypatch: pytest.MonkeyPatch)
     assert _has_next_page([], {"pagination": {"page": 1, "pages": 2}}, 50) is True
     assert _has_next_page([], {"pagination": {"next": "/next"}}, 50) is True
     assert normalize_tags(" a, ,b ") == ["a", "b"]
-    assert estimate_monthly_requests(
-        inventory_interval=60,
-        state_interval=120,
-        estimated_devices=10,
-        aggregate_state_supported=False,
-    ) > 0
+    assert (
+        estimate_monthly_requests(
+            inventory_interval=60,
+            state_interval=120,
+            estimated_devices=10,
+            aggregate_state_supported=False,
+        )
+        > 0
+    )
     assert chunked(["a", "b", "c"], 2) == [["a", "b"], ["c"]]
     assert _parse_envelope({"plain": True}) == ({"plain": True}, {})
 

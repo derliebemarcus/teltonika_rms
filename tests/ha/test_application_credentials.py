@@ -5,12 +5,10 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from homeassistant.components.application_credentials import ClientCredential
 from homeassistant.helpers.config_entry_oauth2_flow import (
     LocalOAuth2ImplementationWithPkce,
 )
-
 from teltonika_rms.application_credentials import (
     async_get_auth_implementation,
     async_get_authorization_server,

@@ -9,4 +9,3 @@ class RmsApiError(Exception):
 
 class RmsAuthError(RmsApiError):
     """Raised for RMS auth/scope failures."""
-

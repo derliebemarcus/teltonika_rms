@@ -197,6 +197,7 @@ def normalize_device(
         "updated_at",
         "timestamp",
     )
+    last_seen: datetime | None
     if isinstance(last_seen_raw, datetime):
         last_seen = last_seen_raw if last_seen_raw.tzinfo else last_seen_raw.replace(tzinfo=UTC)
     else:

@@ -72,7 +72,12 @@ def test_endpoint_matrix_helpers_cover_selection_and_scopes() -> None:
     assert matrix.format_path("device", id="abc") == "/v3/devices/abc"
     assert matrix.format_path("missing", id="abc") is None
 
-    operation = {"security": [{"oauth": ["devices:read", "devices:read"]}, {"other": ["device_location:read"]}]}
+    operation = {
+        "security": [
+            {"oauth": ["devices:read", "devices:read"]},
+            {"other": ["device_location:read"]},
+        ]
+    }
     assert _extract_scopes(operation, []) == ("devices:read", "device_location:read")
     assert _extract_scopes({"security": "broken"}, []) == ()
 

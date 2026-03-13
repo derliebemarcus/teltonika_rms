@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-import logging
 from typing import TYPE_CHECKING, Any
 
 from .const import (
@@ -46,6 +46,7 @@ class TeltonikaRmsRuntime:
     bundle: Any
     remove_service_listener: Callable[[], None] | None = None
 
+
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Set up integration domain."""
     return True
@@ -57,7 +58,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
     from homeassistant.helpers import config_entry_oauth2_flow
     from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-    from .api import OAuth2RmsAuthClient, PatRmsAuthClient, RmsApiClient
+    from .api import OAuth2RmsAuthClient, PatRmsAuthClient, RmsApiClient, RmsAuthClient
     from .coordinator import (
         CoordinatorBundle,
         InventoryCoordinator,
@@ -69,6 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
     from .status_channel import RmsStatusChannelManager
 
     auth_mode = str(entry.data.get(CONF_AUTH_MODE, AUTH_MODE_OAUTH2))
+    auth_client: RmsAuthClient
     if auth_mode == AUTH_MODE_PAT:
         pat_token = str(entry.data.get(CONF_PAT_TOKEN, "")).strip()
         if not pat_token:

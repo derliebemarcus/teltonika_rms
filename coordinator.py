@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import timedelta
-import logging
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -38,10 +38,10 @@ LOGGER = logging.getLogger(__name__)
 class CoordinatorBundle:
     """Runtime coordinators and helpers."""
 
-    inventory: "InventoryCoordinator"
-    state: "StateCoordinator"
-    port_scan: "PortScanCoordinator"
-    port_config: "PortConfigCoordinator"
+    inventory: InventoryCoordinator
+    state: StateCoordinator
+    port_scan: PortScanCoordinator
+    port_config: PortConfigCoordinator
     status_channels: RmsStatusChannelManager
     api: RmsApiClient
 
@@ -104,7 +104,9 @@ class StateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self._api = api
         self._inventory = inventory
         self._enable_location = bool(options.get(CONF_ENABLE_LOCATION, True))
-        self._estimated_devices = int(options.get(CONF_ESTIMATED_DEVICES, DEFAULT_ESTIMATED_DEVICES))
+        self._estimated_devices = int(
+            options.get(CONF_ESTIMATED_DEVICES, DEFAULT_ESTIMATED_DEVICES)
+        )
         self._state_interval = int(options.get(CONF_STATE_INTERVAL, DEFAULT_STATE_INTERVAL))
         super().__init__(
             hass,
@@ -116,9 +118,14 @@ class StateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
     @property
     def monthly_request_estimate(self) -> int:
         """Compute current monthly estimate from options."""
-        aggregate_supported = self._api.endpoint_matrix.path_for("device_state_aggregate") is not None
+        aggregate_supported = (
+            self._api.endpoint_matrix.path_for("device_state_aggregate") is not None
+        )
+        inventory_interval = self._inventory.update_interval or timedelta(
+            seconds=DEFAULT_INVENTORY_INTERVAL
+        )
         return estimate_monthly_requests(
-            inventory_interval=int(self._inventory.update_interval.total_seconds()),
+            inventory_interval=int(inventory_interval.total_seconds()),
             state_interval=self._state_interval,
             estimated_devices=self._estimated_devices,
             aggregate_state_supported=aggregate_supported,
