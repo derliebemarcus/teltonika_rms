@@ -17,7 +17,7 @@
     "application_credentials"
   ],
   "requirements": [
-    "python-socketio==5.11.2"
+    "python-socketio==5.14.0"
   ],
   "version": "0.8.2"
 }
