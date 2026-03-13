@@ -2,16 +2,52 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.5.2 - 2026-03-13
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Added repository-level `icon.png` compatibility branding alongside `brand/icon.png` so HACS can resolve the integration icon more reliably.
+- Raised automated test coverage to 97%, giving stronger regression protection for config flow, coordinators, API fallback paths, and repository metadata.
+- Added enforcement for structured release notes so GitHub releases consistently highlight product impact first and maintenance/testing items afterwards.
+
+### Changes
+
+- Standardized README badges so all top-level badges use a consistent `for-the-badge` height and styling.
+- Enforced categorized commit-message bodies through a `commit-msg` hook:
+  - `add:`
+  - `change:`
+  - `deprecate:`
+  - `remove:`
+  - `fix:`
+
+### Bugfixes
+
+- Fixed OAuth2 reauthentication to restart implementation selection correctly instead of calling a non-existent superclass reauth method.
+- Replaced the unstable dynamic license badge with a stable MIT badge so the repository page no longer shows `repo not found`.
+
 ## 0.5.1 - 2026-03-13
 
-- Increased automated test coverage to 94% across the integration codebase.
-- Added high-value runtime coverage for:
-  - RMS API retries, pagination, aggregate-state fallback, and channel resolution
-  - OAuth application credential helpers
-  - config-flow edge cases and setup/unload failure handling
-  - Socket.IO status-channel success, failure, and polling-timeout behavior
-- Expanded unit coverage for endpoint-matrix parsing and device normalization helpers.
-- Kept the Coveralls workflow aligned with the current HA/runtime dependency floor.
+### New Features
+
+- None.
+
+### Improvements
+
+- Increased automated test coverage to 94% across the integration codebase, improving regression protection for authentication, coordinator updates, and status-channel handling.
+- Expanded runtime coverage for RMS API retries, pagination, aggregate-state fallback, and channel resolution so remote-device state handling is validated more thoroughly.
+- Expanded unit coverage for endpoint-matrix parsing and device normalization helpers, reducing the chance of API-schema or payload-shape regressions.
+
+### Changes
+
+- Kept the Coveralls workflow aligned with the current HA/runtime dependency floor so published coverage stays current and comparable across releases.
+
+### Bugfixes
+
+- None.
 
 ## 0.5.0 - 2026-03-13
 

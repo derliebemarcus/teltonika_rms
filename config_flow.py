@@ -98,7 +98,7 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
         auth_mode = str(self._reauth_entry.data.get(CONF_AUTH_MODE, AUTH_MODE_OAUTH2))
         if auth_mode == AUTH_MODE_PAT:
             return await self.async_step_reauth_pat()
-        return await super().async_step_reauth(entry_data)
+        return await self.async_step_pick_implementation()
 
     async def async_step_reauth_pat(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Reauthenticate PAT by replacing the token."""

@@ -12,6 +12,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 
 from teltonika_rms.config_flow import (
@@ -110,6 +111,23 @@ def _test_matrix(aggregate: bool = True) -> EndpointMatrix:
 def test_flow_extra_authorize_data_contains_scopes() -> None:
     flow = OAuth2FlowHandler()
     assert flow.extra_authorize_data == {"scope": " ".join(OAUTH2_SCOPES)}
+    assert flow.logger.name.endswith("config_flow")
+
+
+def test_user_and_oauth2_steps_delegate_to_homeassistant_base(monkeypatch: pytest.MonkeyPatch) -> None:
+    flow = OAuth2FlowHandler()
+    flow.async_show_menu = lambda **kwargs: kwargs  # type: ignore[method-assign]
+    result = asyncio.run(flow.async_step_user())
+    assert result == {"step_id": "user", "menu_options": ["oauth2", "pat"]}
+
+    async def _base_user(self: Any, user_input: dict[str, Any] | None = None) -> dict[str, Any]:
+        return {"type": "external", "user_input": user_input}
+
+    monkeypatch.setattr(
+        "homeassistant.helpers.config_entry_oauth2_flow.AbstractOAuth2FlowHandler.async_step_user",
+        _base_user,
+    )
+    assert asyncio.run(flow.async_step_oauth2({"x": 1})) == {"type": "external", "user_input": {"x": 1}}
 
 
 def test_pat_step_rejects_empty_token() -> None:
@@ -163,6 +181,27 @@ def test_reauth_step_handles_missing_entry() -> None:
     assert result["reason"] == "reauth_failed"
 
 
+def test_reauth_step_routes_by_existing_auth_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    flow = OAuth2FlowHandler()
+    pat_entry = SimpleNamespace(data={CONF_AUTH_MODE: AUTH_MODE_PAT})
+    flow.hass = FakeFlowHass()  # type: ignore[assignment]
+    flow.hass._entry = pat_entry
+    flow.context = {"entry_id": "entry-1"}
+
+    async def _reauth_pat() -> dict[str, str]:
+        return {"step": "pat"}
+
+    flow.async_step_reauth_pat = _reauth_pat  # type: ignore[method-assign]
+    assert asyncio.run(flow.async_step_reauth({})) == {"step": "pat"}
+
+    async def _pick_impl(user_input: dict[str, Any] | None = None) -> dict[str, Any]:
+        return {"step": "oauth", "entry_data": user_input}
+
+    flow.async_step_pick_implementation = _pick_impl  # type: ignore[method-assign]
+    flow.hass._entry = SimpleNamespace(data={CONF_AUTH_MODE: AUTH_MODE_OAUTH2})
+    assert asyncio.run(flow.async_step_reauth({"x": 1})) == {"step": "oauth", "entry_data": None}
+
+
 def test_reauth_pat_updates_token() -> None:
     flow = OAuth2FlowHandler()
     flow._reauth_entry = SimpleNamespace(unique_id="x")
@@ -200,6 +239,23 @@ def test_oauth_create_entry_and_reauth_paths() -> None:
 
     aborted = asyncio.run(reauth_flow.async_oauth_create_entry(token))
     assert aborted["reason"] == "wrong_account"
+
+
+def test_oauth_reauth_updates_matching_entry_and_exposes_options_flow() -> None:
+    token = {"token": {"access_token": _make_token({"sub": "user-1"})}}
+    flow = OAuth2FlowHandler()
+    flow.context = {"source": "reauth"}
+    flow._reauth_entry = SimpleNamespace(unique_id="user-1")
+    flow.async_set_unique_id = lambda unique_id: asyncio.sleep(0)  # type: ignore[method-assign]
+    flow.async_update_reload_and_abort = lambda entry, data_updates: {  # type: ignore[method-assign]
+        "entry": entry,
+        "data": data_updates,
+    }
+
+    result = asyncio.run(flow.async_oauth_create_entry(token))
+
+    assert result["data"][CONF_AUTH_MODE] == AUTH_MODE_OAUTH2
+    assert isinstance(OAuth2FlowHandler.async_get_options_flow(SimpleNamespace()), TeltonikaRmsOptionsFlow)
 
 
 def test_options_flow_handles_budget_and_normalizes_tags(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -258,7 +314,10 @@ def test_options_flow_shows_defaults_when_opened_without_input() -> None:
 def test_token_helpers_extract_subject_and_fingerprint() -> None:
     token = {"token": {"access_token": _make_token({"sub": "abc"})}}
     assert _extract_subject_from_token(token) == "abc"
+    assert _extract_subject_from_token({"token": "bad"}) is None
+    assert _extract_subject_from_token({"token": {CONF_ACCESS_TOKEN: 1}}) is None
     assert _extract_subject_from_token({"token": {"access_token": "broken"}}) is None
+    assert _extract_subject_from_token({"token": {"access_token": "x.bad.signature"}}) is None
     assert len(_token_fingerprint("secret")) == 16
 
 

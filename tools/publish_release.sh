@@ -72,6 +72,13 @@ if [ ! -s "$RELEASE_NOTES_FILE" ]; then
   exit 1
 fi
 
+for heading in "### New Features" "### Improvements" "### Changes" "### Bugfixes"; do
+  if ! grep -Fqx "$heading" "$RELEASE_NOTES_FILE"; then
+    echo "Release notes for $VERSION must contain heading: $heading"
+    exit 1
+  fi
+done
+
 git push origin "$BRANCH" --follow-tags
 
 if gh release view "$TAG" >/dev/null 2>&1; then

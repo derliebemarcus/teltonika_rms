@@ -177,6 +177,41 @@ def test_coordinator_bundle_and_budget_validation() -> None:
         estimated_devices=10,
         aggregate_state_supported=True,
     ) is True
+    assert bundle.merged_device("missing") is None
+
+
+def test_coordinator_constructors_cover_default_option_parsing(monkeypatch: pytest.MonkeyPatch) -> None:
+    def _fake_super_init(self: Any, hass: Any, logger: Any, *, name: str, update_interval: timedelta) -> None:
+        self.hass = hass
+        self.logger = logger
+        self.name = name
+        self.update_interval = update_interval
+
+    monkeypatch.setattr(
+        "homeassistant.helpers.update_coordinator.DataUpdateCoordinator.__init__",
+        _fake_super_init,
+    )
+
+    hass = SimpleNamespace()
+    api = SimpleNamespace(endpoint_matrix=_matrix(), estimate_max_calls_per_cycle=lambda interval: 2)
+    inventory = InventoryCoordinator(
+        hass,  # type: ignore[arg-type]
+        api,  # type: ignore[arg-type]
+        {"tags": " alpha,beta ", "device_status": " online ", "inventory_interval": 30},
+    )
+    state = StateCoordinator(
+        hass,  # type: ignore[arg-type]
+        api,  # type: ignore[arg-type]
+        inventory,
+        {"enable_location": False, "estimated_devices": 5, "state_interval": 30},
+    )
+
+    assert inventory._tags == ["alpha", "beta"]
+    assert inventory._device_status == "online"
+    assert int(inventory.update_interval.total_seconds()) == 60
+    assert state._enable_location is False
+    assert state._estimated_devices == 5
+    assert int(state.update_interval.total_seconds()) == 60
 
 
 def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -201,6 +236,14 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     failing_inventory._api.async_list_devices = _raise_list
     with pytest.raises(UpdateFailed):
         asyncio.run(failing_inventory._async_update_data())
+
+    inventory_skip = object.__new__(InventoryCoordinator)
+    inventory_skip._api = SimpleNamespace(
+        async_list_devices=lambda **kwargs: asyncio.sleep(0, result=[{"id": "dev-1"}, {"name": "missing"}])
+    )
+    inventory_skip._tags = []
+    inventory_skip._device_status = None
+    assert asyncio.run(inventory_skip._async_update_data()) == {"dev-1": {"id": "dev-1"}}
 
     state = object.__new__(StateCoordinator)
     state._api = SimpleNamespace(
@@ -229,6 +272,17 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     with pytest.raises(UpdateFailed):
         asyncio.run(state._async_update_data())
 
+    async def _auth_state(device_ids: list[str], max_per_cycle: int | None) -> Any:
+        raise ConfigEntryAuthFailed("denied")
+
+    state._api.async_get_states_for_devices = _auth_state
+    with pytest.raises(ConfigEntryAuthFailed):
+        asyncio.run(state._async_update_data())
+
+    state_empty = object.__new__(StateCoordinator)
+    state_empty._inventory = SimpleNamespace(data={}, update_interval=timedelta(seconds=900))
+    assert asyncio.run(state_empty._async_update_data()) == {}
+
 
 def test_coordinator_handles_auth_failed_and_refresh_all() -> None:
     inventory = object.__new__(InventoryCoordinator)
@@ -246,6 +300,27 @@ def test_coordinator_handles_auth_failed_and_refresh_all() -> None:
     asyncio.run(async_refresh_all(bundle))
     assert bundle.inventory.refresh_calls == 1
     assert bundle.state.refresh_calls == 1
+
+
+def test_state_coordinator_handles_location_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _raise_location(device_id: str) -> Any:
+        raise RmsApiError("bad location")
+
+    state = object.__new__(StateCoordinator)
+    state._api = SimpleNamespace(
+        endpoint_matrix=_matrix(aggregate=False),
+        async_get_states_for_devices=lambda device_ids, max_per_cycle: asyncio.sleep(0, result={"dev-1": {"online": True}}),
+        async_get_device_location=_raise_location,
+        estimate_max_calls_per_cycle=lambda interval: 2,
+    )
+    state._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}}, update_interval=timedelta(seconds=900))
+    state._enable_location = True
+    state._estimated_devices = 1
+    state._state_interval = 120
+
+    result = asyncio.run(state._async_update_data())
+
+    assert result == {"dev-1": {"state": {"online": True}}}
 
 
 def test_diagnostics_redacts_sensitive_fields() -> None:

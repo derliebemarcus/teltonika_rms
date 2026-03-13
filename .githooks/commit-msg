@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MSG_FILE="$1"
+
+mapfile -t RAW_LINES < "$MSG_FILE"
+LINES=()
+for line in "${RAW_LINES[@]}"; do
+  case "$line" in
+    \#*)
+      continue
+      ;;
+  esac
+  LINES+=("$line")
+done
+
+trimmed_nonempty=()
+for line in "${LINES[@]}"; do
+  if [ -n "${line//[[:space:]]/}" ]; then
+    trimmed_nonempty+=("$line")
+  fi
+done
+
+if [ "${#trimmed_nonempty[@]}" -eq 0 ]; then
+  echo "Commit message must not be empty."
+  exit 1
+fi
+
+category_regex='^(add|change|deprecate|remove|fix): [^ ].*'
+
+if [ "${#trimmed_nonempty[@]}" -eq 1 ]; then
+  if [[ ! "${trimmed_nonempty[0]}" =~ $category_regex ]]; then
+    echo "Single-line commit messages must start with one category: add:, change:, deprecate:, remove:, fix:"
+    exit 1
+  fi
+  exit 0
+fi
+
+summary_seen=0
+body_started=0
+body_lines=0
+blank_after_summary=0
+for line in "${LINES[@]}"; do
+  if [ "$summary_seen" -eq 0 ]; then
+    if [ -z "${line//[[:space:]]/}" ]; then
+      continue
+    fi
+    summary_seen=1
+    continue
+  fi
+
+  if [ "$body_started" -eq 0 ]; then
+    if [ -z "${line//[[:space:]]/}" ]; then
+      blank_after_summary=1
+      continue
+    fi
+    if [ "$blank_after_summary" -eq 0 ]; then
+      echo "Multi-line commit messages require a summary line followed by a blank line."
+      exit 1
+    fi
+    body_started=1
+  fi
+
+  if [ -z "${line//[[:space:]]/}" ]; then
+    continue
+  fi
+
+  if [[ ! "$line" =~ $category_regex ]]; then
+    echo "Each commit body line must start with exactly one category: add:, change:, deprecate:, remove:, fix:"
+    exit 1
+  fi
+  body_lines=$((body_lines + 1))
+done
+
+if [ "$body_lines" -eq 0 ]; then
+  echo "Multi-line commit messages require at least one categorized body line."
+  exit 1
+fi

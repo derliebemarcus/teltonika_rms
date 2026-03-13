@@ -2,28 +2,30 @@
 
 [![HACS Badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
-[![License](https://img.shields.io/github/license/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-1f6feb?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/derliebemarcus/teltonika_rms/total?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
-[![Coverage Status](https://coveralls.io/repos/github/derliebemarcus/teltonika_rms/badge.svg?branch=main)](https://coveralls.io/github/derliebemarcus/teltonika_rms)
+[![Coverage Status](https://img.shields.io/coverallsCoverage/github/derliebemarcus/teltonika_rms?branch=main&style=for-the-badge)](https://coveralls.io/github/derliebemarcus/teltonika_rms)
 
-Custom Home Assistant integration for read-only monitoring of Teltonika RMS managed devices.
+## Summary
+
+A custom Home Assistant integration for read-only monitoring of devices managed with Teltonika RMS.
 
 The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, timestamps, and optional location tracking.
 
 ## What This Component Provides
 
-- Authentication with either:
-  - OAuth2 (authorization code + PKCE)
-  - Personal Access Token (PAT)
-- Device polling with request-budget safeguards (RMS monthly quota aware)
-- API envelope parsing (`success`, `data`, `errors`, `meta`)
-- Status-channel handling (`meta.channel`) with Socket.IO first, HTTP polling fallback
 - Per-device entities:
   - `binary_sensor`: online connectivity
   - `sensor`: model, firmware, serial, last seen timestamp
   - `device_tracker` (optional): GPS location only for devices that provide coordinates, including detailed location attributes (`location_detail`, `coordinates`, `google_maps_url`)
 - Service:
   - `teltonika_rms.refresh` to trigger immediate refresh
+- Authentication with either:
+  - OAuth2 (authorization code + PKCE)
+  - Personal Access Token (PAT)
+- Device polling with request-budget safeguards (RMS monthly quota aware)
+- API envelope parsing (`success`, `data`, `errors`, `meta`)
+- Status-channel handling (`meta.channel`) with Socket.IO first, HTTP polling fallback
 
 ## Installation
 
@@ -55,21 +57,23 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
    - Sign in with the RMS account that owns the devices you want to monitor.
    - Complete two-factor authentication if your account requires it.
 3. Create an OAuth application in [RMS Account Settings](https://account.rms.teltonika-networks.com/settings/application).
-4. Grant at least these scopes to the application:
+4. Configure redirect URL:
+   - `https://my.home-assistant.io/redirect/oauth`
+5. Set the application type to `Confidential`.
+5. Grant at least this scope to the application:
    - `devices:read`
-5. Add these scopes if needed:
+6. Add these scopes if needed:
    - `device_location:read` for GPS tracker entities
    - `device_actions:read` for broader status/channel visibility
-6. Configure redirect URL:
-   - `https://my.home-assistant.io/redirect/oauth`
 7. In Home Assistant, go to:
-   - `Settings -> Devices & Services -> Application Credentials`
+   - `Settings -> Devices & Services` then click on the three dots in the upper right corner and select `Application Credentials`
 8. Add `Teltonika RMS` credentials (client ID + client secret).
 9. Go to `Settings -> Devices & Services -> Add Integration`.
 10. Select `Teltonika RMS`.
-11. When the integration asks for the authentication mode, select `OAuth2 (recommended)` again.
+11. When the integration asks for the authentication mode, select `OAuth2 (recommended)`.
 12. Confirm the dialog that opens to link the Teltonika OAuth application with Home Assistant.
-13. After successful authorization, Home Assistant imports the RMS devices and lets you assign them to areas.
+13. Confirm the dialog that opens to link the Teltonika account to Home Assistant.
+14. After successful authorization, Home Assistant imports the RMS devices and lets you assign them to areas.
 
 ### Personal Access Token (PAT)
 
@@ -131,8 +135,7 @@ python3 tools/check_translations.py
 python3 -m pytest
 ```
 
-Hinweis: HA-nahe Tests unter `tests/ha/` werden nur in einer passenden Home-Assistant-
-Entwicklungsumgebung ausgeführt (siehe Developer Docs).
+Note: HA-related tests under `tests/ha/` will only run in a suitable Home Assistant development environment (see [Developer Docs](https://developers.home-assistant.io/docs/development_index/)).
 
 - Release notes are tracked in:
   - `CHANGELOG.md`
@@ -172,5 +175,10 @@ This will:
 - create the local version tag if it does not exist yet
 - push the current branch and tags to GitHub
 - create or update the matching entry on the GitHub Releases page
+
+<br/>
+
+---
+<br/>
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-derliebemarcus-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000000)](https://buymeacoffee.com/derliebemarcus)

@@ -142,6 +142,15 @@ def test_pat_auth_client_adds_bearer_token() -> None:
     assert asyncio.run(client.async_get_access_token()) == "secret-token"
 
 
+def test_api_accessors_expose_matrix_and_access_token() -> None:
+    auth = FakeAuthClient([], token="abc")
+    matrix = _matrix()
+    client = RmsApiClient(auth, matrix)
+
+    assert client.endpoint_matrix is matrix
+    assert asyncio.run(client.async_get_access_token()) == "abc"
+
+
 def test_oauth2_auth_client_uses_session_and_exposes_access_token() -> None:
     session = FakeOAuthSession()
     client = OAuth2RmsAuthClient(session)  # type: ignore[arg-type]

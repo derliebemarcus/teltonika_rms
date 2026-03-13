@@ -10,6 +10,8 @@ from const import UPDATE_PLATFORMS
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "manifest.json"
 HACS = ROOT / "hacs.json"
+ROOT_ICON = ROOT / "icon.png"
+BRAND_ICON = ROOT / "brand" / "icon.png"
 
 
 def test_datetime_platform_removed() -> None:
@@ -26,3 +28,9 @@ def test_manifest_and_hacs_min_homeassistant_version_match() -> None:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     hacs = json.loads(HACS.read_text(encoding="utf-8"))
     assert manifest["homeassistant"] == hacs["homeassistant"]
+
+
+def test_hacs_root_icon_matches_brand_icon() -> None:
+    assert ROOT_ICON.exists()
+    assert BRAND_ICON.exists()
+    assert ROOT_ICON.read_bytes() == BRAND_ICON.read_bytes()
