@@ -17,6 +17,14 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 - Per-device entities:
   - `binary_sensor`: online connectivity
   - `sensor`: model, firmware, serial, last seen timestamp
+  - additional `sensor` entities when RMS provides the data:
+    - clients count
+    - router uptime
+    - signal strength
+    - WAN state
+    - connection state
+    - connection type
+    - SIM slot
   - `device_tracker` (optional): GPS location only for devices that provide coordinates, including detailed location attributes (`location_detail`, `coordinates`, `google_maps_url`)
 - Service:
   - `teltonika_rms.refresh` to trigger immediate refresh

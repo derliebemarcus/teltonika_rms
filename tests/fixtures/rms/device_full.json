@@ -1,0 +1,18 @@
+{
+  "id": 70810,
+  "model": "RUT950",
+  "name": "RUT Device 1",
+  "serial": "0000000000",
+  "status": 1,
+  "updated_at": "2020-02-20 09:10:59",
+  "firmware": "RUT9XX_R_00.06.05.3",
+  "clients_count": "3",
+  "router_uptime": 3060,
+  "signal": -81,
+  "wan_state": "Mobile",
+  "connection_state": "connected",
+  "connection_type": "LTE",
+  "sim_slot": 1,
+  "latitude": 48.790625,
+  "longitude": 14.269965
+}

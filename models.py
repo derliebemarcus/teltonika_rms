@@ -20,6 +20,13 @@ class NormalizedDevice:
     serial: str | None
     online: bool | None
     last_seen: datetime | None
+    clients_count: int | None
+    router_uptime: int | None
+    signal_strength: int | None
+    wan_state: str | None
+    connection_state: str | None
+    connection_type: str | None
+    sim_slot: int | None
     latitude: float | None
     longitude: float | None
     location_label: str | None
@@ -85,6 +92,16 @@ def parse_float(value: Any) -> float | None:
         return None
     try:
         return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_int(value: Any) -> int | None:
+    """Convert values to int when possible."""
+    if value is None:
+        return None
+    try:
+        return int(value)
     except (TypeError, ValueError):
         return None
 
@@ -155,6 +172,14 @@ def normalize_device(
     else:
         last_seen = parse_rms_timestamp(str(last_seen_raw)) if last_seen_raw else None
 
+    clients_count = parse_int(first_value(merged, "clients_count"))
+    router_uptime = parse_int(first_value(merged, "router_uptime"))
+    signal_strength = parse_int(first_value(merged, "signal"))
+    sim_slot = parse_int(first_value(merged, "sim_slot"))
+    wan_state_raw = first_value(merged, "wan_state")
+    connection_state_raw = first_value(merged, "connection_state")
+    connection_type_raw = first_value(merged, "connection_type")
+
     latitude = parse_float(
         first_value(
             merged,
@@ -214,6 +239,13 @@ def normalize_device(
         serial=str(serial) if serial is not None else None,
         online=online,
         last_seen=last_seen,
+        clients_count=clients_count,
+        router_uptime=router_uptime,
+        signal_strength=signal_strength,
+        wan_state=str(wan_state_raw) if wan_state_raw is not None else None,
+        connection_state=str(connection_state_raw) if connection_state_raw is not None else None,
+        connection_type=str(connection_type_raw) if connection_type_raw is not None else None,
+        sim_slot=sim_slot,
         latitude=latitude,
         longitude=longitude,
         location_label=location_label,

@@ -9,6 +9,7 @@ from models import (
     has_location_coordinates,
     normalize_device,
     parse_float,
+    parse_int,
     parse_online,
     parse_rms_timestamp,
 )
@@ -75,6 +76,8 @@ def test_model_helper_functions_cover_common_variants() -> None:
 
     assert parse_float("1.25") == 1.25
     assert parse_float("bad") is None
+    assert parse_int("7") == 7
+    assert parse_int("bad") is None
 
 
 def test_normalize_device_handles_missing_id_datetime_and_string_coordinates() -> None:
@@ -92,6 +95,31 @@ def test_normalize_device_handles_missing_id_datetime_and_string_coordinates() -
     assert normalized.name == "RMS SER-1"
     assert normalized.online is True
     assert normalized.last_seen == naive.replace(tzinfo=UTC)
+    assert normalized.clients_count is None
+    assert normalized.router_uptime is None
     assert normalized.latitude == 47.37
     assert normalized.longitude == 8.55
     assert normalized.location_label == "47.370000, 8.550000"
+
+
+def test_normalize_device_parses_optional_runtime_metrics() -> None:
+    normalized = normalize_device(
+        {"id": "a1", "clients_count": "3"},
+        state={
+            "router_uptime": 7200,
+            "signal": "-79",
+            "wan_state": "Mobile",
+            "connection_state": "connected",
+            "connection_type": "LTE",
+            "sim_slot": "2",
+        },
+    )
+
+    assert normalized is not None
+    assert normalized.clients_count == 3
+    assert normalized.router_uptime == 7200
+    assert normalized.signal_strength == -79
+    assert normalized.wan_state == "Mobile"
+    assert normalized.connection_state == "connected"
+    assert normalized.connection_type == "LTE"
+    assert normalized.sim_slot == 2

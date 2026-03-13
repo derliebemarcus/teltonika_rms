@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement for the Teltonika RMS integration.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the current limitation?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What should change?
+    validations:
+      required: true
+  - type: textarea
+    id: rms_context
+    attributes:
+      label: RMS/API context
+      description: Endpoint, field, scope, or device capability if known.

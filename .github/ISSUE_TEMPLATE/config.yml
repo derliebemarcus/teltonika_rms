@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Teltonika RMS API documentation
+    url: https://developers.rms.teltonika-networks.com/
+    about: Check the official RMS documentation first for API and scope behavior.

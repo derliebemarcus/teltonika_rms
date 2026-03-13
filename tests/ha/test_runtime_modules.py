@@ -29,10 +29,17 @@ from teltonika_rms.entity import TeltonikaRmsEntity
 from teltonika_rms.exceptions import RmsApiError
 from teltonika_rms.models import NormalizedDevice
 from teltonika_rms.sensor import (
+    RmsClientsCountSensor,
+    RmsConnectionStateSensor,
+    RmsConnectionTypeSensor,
     RmsFirmwareSensor,
     RmsLastSeenSensor,
     RmsModelSensor,
+    RmsRouterUptimeSensor,
     RmsSerialSensor,
+    RmsSignalStrengthSensor,
+    RmsSimSlotSensor,
+    RmsWanStateSensor,
     async_setup_entry as sensor_setup,
 )
 from teltonika_rms.status_channel import (
@@ -74,6 +81,13 @@ def _normalized(
         serial="SERIAL",
         online=online,
         last_seen=datetime(2026, 3, 13, 12, 0, tzinfo=UTC),
+        clients_count=4,
+        router_uptime=3600,
+        signal_strength=-81,
+        wan_state="Mobile",
+        connection_state="connected",
+        connection_type="LTE",
+        sim_slot=1,
         latitude=latitude,
         longitude=longitude,
         location_label="Zurich",
@@ -112,6 +126,13 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     firmware = RmsFirmwareSensor(bundle, "dev-1")
     serial = RmsSerialSensor(bundle, "dev-1")
     last_seen = RmsLastSeenSensor(bundle, "dev-1")
+    clients = RmsClientsCountSensor(bundle, "dev-1")
+    uptime = RmsRouterUptimeSensor(bundle, "dev-1")
+    signal = RmsSignalStrengthSensor(bundle, "dev-1")
+    wan_state = RmsWanStateSensor(bundle, "dev-1")
+    connection_state = RmsConnectionStateSensor(bundle, "dev-1")
+    connection_type = RmsConnectionTypeSensor(bundle, "dev-1")
+    sim_slot = RmsSimSlotSensor(bundle, "dev-1")
     tracker = RmsDeviceTracker(bundle, "dev-1")
 
     assert base.available is True
@@ -121,6 +142,13 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     assert firmware.native_value == "1.0"
     assert serial.native_value == "SERIAL"
     assert last_seen.native_value is not None
+    assert clients.native_value == 4
+    assert uptime.native_value == 3600
+    assert signal.native_value == -81
+    assert wan_state.native_value == "Mobile"
+    assert connection_state.native_value == "connected"
+    assert connection_type.native_value == "LTE"
+    assert sim_slot.native_value == 1
     assert tracker.available is True
     assert tracker.latitude == 47.0
     assert tracker.longitude == 8.0
@@ -133,11 +161,13 @@ def test_tracker_and_base_entity_handle_missing_location() -> None:
 
     tracker = RmsDeviceTracker(bundle, "dev-1")
     base = TeltonikaRmsEntity(bundle, "missing")
+    clients = RmsClientsCountSensor(bundle, "dev-1")
 
     assert tracker.available is False
     assert tracker.extra_state_attributes == {"location_detail": "Zurich"}
     assert base.available is False
     assert base.device_info is None
+    assert clients.available is True
 
 
 def test_platform_setup_entry_adds_expected_entities() -> None:
@@ -153,7 +183,7 @@ def test_platform_setup_entry_adds_expected_entities() -> None:
     asyncio.run(tracker_setup(None, entry, added_tracker.extend))
 
     assert len(added_binary) == 1
-    assert len(added_sensor) == 4
+    assert len(added_sensor) == 11
     assert len(added_tracker) == 1
 
 
@@ -332,7 +362,7 @@ def test_diagnostics_redacts_sensitive_fields() -> None:
     entry = SimpleNamespace(
         entry_id="entry-1",
         title="Teltonika RMS",
-        data={"access_token": "secret", "pat_token": "secret", "other": "keep"},
+        data={"access_token": "secret", "pat_token": "secret", "auth_mode": "pat", "other": "keep"},
         options={"interval": 60},
         runtime_data=TeltonikaRmsRuntime(bundle=bundle),
     )
@@ -343,6 +373,8 @@ def test_diagnostics_redacts_sensitive_fields() -> None:
     for key in TO_REDACT:
         if key in diagnostics["entry"]["data"]:
             assert diagnostics["entry"]["data"][key] == "**REDACTED**"
+    assert diagnostics["runtime"]["auth_mode"] == "pat"
+    assert diagnostics["runtime"]["aggregate_state_available"] is None
     assert diagnostics["runtime"]["request_counter"] == 7
 
 

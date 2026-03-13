@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1506,
+      "device_model": "RUT955",
+      "type": "firmware",
+      "version": "RUT9XX_R_00.06.00",
+      "name": "RUT9XX_R_00.06.00_WEBUI.bin"
+    }
+  ],
+  "meta": {
+    "total": 1
+  }
+}

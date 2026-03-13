@@ -2,6 +2,38 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.0 - 2026-03-13
+
+### New Features
+
+- Added new optional RMS sensors that are created only when the API actually provides the value:
+  - clients count
+  - router uptime
+  - signal strength
+  - WAN state
+  - connection state
+  - connection type
+  - SIM slot
+- Added representative RMS contract fixtures derived from the compiled API schema to validate payload handling against more realistic examples.
+
+### Improvements
+
+- Expanded diagnostics output with auth mode, aggregate-state availability, and monthly request estimate to make support cases easier to debug.
+- Added repository quality gates for commit-message format and release-note structure so project rules are enforced in CI, not only by local hooks.
+- Added issue templates, a pull-request template, and maintainer contribution guidance to make incoming changes and bug reports more actionable.
+
+### Changes
+
+- Updated README to document the new RMS sensors and clarify that they are only exposed when RMS provides the underlying value.
+- Added repository-level governance tooling:
+  - `tools/check_commit_messages.py`
+  - `tools/check_release_notes.py`
+  - `.github/workflows/quality.yml`
+
+### Bugfixes
+
+- Fixed OAuth2 reauthentication flow so it correctly restarts implementation selection instead of calling a non-existent superclass reauth method.
+
 ## 0.5.2 - 2026-03-13
 
 ### New Features

@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from . import TeltonikaRmsRuntime
+from .const import AUTH_MODE_OAUTH2, CONF_AUTH_MODE
 
 TO_REDACT = {"access_token", "refresh_token", "token", "client_secret", "pat_token"}
 
@@ -29,9 +30,16 @@ async def async_get_config_entry_diagnostics(
     }
     if runtime is not None:
         diagnostics["runtime"] = {
+            "auth_mode": str(config_entry.data.get(CONF_AUTH_MODE, AUTH_MODE_OAUTH2)),
             "request_counter": runtime.bundle.api.request_counter,
             "inventory_devices": len(runtime.bundle.inventory.data),
             "state_devices": len(runtime.bundle.state.data),
+            "aggregate_state_available": getattr(runtime.bundle.api, "_aggregate_state_available", None),
+            "monthly_request_estimate": getattr(
+                runtime.bundle.state,
+                "monthly_request_estimate",
+                None,
+            ),
             "endpoint_matrix_source": runtime.bundle.api.endpoint_matrix.source,
             "endpoint_matrix_paths": {
                 key: spec.path for key, spec in runtime.bundle.api.endpoint_matrix.endpoints.items()
