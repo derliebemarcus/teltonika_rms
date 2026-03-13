@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 CATEGORY_RE = re.compile(r"^(add|change|deprecate|remove|fix): [^ ].*")
+BYPASS_PREFIX_RE = re.compile(r"^(Update|Bump|Merge)\b")
 DEPENDABOT_NAME = "dependabot[bot]"
 
 
@@ -24,6 +25,8 @@ def validate_message(message: str) -> str | None:
     meaningful = _meaningful_lines(message)
     if not meaningful:
         return "commit message must not be empty"
+    if BYPASS_PREFIX_RE.match(meaningful[0]):
+        return None
 
     if len(meaningful) == 1:
         if not CATEGORY_RE.match(meaningful[0]):
