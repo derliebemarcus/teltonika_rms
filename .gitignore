@@ -21,6 +21,7 @@ env/
 .ruff_cache/
 .coverage
 .coverage.*
+coverage.xml
 htmlcov/
 
 # macOS/editor noise

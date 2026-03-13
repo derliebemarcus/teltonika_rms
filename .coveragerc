@@ -1,0 +1,14 @@
+[run]
+source = .
+omit =
+    tests/*
+    tools/*
+    .githooks/*
+    .venv/*
+    .venv-test/*
+    brand/*
+    translations/*
+
+[report]
+skip_covered = True
+show_missing = True

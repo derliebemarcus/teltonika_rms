@@ -4,6 +4,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
 [![License](https://img.shields.io/github/license/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/derliebemarcus/teltonika_rms/total?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
+[![Coverage](https://img.shields.io/codecov/c/github/derliebemarcus/teltonika_rms?style=for-the-badge)](https://app.codecov.io/gh/derliebemarcus/teltonika_rms)
 
 Custom Home Assistant integration for read-only monitoring of Teltonika RMS managed devices.
 
@@ -171,3 +172,5 @@ This will:
 - create the local version tag if it does not exist yet
 - push the current branch and tags to GitHub
 - create or update the matching entry on the GitHub Releases page
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-derliebemarcus-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000000)](https://buymeacoffee.com/derliebemarcus)
