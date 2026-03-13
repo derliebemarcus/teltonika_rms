@@ -309,6 +309,123 @@ def test_status_channel_manager_and_helpers(monkeypatch: pytest.MonkeyPatch) -> 
     assert _is_terminal({"completed": True}) is True
     assert _is_terminal({"status": "success"}) is True
     assert _is_terminal({"status": "pending"}) is False
+    assert _is_terminal({"status": 1}) is False
+
+
+def test_status_channel_socket_success_and_disconnect(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: dict[str, Any] = {"handlers": {}}
+
+    class FakeAsyncClient:
+        def __init__(self, **kwargs: Any) -> None:
+            self.connected = False
+            seen["client"] = self
+
+        def on(self, event: str) -> Any:
+            def _register(callback: Any) -> Any:
+                seen["handlers"][event] = callback
+                return callback
+
+            return _register
+
+        async def connect(self, url: str, **kwargs: Any) -> None:
+            self.connected = True
+            seen["connect_url"] = url
+            seen["connect_kwargs"] = kwargs
+
+        async def emit(self, event: str, payload: dict[str, Any]) -> None:
+            seen["emit"] = (event, payload)
+            await seen["handlers"]["message"]({"channel": "other", "status": "done"})
+            await seen["handlers"]["message"]("invalid")
+            await seen["handlers"]["status"]({"channel": "abc", "status": "done"})
+
+        async def disconnect(self) -> None:
+            seen["disconnected"] = True
+            self.connected = False
+
+    monkeypatch.setattr(
+        "teltonika_rms.status_channel.socketio",
+        SimpleNamespace(AsyncClient=FakeAsyncClient),
+    )
+    manager = RmsStatusChannelManager(
+        SimpleNamespace(async_get_access_token=lambda: asyncio.sleep(0, result="token-123"))
+    )
+
+    result = asyncio.run(manager._async_wait_via_socket("abc", 1))
+
+    assert result == {"channel": "abc", "status": "done"}
+    assert seen["connect_url"].endswith("?token=token-123")
+    assert seen["connect_kwargs"]["auth"] == {"token": "token-123"}
+    assert seen["emit"] == ("subscribe", {"channel": "abc"})
+    assert seen["disconnected"] is True
+
+
+def test_status_channel_socket_handles_connect_failures_and_emit_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeAsyncClient:
+        def __init__(self, **kwargs: Any) -> None:
+            self.connected = True
+
+        def on(self, event: str) -> Any:
+            return lambda callback: callback
+
+        async def connect(self, url: str, **kwargs: Any) -> None:
+            return None
+
+        async def emit(self, event: str, payload: dict[str, Any]) -> None:
+            raise RuntimeError("emit failed")
+
+        async def disconnect(self) -> None:
+            self.connected = False
+
+    monkeypatch.setattr(
+        "teltonika_rms.status_channel.socketio",
+        SimpleNamespace(AsyncClient=FakeAsyncClient),
+    )
+    manager = RmsStatusChannelManager(
+        SimpleNamespace(async_get_access_token=lambda: asyncio.sleep(0, result="token-123"))
+    )
+
+    assert asyncio.run(manager._async_wait_via_socket("abc", 0)) is None
+
+    class FailingClient(FakeAsyncClient):
+        async def connect(self, url: str, **kwargs: Any) -> None:
+            raise RuntimeError("connect failed")
+
+    monkeypatch.setattr(
+        "teltonika_rms.status_channel.socketio",
+        SimpleNamespace(AsyncClient=FailingClient),
+    )
+    assert asyncio.run(manager._async_wait_via_socket("abc", 1)) is None
+
+
+def test_status_channel_polling_times_out(monkeypatch: pytest.MonkeyPatch) -> None:
+    polls: list[str] = []
+
+    async def _pending(channel_id: str) -> dict[str, Any]:
+        polls.append(channel_id)
+        return {"status": "pending"}
+
+    async def _sleep(delay: float) -> None:
+        return None
+
+    now = datetime(2026, 3, 13, 12, 0, tzinfo=UTC)
+    times = iter([now, now, now + timedelta(seconds=3)])
+
+    class FakeDateTime(datetime):
+        @classmethod
+        def now(cls, tz: Any = None) -> datetime:
+            return next(times)
+
+    monkeypatch.setattr("teltonika_rms.status_channel.asyncio.sleep", _sleep)
+    monkeypatch.setattr("teltonika_rms.status_channel.datetime", FakeDateTime)
+    manager = RmsStatusChannelManager(
+        SimpleNamespace(
+            async_poll_status_channel=_pending,
+            async_get_access_token=lambda: asyncio.sleep(0, result="token"),
+        )
+    )
+
+    assert asyncio.run(manager._async_wait_via_polling("abc", 2)) is None
+    assert polls == ["abc"]
 
 
 def test_homeassistant_can_be_constructed_for_coordinator_compatibility() -> None:

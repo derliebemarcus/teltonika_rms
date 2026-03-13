@@ -121,6 +121,18 @@ def test_pat_step_rejects_empty_token() -> None:
     assert result["errors"]["base"] == "invalid_pat"
 
 
+def test_reauth_pat_rejects_empty_token_and_missing_entry() -> None:
+    flow = OAuth2FlowHandler()
+    flow.async_show_form = lambda **kwargs: kwargs  # type: ignore[method-assign]
+    flow.async_abort = lambda **kwargs: kwargs  # type: ignore[method-assign]
+
+    empty = asyncio.run(flow.async_step_reauth_pat({CONF_PAT_TOKEN: "   "}))
+    assert empty["errors"]["base"] == "invalid_pat"
+
+    missing = asyncio.run(flow.async_step_reauth_pat({CONF_PAT_TOKEN: "token"}))
+    assert missing["reason"] == "reauth_failed"
+
+
 def test_pat_step_creates_entry_for_valid_token() -> None:
     flow = OAuth2FlowHandler()
     seen: dict[str, Any] = {}
@@ -233,6 +245,16 @@ def test_options_flow_handles_budget_and_normalizes_tags(monkeypatch: pytest.Mon
     assert excessive["errors"]["base"] == "request_budget_exceeded"
 
 
+def test_options_flow_shows_defaults_when_opened_without_input() -> None:
+    flow = TeltonikaRmsOptionsFlow(SimpleNamespace(options={CONF_STATE_INTERVAL: 240}))
+    flow.async_show_form = lambda **kwargs: kwargs  # type: ignore[method-assign]
+
+    result = asyncio.run(flow.async_step_init())
+
+    assert result["step_id"] == "init"
+    assert result["errors"] == {}
+
+
 def test_token_helpers_extract_subject_and_fingerprint() -> None:
     token = {"token": {"access_token": _make_token({"sub": "abc"})}}
     assert _extract_subject_from_token(token) == "abc"
@@ -276,6 +298,19 @@ def test_integration_unload_and_reload_entry() -> None:
     assert unloaded is True
     assert ("teltonika_rms", "refresh") in hass.services.removed
     assert hass.config_entries.reloaded == ["entry-1"]
+
+
+def test_integration_unload_entry_stops_on_platform_unload_failure() -> None:
+    hass = FakeHass()
+
+    async def _unload_platforms(entry: Any, platforms: tuple[str, ...]) -> bool:
+        return False
+
+    hass.config_entries.async_unload_platforms = _unload_platforms  # type: ignore[method-assign]
+    hass.services.registered[("teltonika_rms", "refresh")] = object()
+
+    assert asyncio.run(integration.async_unload_entry(hass, SimpleNamespace(entry_id="entry-1"))) is False
+    assert hass.services.removed == []
 
 
 def test_integration_setup_entry_pat_and_oauth_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -351,6 +386,88 @@ def test_integration_setup_entry_pat_and_oauth_error(monkeypatch: pytest.MonkeyP
     oauth_entry = SimpleNamespace(data={CONF_AUTH_MODE: AUTH_MODE_OAUTH2}, options={})
     with pytest.raises(ConfigEntryNotReady, match="OAuth implementation unavailable"):
         asyncio.run(integration.async_setup_entry(hass, oauth_entry))
+
+
+def test_integration_setup_entry_wraps_refresh_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeApi:
+        def __init__(self, auth: Any, endpoint_matrix: Any) -> None:
+            self.endpoint_matrix = endpoint_matrix
+
+        def set_status_channel_manager(self, manager: Any) -> None:
+            return None
+
+        async def async_validate_connection(self) -> None:
+            return None
+
+    class FailingCoordinator:
+        def __init__(self, *_args: Any, **_kwargs: Any) -> None:
+            self.data = {}
+            self.update_interval = timedelta(seconds=120)
+
+        async def async_config_entry_first_refresh(self) -> None:
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
+    monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
+    monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
+    monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FailingCoordinator)
+    monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FailingCoordinator)
+    monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
+    monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
+
+    hass = FakeHass()
+    entry = SimpleNamespace(
+        data={CONF_AUTH_MODE: AUTH_MODE_PAT, CONF_PAT_TOKEN: "pat-token"},
+        options={},
+        runtime_data=None,
+        entry_id="entry-1",
+        add_update_listener=lambda listener: "listener-token",
+        async_on_unload=lambda cb: None,
+    )
+
+    with pytest.raises(ConfigEntryNotReady, match="Failed to initialize Teltonika RMS: boom"):
+        asyncio.run(integration.async_setup_entry(hass, entry))
+
+
+def test_integration_setup_entry_propagates_auth_failures(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeApi:
+        def __init__(self, auth: Any, endpoint_matrix: Any) -> None:
+            self.endpoint_matrix = endpoint_matrix
+
+        def set_status_channel_manager(self, manager: Any) -> None:
+            return None
+
+        async def async_validate_connection(self) -> None:
+            raise ConfigEntryAuthFailed("denied")
+
+    class FakeCoordinator:
+        def __init__(self, *_args: Any, **_kwargs: Any) -> None:
+            self.data = {}
+            self.update_interval = timedelta(seconds=120)
+
+        async def async_config_entry_first_refresh(self) -> None:
+            return None
+
+    monkeypatch.setattr("teltonika_rms.endpoint_matrix.load_endpoint_matrix", lambda path: _test_matrix())
+    monkeypatch.setattr("teltonika_rms.api.PatRmsAuthClient", lambda session, token: ("pat", session, token))
+    monkeypatch.setattr("teltonika_rms.api.RmsApiClient", FakeApi)
+    monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FakeCoordinator)
+    monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FakeCoordinator)
+    monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
+    monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
+
+    hass = FakeHass()
+    entry = SimpleNamespace(
+        data={CONF_AUTH_MODE: AUTH_MODE_PAT, CONF_PAT_TOKEN: "pat-token"},
+        options={},
+        runtime_data=None,
+        entry_id="entry-1",
+        add_update_listener=lambda listener: "listener-token",
+        async_on_unload=lambda cb: None,
+    )
+
+    with pytest.raises(ConfigEntryAuthFailed):
+        asyncio.run(integration.async_setup_entry(hass, entry))
 
 
 def test_integration_setup_returns_true() -> None:

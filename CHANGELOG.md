@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.5.1 - 2026-03-13
+
+- Increased automated test coverage to 94% across the integration codebase.
+- Added high-value runtime coverage for:
+  - RMS API retries, pagination, aggregate-state fallback, and channel resolution
+  - OAuth application credential helpers
+  - config-flow edge cases and setup/unload failure handling
+  - Socket.IO status-channel success, failure, and polling-timeout behavior
+- Expanded unit coverage for endpoint-matrix parsing and device normalization helpers.
+- Kept the Coveralls workflow aligned with the current HA/runtime dependency floor.
+
 ## 0.5.0 - 2026-03-13
 
 - Added README badges for HACS, GitHub releases, license, and downloads.
