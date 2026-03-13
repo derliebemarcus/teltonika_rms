@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.2 - 2026-03-13
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Firmware update entities now tolerate more RMS firmware metadata shapes, including string-based `current`, `latest`, and `stable` values returned by some devices.
+
+### Changes
+
+- Update entity discovery now also reacts to state coordinator refreshes, not only inventory refreshes.
+- RMS status-channel completion detection now accepts both `status: completed` and `response_state: completed`.
+
+### Bugfixes
+
+- Fixed PoE switch discovery when RMS configurator status payloads finish with `completed` instead of `success`, so PoE switch entities can be created after the background port-configuration refresh finishes.
+- Fixed missing firmware update entities for devices that expose firmware metadata in alternative RMS shapes that were previously not normalized into the integration model.
+
 ## 0.8.1 - 2026-03-13
 
 ### New Features

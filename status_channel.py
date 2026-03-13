@@ -114,15 +114,19 @@ def _coerce_payload(payload: Any) -> dict[str, Any] | None:
 def _is_terminal(payload: dict[str, Any]) -> bool:
     if payload.get("completed") is True:
         return True
-    status = payload.get("status")
-    if not isinstance(status, str):
-        return False
-    return status.lower() in {
-        "done",
-        "finished",
-        "failed",
-        "error",
-        "expired",
-        "cancelled",
-        "success",
-    }
+    for key in ("status", "response_state"):
+        status = payload.get(key)
+        if not isinstance(status, str):
+            continue
+        if status.lower() in {
+            "completed",
+            "done",
+            "finished",
+            "failed",
+            "error",
+            "expired",
+            "cancelled",
+            "success",
+        }:
+            return True
+    return False

@@ -380,7 +380,7 @@ def test_sensor_and_update_setup_skip_duplicates_and_optional_entities() -> None
     assert not any(isinstance(entity, RmsUsedEthernetPortsSensor) for entity in added_sensor)
     assert len(added_sensor) == len({entity.unique_id for entity in added_sensor})
     assert len(added_switch) == 2
-    assert len(unloaders) == 6
+    assert len(unloaders) == 7
 
     bundle_with_update = _bundle(_normalized())
     runtime_with_update = TeltonikaRmsRuntime(bundle=bundle_with_update)
@@ -394,6 +394,32 @@ def test_sensor_and_update_setup_skip_duplicates_and_optional_entities() -> None
     for listener in bundle_with_update.inventory.listeners:
         listener()
     assert len(added_update_once) == 1
+
+
+def test_update_setup_can_add_entity_after_state_listener_refresh() -> None:
+    normalized = _normalized()
+    normalized.latest_firmware = None
+    normalized.stable_firmware = None
+    current = {"value": normalized}
+
+    bundle = _bundle(normalized)
+    runtime = TeltonikaRmsRuntime(bundle=bundle)
+    entry = SimpleNamespace(
+        runtime_data=runtime,
+        async_on_unload=lambda cb: None,
+    )
+    added_update: list[Any] = []
+
+    bundle.merged_device = lambda device_id: current["value"] if device_id == "dev-1" else None
+
+    asyncio.run(update_setup(None, entry, added_update.extend))
+    assert added_update == []
+
+    current["value"] = _normalized()
+    for listener in bundle.state.listeners:
+        listener()
+
+    assert len(added_update) == 1
 
 
 def test_reboot_button_executes_action_and_refreshes_state() -> None:
@@ -791,6 +817,8 @@ def test_status_channel_manager_and_helpers(monkeypatch: pytest.MonkeyPatch) -> 
     assert _coerce_payload({"ok": True}) == {"ok": True}
     assert _coerce_payload("bad") is None
     assert _is_terminal({"completed": True}) is True
+    assert _is_terminal({"status": "completed"}) is True
+    assert _is_terminal({"response_state": "completed"}) is True
     assert _is_terminal({"status": "success"}) is True
     assert _is_terminal({"status": "pending"}) is False
     assert _is_terminal({"status": 1}) is False

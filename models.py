@@ -156,9 +156,29 @@ def normalize_device(
     name = first_value(merged, "name", "title", "hostname", "device_name") or f"RMS {device_id_str}"
 
     model = first_value(merged, "model", "product.model", "hardware.model")
-    firmware = first_value(merged, "firmware", "fw_version", "software.version")
-    latest_firmware = first_value(merged, "firmware_information.latest.name")
-    stable_firmware = first_value(merged, "firmware_information.stable.name")
+    firmware = first_value(
+        merged,
+        "firmware",
+        "fw_version",
+        "software.version",
+        "firmware_information.current.name",
+        "firmware_information.current.version",
+        "firmware_information.current",
+    )
+    latest_firmware = first_value(
+        merged,
+        "firmware_information.latest.name",
+        "firmware_information.latest.version",
+        "firmware_information.latest",
+        "latest_firmware",
+    )
+    stable_firmware = first_value(
+        merged,
+        "firmware_information.stable.name",
+        "firmware_information.stable.version",
+        "firmware_information.stable",
+        "stable_firmware",
+    )
     serial = first_value(merged, "serial", "serial_number", "sn")
     comparison_firmware = latest_firmware or stable_firmware
     firmware_update_available = None

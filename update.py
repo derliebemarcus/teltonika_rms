@@ -39,6 +39,7 @@ async def async_setup_entry(
 
     _add_new_entities()
     entry.async_on_unload(bundle.inventory.async_add_listener(_add_new_entities))
+    entry.async_on_unload(bundle.state.async_add_listener(_add_new_entities))
 
 
 class RmsFirmwareUpdateEntity(TeltonikaRmsEntity, UpdateEntity):

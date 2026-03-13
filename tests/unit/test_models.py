@@ -140,3 +140,21 @@ def test_normalize_device_parses_optional_runtime_metrics() -> None:
     assert normalized.connection_state == "connected"
     assert normalized.connection_type == "LTE"
     assert normalized.sim_slot == 2
+
+
+def test_normalize_device_accepts_alternative_firmware_information_shapes() -> None:
+    normalized = normalize_device(
+        {
+            "id": "dev-1",
+            "firmware_information": {
+                "current": "RUTX_R_00.07.14",
+                "latest": "RUTX_R_00.07.15",
+                "stable": {"version": "RUTX_R_00.07.14.1"},
+            },
+        }
+    )
+
+    assert normalized is not None
+    assert normalized.firmware == "RUTX_R_00.07.14"
+    assert normalized.latest_firmware == "RUTX_R_00.07.15"
+    assert normalized.stable_firmware == "RUTX_R_00.07.14.1"
