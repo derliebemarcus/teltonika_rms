@@ -211,7 +211,7 @@ class PortScanCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]
                 if not self._scope_warning_logged:
                     LOGGER.warning(
                         "Skipping Teltonika RMS ethernet port scans because the current credentials "
-                        "do not allow the port-scan endpoint. Add device_actions:read and "
+                        "do not allow the port-scan endpoint. Add device_remote_access:read and "
                         "reauthenticate to enable Ethernet port entities."
                     )
                     self._scope_warning_logged = True

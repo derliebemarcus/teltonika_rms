@@ -78,7 +78,8 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
    - `devices:read`
 6. Add these scopes if needed:
    - `device_location:read` for GPS tracker entities
-   - `device_actions:read` for broader status/channel visibility and Ethernet port scan sensors
+   - `device_actions:read` for broader status/channel visibility
+   - `device_remote_access:read` for Ethernet port scan sensors
    - `device_actions:write` for the reboot button
 7. In Home Assistant, go to:
    - `Settings -> Devices & Services` then click on the three dots in the upper right corner and select `Application Credentials`
@@ -103,7 +104,8 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
       - `devices:read`
    3. Add these if needed:
       - `device_location:read` for GPS tracker entities
-      - `device_actions:read` for broader status/channel visibility and Ethernet port scan sensors
+      - `device_actions:read` for broader status/channel visibility
+      - `device_remote_access:read` for Ethernet port scan sensors
       - `device_actions:write` for the reboot button
 
 ## Configuration in Home Assistant

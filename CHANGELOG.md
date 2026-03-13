@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.7.2 - 2026-03-13
+
+### New Features
+
+- None.
+
+### Improvements
+
+- OAuth2 and PAT scope guidance now matches the actual RMS permission needed for Ethernet port scan sensors.
+
+### Changes
+
+- Added `device_remote_access:read` to the requested OAuth scope set for Teltonika RMS.
+- Updated runtime warnings and README scope instructions so Ethernet port scan sensors point to `device_remote_access:read` instead of the incorrect `device_actions:read`.
+
+### Bugfixes
+
+- Fixed the Ethernet port scan permission guidance after live validation showed that `device_actions:read` alone still returns `403` for `/devices/{id}/port-scan/`.
+
 ## 0.7.1 - 2026-03-13
 
 ### New Features

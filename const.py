@@ -18,6 +18,7 @@ OAUTH2_SCOPES: tuple[str, ...] = (
     "devices:read",
     "device_location:read",
     "device_actions:read",
+    "device_remote_access:read",
     "device_actions:write",
 )
 
