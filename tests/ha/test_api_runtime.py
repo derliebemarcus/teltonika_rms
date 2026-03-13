@@ -269,7 +269,7 @@ def test_api_reboot_device_posts_action_payload() -> None:
 
     assert result == {"queued": True}
     assert auth.calls[0]["method"] == "POST"
-    assert auth.calls[0]["url"].endswith("/v3/devices/actions")
+    assert auth.calls[0]["url"].endswith("/devices/actions")
     assert auth.calls[0]["json"] == {"action": "reboot", "device_id": [42]}
 
 

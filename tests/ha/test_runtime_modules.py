@@ -149,7 +149,7 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     assert serial.native_value == "SERIAL"
     assert last_seen.native_value is not None
     assert clients.native_value == 4
-    assert uptime.native_value == 3600
+    assert uptime.native_value == 0.04
     assert temperature.native_value == 360
     assert signal.native_value == -81
     assert wan_state.native_value == "Mobile"

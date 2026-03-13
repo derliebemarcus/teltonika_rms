@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.1 - 2026-03-13
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Changed router uptime presentation from raw seconds to days, making long-running devices easier to read directly in Home Assistant.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed the reboot action to use the correct RMS endpoint `/devices/actions` instead of the invalid versioned path.
+
 ## 0.6.0 - 2026-03-13
 
 ### New Features

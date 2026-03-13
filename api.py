@@ -22,7 +22,7 @@ LOGGER = logging.getLogger(__name__)
 _DEFAULT_TIMEOUT = 30
 _MAX_RETRIES = 4
 _RETRIABLE_STATUS_CODES = {429, 500, 502, 503, 504}
-_DEVICE_ACTIONS_PATH = "/v3/devices/actions"
+_DEVICE_ACTIONS_PATH = "/devices/actions"
 
 
 class RmsAuthClient(Protocol):

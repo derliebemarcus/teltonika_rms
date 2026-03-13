@@ -157,10 +157,18 @@ class RmsRouterUptimeSensor(_OptionalDiagnosticSensor):
     entity_key = "router_uptime"
     _attr_name = "Router Uptime"
     _attr_icon = "mdi:timer-outline"
-    _attr_native_unit_of_measurement = UnitOfTime.SECONDS
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.DAYS
 
     def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
         super().__init__(bundle, device_id, self.entity_key)
+
+    @property
+    def native_value(self) -> float | None:
+        normalized = self._normalized
+        if normalized is None or normalized.router_uptime is None:
+            return None
+        return round(normalized.router_uptime / 86400, 2)
 
 
 class RmsTemperatureSensor(_OptionalDiagnosticSensor):
