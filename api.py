@@ -23,6 +23,8 @@ _DEFAULT_TIMEOUT = 30
 _MAX_RETRIES = 4
 _RETRIABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 _DEVICE_ACTIONS_PATH = "/devices/actions"
+_DEVICE_CONFIGURATION_READ_PATH = "/devices/configurator/configuration"
+_DEVICE_CONFIGURATION_WRITE_PATH = "/devices/configurator/configure"
 
 
 class RmsAuthClient(Protocol):
@@ -219,6 +221,45 @@ class RmsApiClient:
 
         resolved = await self._resolve_meta_channel(meta, data)
         return _extract_ethernet_ports(device_id, resolved)
+
+    async def async_get_device_port_configurations(self, device_id: str) -> list[dict[str, Any]] | None:
+        """Fetch switch port configuration data for one device."""
+        payload = {
+            "device_id": _normalize_device_identifier(device_id),
+            "endpoints": [{"path": "/ports_settings/config"}],
+        }
+        data, meta = await self.async_request(
+            "POST",
+            _DEVICE_CONFIGURATION_READ_PATH,
+            json_body=payload,
+            allow_not_found=True,
+        )
+        if data is None and not meta:
+            return None
+
+        resolved = await self._resolve_meta_channel(meta, data)
+        return _extract_port_configurations(resolved)
+
+    async def async_set_device_port_poe(self, device_id: str, port_id: str, enabled: bool) -> Any:
+        """Enable or disable PoE on one configurable port."""
+        payload = {
+            "configuration": [
+                {
+                    "path": "/ports_settings/config/{id}",
+                    "content_type": "application/json",
+                    "method": "put",
+                    "request_data": {"data": {"poe_enable": "1" if enabled else "0"}},
+                    "query_parameters": [{"key": "id", "value": port_id}],
+                    "device_id": [_normalize_device_identifier(device_id)],
+                }
+            ]
+        }
+        data, meta = await self.async_request(
+            "POST",
+            _DEVICE_CONFIGURATION_WRITE_PATH,
+            json_body=payload,
+        )
+        return await self._resolve_meta_channel(meta, data)
 
     async def async_execute_device_action(
         self,
@@ -527,3 +568,33 @@ def _extract_ethernet_ports(device_id: str, payload: Any) -> list[dict[str, Any]
         return []
 
     return None
+
+
+def _extract_port_configurations(payload: Any) -> list[dict[str, Any]] | None:
+    """Extract switch port configuration rows from configurator status payloads."""
+    if payload is None:
+        return None
+
+    if isinstance(payload, list):
+        if payload and all(isinstance(item, dict) and isinstance(item.get("data"), list) for item in payload):
+            rows: list[dict[str, Any]] = []
+            for item in payload:
+                rows.extend(row for row in item["data"] if isinstance(row, dict))
+            return rows
+        return [item for item in payload if isinstance(item, dict)]
+
+    if not isinstance(payload, dict):
+        return None
+
+    items = payload.get("data")
+    if not isinstance(items, list):
+        return []
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        data = item.get("data")
+        if isinstance(data, list):
+            return [row for row in data if isinstance(row, dict)]
+
+    return []

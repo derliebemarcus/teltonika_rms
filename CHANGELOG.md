@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.0 - 2026-03-13
+
+### New Features
+
+- Added PoE `switch` entities for configurable switch ports, so supported Teltonika switch ports can now be turned on and off directly from Home Assistant.
+
+### Improvements
+
+- PoE switches are created only for ports where RMS actually exposes a `poe_enable` setting, so non-PoE ports such as SFP uplinks do not create misleading entities.
+- PoE state is now read from the RMS configurator port configuration endpoint, which keeps Home Assistant aligned with the actual current device configuration.
+
+### Changes
+
+- Expanded the requested OAuth2 scopes to include:
+  - `device_configurations:read`
+  - `device_configurations:write`
+- Added a dedicated low-frequency port-configuration coordinator alongside the existing Ethernet port-scan coordinator.
+- Updated README scope guidance and feature list to document PoE switches and their required permissions.
+
+### Bugfixes
+
+- None.
+
 ## 0.7.2 - 2026-03-13
 
 ### New Features

@@ -21,6 +21,7 @@ from .const import (
     CONF_TAGS,
     DEFAULT_ESTIMATED_DEVICES,
     DEFAULT_INVENTORY_INTERVAL,
+    DEFAULT_PORT_CONFIG_INTERVAL,
     DEFAULT_PORT_SCAN_INTERVAL,
     DEFAULT_STATE_INTERVAL,
     MAX_MONTHLY_REQUESTS,
@@ -40,6 +41,7 @@ class CoordinatorBundle:
     inventory: "InventoryCoordinator"
     state: "StateCoordinator"
     port_scan: "PortScanCoordinator"
+    port_config: "PortConfigCoordinator"
     status_channels: RmsStatusChannelManager
     api: RmsApiClient
 
@@ -223,11 +225,56 @@ class PortScanCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]
         return results
 
 
+class PortConfigCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]):
+    """Fetches switch port configuration data on a low cadence."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        api: RmsApiClient,
+        inventory: InventoryCoordinator,
+    ) -> None:
+        self._api = api
+        self._inventory = inventory
+        self._scope_warning_logged = False
+        super().__init__(
+            hass,
+            LOGGER,
+            name="Teltonika RMS port configuration",
+            update_interval=timedelta(seconds=DEFAULT_PORT_CONFIG_INTERVAL),
+        )
+
+    async def _async_update_data(self) -> dict[str, list[dict[str, Any]]]:
+        device_ids = list(self._inventory.data.keys())
+        if not device_ids:
+            return {}
+
+        results: dict[str, list[dict[str, Any]]] = {}
+        for device_id in device_ids:
+            try:
+                ports = await self._api.async_get_device_port_configurations(device_id)
+            except ConfigEntryAuthFailed:
+                if not self._scope_warning_logged:
+                    LOGGER.warning(
+                        "Skipping Teltonika RMS port configuration reads because the current "
+                        "credentials do not allow the configurator endpoint. Add "
+                        "device_configurations:read and reauthenticate to enable PoE switches."
+                    )
+                    self._scope_warning_logged = True
+                return {}
+            except RmsApiError:
+                continue
+            if ports is not None:
+                results[device_id] = ports
+        return results
+
+
 async def async_refresh_all(bundle: CoordinatorBundle) -> None:
     """Run immediate refresh for both coordinators."""
     await bundle.inventory.async_request_refresh()
     await bundle.state.async_request_refresh()
     await bundle.port_scan.async_request_refresh()
+    await bundle.port_config.async_request_refresh()
 
 
 def validate_request_budget(

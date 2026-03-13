@@ -20,6 +20,8 @@ OAUTH2_SCOPES: tuple[str, ...] = (
     "device_actions:read",
     "device_remote_access:read",
     "device_actions:write",
+    "device_configurations:read",
+    "device_configurations:write",
 )
 
 CONF_INVENTORY_INTERVAL = "inventory_interval"
@@ -33,6 +35,7 @@ CONF_ENABLE_LOCATION = "enable_location"
 DEFAULT_INVENTORY_INTERVAL = 15 * 60
 DEFAULT_STATE_INTERVAL = 2 * 60
 DEFAULT_PORT_SCAN_INTERVAL = 6 * 60 * 60
+DEFAULT_PORT_CONFIG_INTERVAL = 6 * 60 * 60
 DEFAULT_ESTIMATED_DEVICES = 20
 DEFAULT_ENABLE_LOCATION = True
 DEFAULT_SPEC_PATH = ""
@@ -48,6 +51,7 @@ UPDATE_PLATFORMS: tuple[str, ...] = (
     "sensor",
     "device_tracker",
     "button",
+    "switch",
     "update",
 )
 

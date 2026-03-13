@@ -8,7 +8,7 @@
 
 ## Summary
 
-A custom Home Assistant integration for monitoring devices managed with Teltonika RMS, with an optional reboot action from Home Assistant.
+A custom Home Assistant integration for monitoring devices managed with Teltonika RMS, with optional reboot and PoE control actions from Home Assistant.
 
 The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, firmware availability, Ethernet port usage, timestamps, and optional location tracking.
 
@@ -29,6 +29,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
     - used Ethernet ports
     - used Ethernet port names
   - `button`: per-device reboot action
+  - `switch`: per-port PoE switches when RMS exposes configurable PoE-enabled switch ports
   - `update`: firmware availability view with installed and latest RMS firmware versions
   - `device_tracker` (optional): GPS location only for devices that provide coordinates, including detailed location attributes (`location_detail`, `coordinates`, `google_maps_url`)
 - Service:
@@ -40,6 +41,7 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 - API envelope parsing (`success`, `data`, `errors`, `meta`)
 - Status-channel handling (`meta.channel`) with Socket.IO first, HTTP polling fallback
 - Low-frequency Ethernet port scans to surface which ports are in use and which named ports currently have connected devices
+- Low-frequency port-configuration reads to expose PoE switch control only on ports that actually support it
 
 ## Installation
 
@@ -81,6 +83,8 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
    - `device_actions:read` for broader status/channel visibility
    - `device_remote_access:read` for Ethernet port scan sensors
    - `device_actions:write` for the reboot button
+   - `device_configurations:read` for PoE switch state
+   - `device_configurations:write` for PoE switch control
 7. In Home Assistant, go to:
    - `Settings -> Devices & Services` then click on the three dots in the upper right corner and select `Application Credentials`
 8. Add `Teltonika RMS` credentials (client ID + client secret).
@@ -107,6 +111,8 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
       - `device_actions:read` for broader status/channel visibility
       - `device_remote_access:read` for Ethernet port scan sensors
       - `device_actions:write` for the reboot button
+      - `device_configurations:read` for PoE switch state
+      - `device_configurations:write` for PoE switch control
 
 ## Configuration in Home Assistant
 
@@ -116,7 +122,8 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
    - `OAuth2 (recommended)` or `Personal access token (PAT)`.
 4. Finish authentication.
 5. If you want to use the reboot button with OAuth2 and you authenticated before version `0.6.0`, reauthenticate once so Home Assistant can request `device_actions:write`.
-6. Open integration options to tune:
+6. If you want to use PoE switches and you authenticated before version `0.8.0`, reauthenticate once so Home Assistant can request `device_configurations:read` and `device_configurations:write`.
+7. Open integration options to tune:
    - Inventory polling interval
    - State polling interval
    - Device count estimate

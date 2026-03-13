@@ -16,6 +16,7 @@ from teltonika_rms.api import (
     RmsApiClient,
     _async_retry_sleep,
     _coerce_list,
+    _extract_port_configurations,
     _coerce_state_map,
     _extract_ethernet_ports,
     _has_next_page,
@@ -366,6 +367,90 @@ def test_api_get_device_ethernet_ports_handles_status_channel_and_missing_values
     assert asyncio.run(client.async_get_device_ethernet_ports("42")) is None
 
 
+def test_api_get_device_port_configurations_handles_status_channel_and_missing_values() -> None:
+    class FakeChannelManager:
+        async def async_wait_for_channel(self, channel_id: str) -> dict[str, Any]:
+            assert channel_id == "port-config"
+            return {
+                "value": "Successfully executed API action.",
+                "data": [
+                    {
+                        "rid": 0,
+                        "type": "api_forward",
+                        "data": [
+                            {"id": "port1", ".type": "switch_port", "poe_enable": "1", "description": "tado"},
+                            {"id": "port2", ".type": "switch_port", "poe_enable": "0"},
+                            {"id": "sfp1", ".type": "switch_port"},
+                        ],
+                        "code": 200,
+                    }
+                ],
+                "response_state": "completed",
+            }
+
+    client = RmsApiClient(
+        FakeAuthClient([FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-config"}})]),
+        _matrix(),
+    )
+    client.set_status_channel_manager(FakeChannelManager())
+
+    ports = asyncio.run(client.async_get_device_port_configurations("42"))
+
+    assert ports == [
+        {"id": "port1", ".type": "switch_port", "poe_enable": "1", "description": "tado"},
+        {"id": "port2", ".type": "switch_port", "poe_enable": "0"},
+        {"id": "sfp1", ".type": "switch_port"},
+    ]
+    assert client._auth.calls[0]["method"] == "POST"
+    assert client._auth.calls[0]["url"].endswith("/devices/configurator/configuration")
+    assert client._auth.calls[0]["json"] == {
+        "device_id": 42,
+        "endpoints": [{"path": "/ports_settings/config"}],
+    }
+
+    client = RmsApiClient(FakeAuthClient([FakeResponse(404, {"missing": True})]), _matrix())
+    assert asyncio.run(client.async_get_device_port_configurations("42")) is None
+
+
+def test_api_set_device_port_poe_posts_expected_payloads() -> None:
+    auth = FakeAuthClient(
+        [
+            FakeResponse(200, {"success": True, "data": {"queued": True}, "meta": {}}),
+            FakeResponse(200, {"success": True, "data": {"queued": True}, "meta": {}}),
+        ]
+    )
+    client = RmsApiClient(auth, _matrix())
+
+    assert asyncio.run(client.async_set_device_port_poe("42", "port3", True)) == {"queued": True}
+    assert auth.calls[0]["url"].endswith("/devices/configurator/configure")
+    assert auth.calls[0]["json"] == {
+        "configuration": [
+            {
+                "path": "/ports_settings/config/{id}",
+                "content_type": "application/json",
+                "method": "put",
+                "request_data": {"data": {"poe_enable": "1"}},
+                "query_parameters": [{"key": "id", "value": "port3"}],
+                "device_id": [42],
+            }
+        ]
+    }
+
+    assert asyncio.run(client.async_set_device_port_poe("device-a", "port3", False)) == {"queued": True}
+    assert auth.calls[1]["json"] == {
+        "configuration": [
+            {
+                "path": "/ports_settings/config/{id}",
+                "content_type": "application/json",
+                "method": "put",
+                "request_data": {"data": {"poe_enable": "0"}},
+                "query_parameters": [{"key": "id", "value": "port3"}],
+                "device_id": ["device-a"],
+            }
+        ]
+    }
+
+
 def test_api_extract_ethernet_ports_covers_direct_and_empty_payload_shapes() -> None:
     assert _extract_ethernet_ports("42", None) is None
     assert _extract_ethernet_ports("42", {"42": [{"ports": ["bad", {"id": 1}]}]}) == [{"id": 1}]
@@ -374,6 +459,28 @@ def test_api_extract_ethernet_ports_covers_direct_and_empty_payload_shapes() -> 
     assert _extract_ethernet_ports("42", {"42": {"status": "completed"}}) == []
     assert _extract_ethernet_ports("42", {"42": ["bad"]}) == []
     assert _extract_ethernet_ports("42", "bad") is None
+
+
+def test_api_extract_port_configurations_covers_status_payload_shapes() -> None:
+    assert _extract_port_configurations(None) is None
+    assert _extract_port_configurations("bad") is None
+    assert _extract_port_configurations([{"id": "port1"}]) == [{"id": "port1"}]
+    assert _extract_port_configurations({"data": "bad"}) == []
+    assert _extract_port_configurations(
+        {
+            "data": [
+                {"rid": 0, "data": "bad"},
+                {
+                    "rid": 1,
+                    "data": [
+                        {"id": "port1", "poe_enable": "1"},
+                        "bad",
+                        {"id": "port2", "poe_enable": "0"},
+                    ],
+                },
+            ]
+        }
+    ) == [{"id": "port1", "poe_enable": "1"}, {"id": "port2", "poe_enable": "0"}]
 
 
 def test_api_get_states_for_devices_uses_round_robin_without_aggregate(monkeypatch: pytest.MonkeyPatch) -> None:

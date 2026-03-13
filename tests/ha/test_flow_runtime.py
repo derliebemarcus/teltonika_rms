@@ -407,6 +407,7 @@ def test_integration_setup_entry_pat_and_oauth_error(monkeypatch: pytest.MonkeyP
     monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.PortScanCoordinator", FakeCoordinator)
+    monkeypatch.setattr("teltonika_rms.coordinator.PortConfigCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", FakeStatusManager)
     monkeypatch.setattr(
         "homeassistant.helpers.aiohttp_client.async_get_clientsession",
@@ -473,6 +474,7 @@ def test_integration_setup_entry_wraps_refresh_errors(monkeypatch: pytest.Monkey
     monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FailingCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FailingCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.PortScanCoordinator", FailingCoordinator)
+    monkeypatch.setattr("teltonika_rms.coordinator.PortConfigCoordinator", FailingCoordinator)
     monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
     monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
 
@@ -515,6 +517,7 @@ def test_integration_setup_entry_propagates_auth_failures(monkeypatch: pytest.Mo
     monkeypatch.setattr("teltonika_rms.coordinator.InventoryCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.StateCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.coordinator.PortScanCoordinator", FakeCoordinator)
+    monkeypatch.setattr("teltonika_rms.coordinator.PortConfigCoordinator", FakeCoordinator)
     monkeypatch.setattr("teltonika_rms.status_channel.RmsStatusChannelManager", lambda api: SimpleNamespace(api=api))
     monkeypatch.setattr("homeassistant.helpers.aiohttp_client.async_get_clientsession", lambda hass: "session")
 
