@@ -190,6 +190,7 @@ class PortScanCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]
     ) -> None:
         self._api = api
         self._inventory = inventory
+        self._scope_warning_logged = False
         super().__init__(
             hass,
             LOGGER,
@@ -206,6 +207,15 @@ class PortScanCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]
         for device_id in device_ids:
             try:
                 ports = await self._api.async_get_device_ethernet_ports(device_id)
+            except ConfigEntryAuthFailed:
+                if not self._scope_warning_logged:
+                    LOGGER.warning(
+                        "Skipping Teltonika RMS ethernet port scans because the current credentials "
+                        "do not allow the port-scan endpoint. Add device_actions:read and "
+                        "reauthenticate to enable Ethernet port entities."
+                    )
+                    self._scope_warning_logged = True
+                return {}
             except RmsApiError:
                 continue
             if ports is not None:

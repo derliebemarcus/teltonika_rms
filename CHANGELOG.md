@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.7.1 - 2026-03-13
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Missing `device_actions:read` permission for the optional Ethernet port scan no longer blocks the whole integration from starting after upgrade.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed startup behavior so Ethernet port scan refresh degrades gracefully to `no Ethernet entities` when the scope is missing, instead of repeatedly forcing Home Assistant into reconnect/reauth behavior.
+
 ## 0.7.0 - 2026-03-13
 
 ### New Features

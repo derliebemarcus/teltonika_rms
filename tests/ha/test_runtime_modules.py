@@ -532,6 +532,18 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     port_scan._api.async_get_device_ethernet_ports = _raise_ports
     assert asyncio.run(port_scan._async_update_data()) == {}
 
+    auth_port_scan = object.__new__(PortScanCoordinator)
+    auth_port_scan._api = SimpleNamespace()
+    auth_port_scan._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}})
+    auth_port_scan._scope_warning_logged = False
+
+    async def _raise_auth_ports(device_id: str) -> Any:
+        raise ConfigEntryAuthFailed("missing scope")
+
+    auth_port_scan._api.async_get_device_ethernet_ports = _raise_auth_ports
+    assert asyncio.run(auth_port_scan._async_update_data()) == {}
+    assert auth_port_scan._scope_warning_logged is True
+
     empty_port_scan = object.__new__(PortScanCoordinator)
     empty_port_scan._api = SimpleNamespace(
         async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(0, result=[{"name": "unused"}])
