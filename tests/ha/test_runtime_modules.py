@@ -178,6 +178,17 @@ def test_tracker_and_base_entity_handle_missing_location() -> None:
     assert clients.available is True
 
 
+def test_uptime_sensor_returns_none_without_runtime_value() -> None:
+    normalized = _normalized()
+    normalized.router_uptime = None
+    bundle = _bundle(normalized)
+
+    uptime = RmsRouterUptimeSensor(bundle, "dev-1")
+
+    assert uptime.native_value is None
+    assert uptime.available is False
+
+
 def test_platform_setup_entry_adds_expected_entities() -> None:
     bundle = _bundle(_normalized())
     runtime = TeltonikaRmsRuntime(bundle=bundle)

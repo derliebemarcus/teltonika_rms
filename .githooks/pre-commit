@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 REPORT_FILE="$(mktemp "${TMPDIR:-/tmp}/teltonika-rms-pytest-XXXXXX.xml")"
 VENV_DIR="$ROOT/.venv-test"
+COVERAGE_MINIMUM="97.1"
 
 pick_bootstrap_python() {
   if command -v python3.13 >/dev/null 2>&1; then
@@ -58,6 +59,7 @@ trap cleanup EXIT
 cd "$ROOT" || exit 1
 
 ensure_package "pytest" "pytest>=8,<10"
+ensure_package "pytest_cov" "pytest-cov>=6,<7"
 ensure_package "socketio" "python-socketio==5.11.2"
 
 HAS_HA_TESTS=0
@@ -74,8 +76,18 @@ else
   echo "[pre-commit] Running test suite: unit only."
 fi
 
-"$PYTHON_BIN" -m pytest --maxfail=0 "${TEST_TARGETS[@]}" --junitxml "$REPORT_FILE"
+"$PYTHON_BIN" -m pytest --maxfail=0 "${TEST_TARGETS[@]}" \
+  --cov=. \
+  --cov-config=.coveragerc \
+  --cov-report=xml:coverage.xml \
+  --cov-report=term \
+  --junitxml "$REPORT_FILE"
 PYTEST_EXIT=$?
+
+if [ "$PYTEST_EXIT" -eq 0 ]; then
+  "$PYTHON_BIN" "$ROOT/tools/check_coverage_threshold.py" "$ROOT/coverage.xml" "$COVERAGE_MINIMUM"
+  PYTEST_EXIT=$?
+fi
 
 "$PYTHON_BIN" tools/print_pytest_summary.py "$REPORT_FILE"
 

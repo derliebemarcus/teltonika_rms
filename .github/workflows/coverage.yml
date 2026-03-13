@@ -41,6 +41,10 @@ jobs:
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
 
+      - name: Enforce coverage floor
+        run: |
+          python tools/check_coverage_threshold.py coverage.xml 97.1
+
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
