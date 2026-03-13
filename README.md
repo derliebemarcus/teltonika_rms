@@ -91,16 +91,16 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 1. Log in to RMS.
    - Open [RMS](https://rms.teltonika-networks.com/).
    - Sign in with the RMS account that owns the devices you want to monitor.
-   - Complete two-factor authentication (required for PAT generation).
-2. In RMS, generate a Personal Access Token:
-   - Open API token settings as described in [RMS API Credits](https://wiki.teltonika-networks.com/view/RMS_API_Credits).
-   - Create a new token and copy it immediately.
-3. Grant at least:
-   - `devices:read`
-4. Add these if needed:
-   - `device_location:read` for GPS tracker entities
-   - `device_actions:read` for broader status/channel visibility
-   - `device_actions:write` for the reboot button
+   - Open [Account Settings](https://account.rms.teltonika-networks.com/settings/profile).
+   - Complete [two-factor authentication](https://account.rms.teltonika-networks.com/settings/security) (required for PAT generation).
+2. In RMS, generate a [Personal Access Token](https://account.rms.teltonika-networks.com/settings/tokens):
+   1. Create a new token and copy it immediately.
+   2. Grant at least:
+      - `devices:read`
+   3. Add these if needed:
+      - `device_location:read` for GPS tracker entities
+      - `device_actions:read` for broader status/channel visibility
+      - `device_actions:write` for the reboot button
 
 ## Configuration in Home Assistant
 
