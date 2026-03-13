@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.3 - 2026-03-14
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Upgraded the bundled `python-socketio` dependency to `5.14.0`, removing a known vulnerability and bringing the shipped integration dependency set back into compliance with the repository security gates.
+
+### Changes
+
+- Tightened the release workflow shell comparison so `actionlint` and ShellCheck can validate release publishing end to end without false-positive script failures.
+
+### Bugfixes
+
+- Fixed the GitHub Actions release workflow lint failure caused by an inline tag comparison pattern that ShellCheck flagged as invalid.
+- Fixed the dependency-audit failure by shipping a non-vulnerable `python-socketio` version in both runtime and development dependency manifests.
+
 ## 0.8.2 - 2026-03-13
 
 ### New Features

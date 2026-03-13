@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 CATEGORY_RE = re.compile(r"^(add|change|deprecate|remove|fix): [^ ].*")
+DEPENDABOT_NAME = "dependabot[bot]"
 
 
 def _git(*args: str) -> str:
@@ -60,6 +61,22 @@ def validate_message(message: str) -> str | None:
     return None
 
 
+def _is_dependabot_identity(name: str, email: str) -> bool:
+    normalized_name = name.strip().lower()
+    normalized_email = email.strip().lower()
+    return normalized_name == DEPENDABOT_NAME or DEPENDABOT_NAME in normalized_email
+
+
+def _is_dependabot_commit(sha: str) -> bool:
+    author = _git("log", "-1", "--format=%an%n%ae%n%cn%n%ce", sha).splitlines()
+    if len(author) != 4:
+        return False
+    author_name, author_email, committer_name, committer_email = author
+    return _is_dependabot_identity(author_name, author_email) or _is_dependabot_identity(
+        committer_name, committer_email
+    )
+
+
 def main() -> int:
     commit_range = sys.argv[1] if len(sys.argv) > 1 else "HEAD^..HEAD"
     shas = [sha for sha in _git("rev-list", "--reverse", commit_range).splitlines() if sha]
@@ -69,6 +86,8 @@ def main() -> int:
 
     failed = False
     for sha in shas:
+        if _is_dependabot_commit(sha):
+            continue
         message = _git("log", "-1", "--format=%B", sha)
         error = validate_message(message)
         if error:
