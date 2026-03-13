@@ -15,6 +15,15 @@
   - `### Changes`
   - `### Bugfixes`
 
+## Required Test Rules
+
+- New optional features must degrade gracefully when their backing data or capability is not available.
+- Any change that adds a new RMS scope or depends on a scope that existing installs may not yet have must include:
+  - a success-path test
+  - a missing-scope test
+  - a test proving the base integration still starts when the feature is optional
+- High coverage is not enough by itself. Tests must lock the intended runtime behavior, especially for setup, reauth, and feature degradation paths.
+
 ## Home Assistant Direction
 
 This repository aims to stay close to Home Assistant integration conventions:
