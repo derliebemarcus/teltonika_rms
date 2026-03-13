@@ -27,7 +27,7 @@ fi
 TAG="v$VERSION"
 if ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
   echo "[pre-push] Missing tag $TAG for manifest version $VERSION."
-  echo "[pre-push] Run: tools/create_version_tag.sh"
+  echo "[pre-push] Run: tools/publish_release.sh"
   exit 1
 fi
 

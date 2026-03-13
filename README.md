@@ -160,9 +160,14 @@ tools/install_git_hooks.sh
 - Ensures a version tag `v<manifest.version>` exists before push
 - Ensures the tag is part of current branch history
 
-Create a release tag for the current version:
+Publish the current version as a GitHub release:
 
 ```bash
-tools/create_version_tag.sh
-git push --follow-tags
+tools/publish_release.sh
 ```
+
+This will:
+
+- create the local version tag if it does not exist yet
+- push the current branch and tags to GitHub
+- create or update the matching entry on the GitHub Releases page
