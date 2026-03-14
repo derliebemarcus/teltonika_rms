@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.4 - 2026-03-14
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Shipped the runtime `python-socketio` dependency at `5.16.1`, so installations now include the latest Dependabot-delivered security and maintenance updates instead of staying on the older `5.14.0` floor.
+- Updated QA workflow dependencies alongside the release so repository checks run on the newer `pytest-cov`, `actionlint`, `actions/github-script`, and `actions/upload-artifact` revisions already merged on `main`.
+
+### Changes
+
+- Published a follow-up patch release after the Dependabot merges so the released integration version matches the security-relevant dependency state on `main`.
+
+### Bugfixes
+
+- Fixed the release packaging gap where merged security updates on `main` had not yet been rolled into a tagged Home Assistant release.
+
 ## 0.8.3 - 2026-03-14
 
 ### New Features
