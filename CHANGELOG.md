@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.6 - 2026-03-14
+
+### New Features
+
+- None.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed security vulnerabilities by pinning `orjson>=3.11.6` (CVE-2025-67221) and `PyJWT>=2.12.0` (CVE-2026-32597) in the integration dependencies.
+
 ## 0.8.5 - 2026-03-14
 
 ### New Features
