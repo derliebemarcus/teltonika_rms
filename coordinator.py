@@ -158,6 +158,8 @@ class StateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         if self._enable_location:
             await self._async_enrich_locations(results, device_ids, max_per_cycle=max_per_cycle)
 
+        await self._async_enrich_wireless(results, device_ids, max_per_cycle=max_per_cycle)
+
         self._log_budget_warning()
         return results
 
@@ -176,6 +178,31 @@ class StateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                 location = {}
             if location:
                 results.setdefault(device_id, {})["location"] = location
+
+    async def _async_enrich_wireless(
+        self,
+        results: dict[str, dict[str, Any]],
+        device_ids: list[str],
+        *,
+        max_per_cycle: int | None,
+    ) -> None:
+        limit = len(device_ids) if max_per_cycle is None else max(1, max_per_cycle)
+        for device_id in device_ids[:limit]:
+            try:
+                wireless = await self._api.async_get_device_wireless(device_id)
+            except ConfigEntryAuthFailed:
+                # Missing devices:read scope or something, just skip
+                continue
+            except RmsApiError:
+                wireless = []
+            if wireless:
+                # Merge clients_count into the state dict
+                clients_count = sum(
+                    (w.get("clients_count") or 0) for w in wireless if isinstance(w, dict)
+                )
+                results.setdefault(device_id, {}).setdefault("state", {})["clients_count"] = (
+                    clients_count
+                )
 
     def _log_budget_warning(self) -> None:
         estimate = self.monthly_request_estimate

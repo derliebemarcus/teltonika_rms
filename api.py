@@ -208,6 +208,17 @@ class RmsApiClient:
             return data
         return {}
 
+    async def async_get_device_wireless(self, device_id: str) -> list[dict[str, Any]]:
+        """Fetch wireless access point info for a device."""
+        wireless_path = self._matrix.format_path("device_wireless", device_id=device_id)
+        if not wireless_path:
+            return []
+
+        data, _meta = await self.async_request("GET", wireless_path, allow_not_found=True)
+        if isinstance(data, list):
+            return [item for item in data if isinstance(item, dict)]
+        return []
+
     async def async_get_device_ethernet_ports(self, device_id: str) -> list[dict[str, Any]] | None:
         """Fetch Ethernet port usage data for one device."""
         data, meta = await self.async_request(
@@ -524,7 +535,11 @@ def estimate_monthly_requests(
         state_calls = month_seconds / max(1, state_interval)
     else:
         state_calls = (month_seconds / max(1, state_interval)) * max(1, estimated_devices)
-    return int(inventory_calls + state_calls)
+
+    # Wireless endpoints are fetched per-device alongside state
+    wireless_calls = (month_seconds / max(1, state_interval)) * max(1, estimated_devices)
+
+    return int(inventory_calls + state_calls + wireless_calls)
 
 
 def chunked(iterable: Iterable[str], size: int) -> list[list[str]]:
@@ -561,7 +576,7 @@ def _extract_ethernet_ports(device_id: str, payload: Any) -> list[dict[str, Any]
         )
 
     if isinstance(items, list):
-        for item in items:
+        for item in reversed(items):
             if not isinstance(item, dict):
                 continue
             ports = item.get("ports")
@@ -595,6 +610,22 @@ def _extract_port_configurations(payload: Any) -> list[dict[str, Any]] | None:
 
     if not isinstance(payload, dict):
         return None
+
+    # Handle device-grouped configurator payloads (e.g. {"1791608": [{"status": "completed", "data": [{"data": [...]}]}]})
+    if all(isinstance(v, list) for k, v in payload.items() if str(k).isdigit() or "-" in str(k)):
+        for events in payload.values():
+            if not isinstance(events, list) or not events:
+                continue
+            for event in reversed(events):
+                if not isinstance(event, dict):
+                    continue
+                inner_data = event.get("data")
+                if isinstance(inner_data, list):
+                    for inner_item in inner_data:
+                        if isinstance(inner_item, dict) and isinstance(
+                            inner_item.get("data"), list
+                        ):
+                            return [row for row in inner_item["data"] if isinstance(row, dict)]
 
     items = payload.get("data")
     if not isinstance(items, list):

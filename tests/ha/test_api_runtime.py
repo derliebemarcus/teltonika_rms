@@ -123,6 +123,7 @@ def _matrix(*, aggregate: bool = True) -> EndpointMatrix:
         "device_detail": EndpointSpec("/v3/devices/{id}", tuple(), "safe"),
         "device_state_single": EndpointSpec("/v3/devices/{id}/status", tuple(), "async-channel"),
         "device_location": EndpointSpec("/v3/devices/{id}/location", tuple(), "high-cost"),
+        "device_wireless": EndpointSpec("/devices/{device_id}/wireless", tuple(), "safe"),
     }
     if aggregate:
         endpoints["device_state_aggregate"] = EndpointSpec(
@@ -708,3 +709,40 @@ def test_estimate_max_calls_per_cycle_has_floor() -> None:
 
 def test_rms_auth_error_is_subclass_of_api_error() -> None:
     assert issubclass(RmsAuthError, RmsApiError)
+
+
+def test_api_get_device_wireless_handles_missing_and_success() -> None:
+    client = RmsApiClient(
+        FakeAuthClient(
+            [
+                FakeResponse(200, {"success": True, "data": [{"clients_count": 5}], "meta": {}}),
+                FakeResponse(404, {"success": False, "errors": []}),
+            ]
+        ),
+        _matrix(),
+    )
+    assert asyncio.run(client.async_get_device_wireless("1")) == [{"clients_count": 5}]
+    assert asyncio.run(client.async_get_device_wireless("1")) == []
+
+    # Missing endpoint
+    client._matrix = EndpointMatrix(
+        source="test",
+        endpoints={"devices_list": EndpointSpec("/v3/devices", tuple(), "safe")},
+    )
+    assert asyncio.run(client.async_get_device_wireless("1")) == []
+
+
+def test_api_extract_nested_data_lists() -> None:
+    from teltonika_rms.api import _extract_ethernet_ports, _extract_port_configurations
+
+    nested_payload = {"123": [{"status": "completed", "ports": [{"id": "p1"}]}]}
+    assert _extract_ethernet_ports("123", nested_payload) == [{"id": "p1"}]
+
+    config_payload = {
+        "123": [
+            "not a dict",
+            {"status": "pending"},
+            {"status": "completed", "data": ["not a dict", {"data": [{"id": "c1"}]}]},
+        ]
+    }
+    assert _extract_port_configurations(config_payload) == [{"id": "c1"}]

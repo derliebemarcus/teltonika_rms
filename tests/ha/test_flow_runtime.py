@@ -289,8 +289,8 @@ def test_options_flow_handles_budget_and_normalizes_tags(monkeypatch: pytest.Mon
         flow.async_step_init(
             {
                 CONF_INVENTORY_INTERVAL: 300,
-                CONF_STATE_INTERVAL: 120,
-                CONF_ESTIMATED_DEVICES: 20,
+                CONF_STATE_INTERVAL: 300,
+                CONF_ESTIMATED_DEVICES: 2,
                 CONF_TAGS: " alpha, beta ",
                 "device_status": "",
                 CONF_SPEC_PATH: "",

@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.8 - 2026-03-14
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Temperature sensor values are now exposed as `float` type and assigned the `MEASUREMENT` state class for better graph tracking.
+- SIM slot values are now exposed natively as integer.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed wireless `clients_count` missing for Access Points (TAP200) and Routers (RUTX50) by parsing the newly supported `/devices/{device_id}/wireless` endpoint.
+- Fixed an issue where `used_ethernet_ports` and `used_ethernet_port_names` did not populate for certain switches like the TSW202 due to an unhandled API wrapper payload format.
+- Fixed PoE switches failing to populate for devices like the TSW202.
+
 ## 0.8.7 - 2026-03-14
 
 ### New Features

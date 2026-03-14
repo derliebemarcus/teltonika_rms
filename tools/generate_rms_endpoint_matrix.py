@@ -61,6 +61,8 @@ def build_matrix(compiled_spec: dict) -> dict:
         "device_state_aggregate": [],
         "device_state_single": [],
         "device_location": [],
+        "device_wireless": [],
+        "device_port_configurations": [],
     }
 
     for path, methods in paths.items():
@@ -68,6 +70,11 @@ def build_matrix(compiled_spec: dict) -> dict:
             continue
         operation = methods.get("get")
         if not isinstance(operation, dict):
+            # For POST endpoints like port_configurations
+            if path == "/devices/configurator/configuration" and "post" in methods:
+                buckets["device_port_configurations"].append(
+                    (path, _extract_scopes(methods["post"], default_security))
+                )
             continue
         lower = path.lower()
         if "devices" not in lower:
@@ -79,6 +86,8 @@ def build_matrix(compiled_spec: dict) -> dict:
             buckets["device_state_single"].append((path, scopes))
         elif "/devices/" in lower and lower.endswith("/location"):
             buckets["device_location"].append((path, scopes))
+        elif "/devices/" in lower and lower.endswith("/wireless"):
+            buckets["device_wireless"].append((path, scopes))
         elif _is_aggregate_status_candidate(path):
             buckets["device_state_aggregate"].append((path, scopes))
         elif "/devices/" in lower and "{" in path:
@@ -90,6 +99,11 @@ def build_matrix(compiled_spec: dict) -> dict:
         "device_state_aggregate": ("/v3/devices/status", ["devices:read"]),
         "device_state_single": ("/v3/devices/{id}/status", ["devices:read"]),
         "device_location": ("/v3/devices/{id}/location", ["device_location:read"]),
+        "device_wireless": ("/devices/{device_id}/wireless", ["devices:read"]),
+        "device_port_configurations": (
+            "/devices/configurator/configuration",
+            ["device_configurations:read"],
+        ),
     }
 
     endpoints: dict[str, dict] = {}

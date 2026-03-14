@@ -25,7 +25,7 @@ class NormalizedDevice:
     last_seen: datetime | None
     clients_count: int | None
     router_uptime: int | None
-    temperature: int | None
+    temperature: float | None
     signal_strength: int | None
     wan_state: str | None
     connection_state: str | None
@@ -205,7 +205,7 @@ def normalize_device(
 
     clients_count = parse_int(first_value(merged, "clients_count"))
     router_uptime = parse_int(first_value(merged, "router_uptime"))
-    temperature = parse_int(first_value(merged, "temperature"))
+    temperature = parse_float(first_value(merged, "temperature"))
     signal_strength = parse_int(first_value(merged, "signal"))
     sim_slot = parse_int(first_value(merged, "sim_slot"))
     wan_state_raw = first_value(merged, "wan_state")

@@ -116,11 +116,11 @@ def _coerce_payload(payload: Any) -> dict[str, Any] | None:
 def _is_terminal(payload: dict[str, Any]) -> bool:
     if payload.get("completed") is True:
         return True
+
+    # Check root-level keys
     for key in ("status", "response_state"):
         status = payload.get(key)
-        if not isinstance(status, str):
-            continue
-        if status.lower() in {
+        if isinstance(status, str) and status.lower() in {
             "completed",
             "done",
             "finished",
@@ -131,4 +131,27 @@ def _is_terminal(payload: dict[str, Any]) -> bool:
             "success",
         }:
             return True
+
+    # Check device-ID grouped payloads (e.g. from configurator or port-scan)
+    # The payload is a dict mapping device IDs to lists of events
+    if all(isinstance(v, list) for k, v in payload.items() if str(k).isdigit() or "-" in str(k)):
+        for events in payload.values():
+            if not isinstance(events, list) or not events:
+                continue
+            last_event = events[-1]
+            if isinstance(last_event, dict):
+                for key in ("status", "response_state"):
+                    status = last_event.get(key)
+                    if isinstance(status, str) and status.lower() in {
+                        "completed",
+                        "done",
+                        "finished",
+                        "failed",
+                        "error",
+                        "expired",
+                        "cancelled",
+                        "success",
+                    }:
+                        return True
+
     return False

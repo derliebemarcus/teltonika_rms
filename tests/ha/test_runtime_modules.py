@@ -530,8 +530,8 @@ def test_coordinator_bundle_and_budget_validation() -> None:
     assert (
         validate_request_budget(
             inventory_interval=900,
-            state_interval=120,
-            estimated_devices=10,
+            state_interval=300,
+            estimated_devices=1,
             aggregate_state_supported=True,
         )
         is True
@@ -637,6 +637,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
         async_get_device_location=lambda device_id: asyncio.sleep(
             0, result={"latitude": 1.0, "longitude": 2.0}
         ),
+        async_get_device_wireless=lambda device_id: asyncio.sleep(0, result=[{"clients_count": 5}]),
         estimate_max_calls_per_cycle=lambda interval: 3,
     )
     state._inventory = SimpleNamespace(
@@ -648,7 +649,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
 
     result = asyncio.run(state._async_update_data())
 
-    assert result["dev-1"]["state"] == {"online": True}
+    assert result["dev-1"]["state"] == {"online": True, "clients_count": 5}
     assert result["dev-1"]["location"] == {"latitude": 1.0, "longitude": 2.0}
     assert state.monthly_request_estimate > 0
 
@@ -783,6 +784,7 @@ def test_state_coordinator_handles_location_errors(monkeypatch: pytest.MonkeyPat
             0, result={"dev-1": {"online": True}}
         ),
         async_get_device_location=_raise_location,
+        async_get_device_wireless=lambda device_id: asyncio.sleep(0, result=[]),
         estimate_max_calls_per_cycle=lambda interval: 2,
     )
     state._inventory = SimpleNamespace(
@@ -859,6 +861,9 @@ def test_status_channel_manager_and_helpers(monkeypatch: pytest.MonkeyPatch) -> 
     assert _coerce_payload("bad") is None
     assert _is_terminal({"completed": True}) is True
     assert _is_terminal({"status": "completed"}) is True
+    assert _is_terminal({"123": [{"status": "pending"}, {"status": "success"}]}) is True
+    assert _is_terminal({"123": [{"status": "pending"}, "not_a_dict"]}) is False
+    assert _is_terminal({"123": []}) is False
     assert _is_terminal({"response_state": "completed"}) is True
     assert _is_terminal({"status": "success"}) is True
     assert _is_terminal({"status": "pending"}) is False

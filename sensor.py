@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, ClassVar
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory, UnitOfTime
 from homeassistant.core import HomeAssistant, callback
@@ -188,15 +188,26 @@ class RmsTemperatureSensor(_OptionalDiagnosticSensor):
     entity_key = "temperature"
     _attr_name = "Temperature"
     _attr_icon = "mdi:thermometer"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = "°C"
 
     def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
         super().__init__(bundle, device_id, self.entity_key)
+
+    @property
+    def native_value(self) -> float | None:
+        normalized = self._normalized
+        if normalized is None or normalized.temperature is None:
+            return None
+        return float(normalized.temperature)
 
 
 class RmsSignalStrengthSensor(_OptionalDiagnosticSensor):
     entity_key = "signal_strength"
     _attr_name = "Signal Strength"
     _attr_icon = "mdi:signal"
+    _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = "dBm"
 
     def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
@@ -237,6 +248,13 @@ class RmsSimSlotSensor(_OptionalDiagnosticSensor):
 
     def __init__(self, bundle: CoordinatorBundle, device_id: str) -> None:
         super().__init__(bundle, device_id, self.entity_key)
+
+    @property
+    def native_value(self) -> int | None:
+        normalized = self._normalized
+        if normalized is None or normalized.sim_slot is None:
+            return None
+        return int(normalized.sim_slot)
 
 
 class _BasePortScanSensor(TeltonikaRmsEntity, SensorEntity):
