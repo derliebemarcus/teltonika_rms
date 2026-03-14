@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.7 - 2026-03-14
+
+### New Features
+
+- None.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Reverted the dependency pinning of `orjson` and `PyJWT` introduced in `0.8.6` because they directly conflicted with the strict dependencies of Home Assistant 2026.3.0 and 2026.3.1. These vulnerability alerts are upstream within Home Assistant Core and will be fixed when the next core version ships them.
+
 ## 0.8.6 - 2026-03-14
 
 ### New Features
