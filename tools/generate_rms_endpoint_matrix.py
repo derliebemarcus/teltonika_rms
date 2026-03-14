@@ -94,11 +94,18 @@ def build_matrix(compiled_spec: dict) -> dict:
 
     endpoints: dict[str, dict] = {}
     for key, default_value in defaults.items():
-        selected = _pick_best(buckets[key]) or default_value
+        selected = _pick_best(buckets[key])
+        if selected:
+            path, scopes = selected
+            if not scopes:
+                scopes = default_value[1]
+        else:
+            path, scopes = default_value
+
         endpoints[key] = {
-            "path": selected[0],
-            "scopes": selected[1],
-            "polling": _polling_hint(selected[0]),
+            "path": path,
+            "scopes": scopes,
+            "polling": _polling_hint(path),
         }
 
     return {

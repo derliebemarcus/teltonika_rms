@@ -3,7 +3,9 @@
     "device_detail": {
       "path": "/devices/{id}",
       "polling": "safe",
-      "scopes": []
+      "scopes": [
+        "devices:read"
+      ]
     },
     "device_location": {
       "path": "/v3/devices/{id}/location",
@@ -29,7 +31,9 @@
     "devices_list": {
       "path": "/devices",
       "polling": "safe",
-      "scopes": []
+      "scopes": [
+        "devices:read"
+      ]
     }
   },
   "generated_from": "compiled.yaml",

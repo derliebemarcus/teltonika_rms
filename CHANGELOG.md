@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.5 - 2026-03-14
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Modified the endpoint matrix generator tool to correctly preserve default endpoint scopes when parsing OpenAPI definitions that use `BearerAuth` without explicitly redefining scope sets per path.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed the `endpoint_matrix_frozen.json` scope generation so that PAT users with `devices:read` grants are correctly authorized when using generated matrix files.
+
 ## 0.8.4 - 2026-03-14
 
 ### New Features
