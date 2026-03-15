@@ -145,6 +145,8 @@ jobs:
             const tag = "${{ steps.tag.outputs.tag }}";
             const body = fs.readFileSync("release_notes.md", "utf8");
 
+            const isPrerelease = tag.includes("-beta");
+
             try {
               const existing = await github.rest.repos.getReleaseByTag({
                 owner,
@@ -159,6 +161,7 @@ jobs:
                 tag_name: tag,
                 name: `Release ${tag}`,
                 body,
+                prerelease: isPrerelease,
               });
               core.info(`Updated release ${tag}.`);
             } catch (error) {
@@ -172,6 +175,24 @@ jobs:
                 tag_name: tag,
                 name: `Release ${tag}`,
                 body,
+                prerelease: isPrerelease,
               });
               core.info(`Created release ${tag}.`);
             }
+
+      - name: Update floating tags
+        shell: bash
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          SHA="${{ steps.target.outputs.commit_sha }}"
+          if [[ "$TAG" == *"-beta"* ]]; then
+            FLOATING_TAG="beta"
+          else
+            FLOATING_TAG="stable"
+          fi
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f "$FLOATING_TAG" "$SHA"
+          git push origin -f "refs/tags/$FLOATING_TAG"
+

@@ -12,6 +12,8 @@ A custom Home Assistant integration for monitoring devices managed with Teltonik
 
 The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, firmware availability, Ethernet port usage, timestamps, and optional location tracking.
 
+**Supported Devices:** Though the plugin should support all Teltonika devices, it was tested only with RUTX50, TAP200, and TSW202. So those three are the supported devices.
+
 ## What This Component Provides
 
 - Per-device entities:

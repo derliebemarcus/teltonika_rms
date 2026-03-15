@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.0-beta2 - 2026-03-15
+
+### New Features
+
+- Automatically update floating tags ('stable' or 'beta') based on the published release type.
+
+### Improvements
+
+- Clarified supported devices in the README.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- None.
+
 ## 0.9.0-beta1 - 2026-03-15
 
 ### New Features
