@@ -2,6 +2,42 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.0-beta1 - 2026-03-15
+
+### New Features
+
+- Published a new beta version.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- None.
+
+## 0.9.0-beta0 - 2026-03-14
+
+### New Features
+
+- Introduced beta versions (pre-releases) in addition to stable releases.
+
+### Improvements
+
+- Updated documentation to clarify that while the plugin aims to support all Teltonika devices, it has been specifically tested and validated with the RUTX50, TAP200, and TSW202.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- None.
+
 ## 0.8.8 - 2026-03-14
 
 ### New Features
