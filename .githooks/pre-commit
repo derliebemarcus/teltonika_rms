@@ -61,6 +61,19 @@ cd "$ROOT" || exit 1
 ensure_package "pytest" "pytest>=8,<10"
 ensure_package "pytest_cov" "pytest-cov>=6,<7"
 ensure_package "socketio" "python-socketio==5.11.2"
+ensure_package "ruff" "ruff"
+
+echo "[pre-commit] Running ruff format check..."
+if ! "$PYTHON_BIN" -m ruff format --check .; then
+  echo "[pre-commit] Code formatting failed. Run 'ruff format .' to fix."
+  exit 1
+fi
+
+echo "[pre-commit] Running ruff lint check..."
+if ! "$PYTHON_BIN" -m ruff check .; then
+  echo "[pre-commit] Linting failed. Run 'ruff check --fix .' to fix."
+  exit 1
+fi
 
 HAS_HA_TESTS=0
 if [ -d "$ROOT/tests/ha" ]; then
