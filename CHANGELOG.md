@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.0-beta4 - 2026-03-16
+
+### New Features
+
+- None.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed formatting issues that caused the previous release pipeline to fail.
+
 ## 0.9.0-beta3 - 2026-03-16
 
 ### New Features

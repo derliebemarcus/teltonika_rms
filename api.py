@@ -253,7 +253,9 @@ class RmsApiClient:
         resolved = await self._resolve_meta_channel(meta, data)
         return _extract_port_configurations(resolved)
 
-    async def async_set_device_port_enabled(self, device_id: str, port_id: str, enabled: bool) -> Any:
+    async def async_set_device_port_enabled(
+        self, device_id: str, port_id: str, enabled: bool
+    ) -> Any:
         """Enable or disable one configurable port."""
         payload = {
             "configuration": [

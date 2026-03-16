@@ -442,7 +442,9 @@ def test_api_set_device_port_enabled_posts_expected_payloads() -> None:
     )
     client = RmsApiClient(auth, _matrix())
 
-    assert asyncio.run(client.async_set_device_port_enabled("42", "port3", True)) == {"queued": True}
+    assert asyncio.run(client.async_set_device_port_enabled("42", "port3", True)) == {
+        "queued": True
+    }
     assert auth.calls[0]["url"].endswith("/devices/configurator/configure")
     assert auth.calls[0]["json"] == {
         "configuration": [

@@ -151,7 +151,9 @@ class RmsPortSwitch(TeltonikaRmsEntity, SwitchEntity):
 
     async def _async_set_port(self, enabled: bool) -> None:
         try:
-            await self._bundle.api.async_set_device_port_enabled(self.device_id, self._port_id, enabled)
+            await self._bundle.api.async_set_device_port_enabled(
+                self.device_id, self._port_id, enabled
+            )
         except ConfigEntryAuthFailed as err:
             raise HomeAssistantError(
                 "RMS port control requires device_configurations:write permissions. "
