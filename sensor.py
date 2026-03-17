@@ -7,7 +7,7 @@ from typing import Any, ClassVar
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, UnitOfTime
+from homeassistant.const import EntityCategory, UnitOfPower, UnitOfTime
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -52,6 +52,20 @@ async def async_setup_entry(
                     continue
                 known.add(unique)
                 new_entities.append(entity_cls(bundle, device_id))
+            for port in bundle.port_scan.data.get(device_id, []):
+                port_id = str(port.get("name") or "").strip()
+                if port_id == "NIL" or not port_id:
+                    continue
+                if (
+                    port.get("PoE") is not None
+                    or port.get("poe") is not None
+                    or port.get("poe_enable") is not None
+                ):
+                    unique_poe_power = f"{device_id}_{port_id}_poe_w"
+                    if unique_poe_power not in known:
+                        known.add(unique_poe_power)
+                        new_entities.append(RmsPoePowerSensor(bundle, device_id, port_id))
+
         if new_entities:
             async_add_entities(new_entities)
 
@@ -59,6 +73,46 @@ async def async_setup_entry(
     entry.async_on_unload(bundle.inventory.async_add_listener(_add_new_entities))
     entry.async_on_unload(bundle.state.async_add_listener(_add_new_entities))
     entry.async_on_unload(bundle.port_scan.async_add_listener(_add_new_entities))
+
+
+class RmsPoePowerSensor(TeltonikaRmsEntity, SensorEntity):
+    """PoE port power usage in watts."""
+
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:lightning-bolt"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, bundle: CoordinatorBundle, device_id: str, port_id: str) -> None:
+        super().__init__(bundle, device_id, coordinator=bundle.port_scan)
+        self._port_id = port_id
+        self._attr_unique_id = f"{device_id}_{port_id}_poe_w"
+        self._attr_name = f"{port_id.upper()} PoE Power"
+
+    @property
+    def _port(self) -> dict[str, Any] | None:
+        for port in self._bundle.port_scan.data.get(self.device_id, []):
+            if str(port.get("name") or "").strip() == self._port_id:
+                return port
+        return None
+
+    @property
+    def available(self) -> bool:
+        return super().available
+
+    @property
+    def native_value(self) -> float | None:
+        port = self._port
+        if port is None:
+            return None
+        val = port.get("PoE (W)")
+        if val is None:
+            return None
+        try:
+            return float(val)
+        except (TypeError, ValueError):
+            return None
 
 
 class _BaseDiagnosticSensor(TeltonikaRmsEntity, SensorEntity):

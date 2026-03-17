@@ -180,7 +180,7 @@ def normalize_device(
         "stable_firmware",
     )
     serial = first_value(merged, "serial", "serial_number", "sn")
-    comparison_firmware = latest_firmware or stable_firmware
+    comparison_firmware = stable_firmware
     firmware_update_available = None
     if firmware is not None and comparison_firmware is not None:
         firmware_update_available = str(firmware) != str(comparison_firmware)

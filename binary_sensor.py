@@ -43,20 +43,25 @@ async def async_setup_entry(
 
             if is_switch_device and not port_configs:
                 for i in range(1, 9):
-                    port_configs[f"port{i}"] = {"id": f"port{i}"}
+                    port_configs[f"switch_port{i}"] = {"id": f"switch_port{i}"}
                 for i in range(1, 3):
                     port_configs[f"sfp{i}"] = {"id": f"sfp{i}"}
 
             for port in bundle.port_scan.data.get(device_id, []):
                 port_id = str(port.get("name") or "").strip()
+                if port_id == "NIL":
+                    continue
                 if port_id and port_id not in port_configs:
                     port_configs[port_id] = {"id": port_id}
 
-            for port_id in port_configs:
-                unique_port = f"{device_id}_{port_id}_link"
-                if unique_port not in known:
-                    known.add(unique_port)
-                    new_entities.append(RmsPortLinkBinarySensor(bundle, device_id, port_id))
+            for port_id in list(port_configs.keys()):
+                if port_id == "NIL":
+                    port_configs.pop(port_id)
+                else:
+                    unique_port = f"{device_id}_{port_id}_link"
+                    if unique_port not in known:
+                        known.add(unique_port)
+                        new_entities.append(RmsPortLinkBinarySensor(bundle, device_id, port_id))
         if new_entities:
             async_add_entities(new_entities)
 

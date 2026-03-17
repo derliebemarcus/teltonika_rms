@@ -44,16 +44,18 @@ async def async_setup_entry(
 
             if is_switch_device and not port_configs:
                 for i in range(1, 9):
-                    port_configs[f"port{i}"] = {"id": f"port{i}"}
+                    port_configs[f"switch_port{i}"] = {"id": f"switch_port{i}"}
                 for i in range(1, 3):
                     port_configs[f"sfp{i}"] = {"id": f"sfp{i}"}
 
             for scan_port in bundle.port_scan.data.get(device_id, []):
                 port_name = str(scan_port.get("name") or "").strip()
+                if port_name == "NIL":
+                    continue
                 if port_name and port_name not in port_configs:
                     port_configs[port_name] = {"id": port_name}
 
-            ports = list(port_configs.values())
+            ports = [p for p in port_configs.values() if str(p.get("id")) != "NIL"]
 
             LOGGER.debug(
                 "Device detected: %s (Model: %s, Is Switch: %s). Found %d port configurations.",
@@ -109,7 +111,20 @@ class RmsPoeSwitch(TeltonikaRmsEntity, SwitchEntity):
     @property
     def is_on(self) -> bool:
         port = self._port
-        return port is not None and str(port.get("poe_enable")) == "1"
+        if port is None:
+            return False
+
+        val = port.get("poe_enable")
+        if val is not None:
+            return str(val) in ("1", "true", "True")
+
+        val_poe = port.get("PoE")
+        if val_poe is None:
+            val_poe = port.get("poe")
+        if val_poe is not None:
+            return str(val_poe) in ("1", "true", "True")
+
+        return False
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -133,8 +148,9 @@ class RmsPoeSwitch(TeltonikaRmsEntity, SwitchEntity):
             await self._bundle.api.async_set_device_port_poe(self.device_id, self._port_id, enabled)
         except ConfigEntryAuthFailed as err:
             raise HomeAssistantError(
-                "RMS PoE control requires device_configurations:write permissions. "
-                "Reauthenticate and try again."
+                "RMS PoE control failed. The device model may not support RMS remote PoE configuration, "
+                "or you may need to reauthenticate your Home Assistant integration to activate the "
+                "device_configurations:write permission."
             ) from err
         await self._bundle.port_config.async_request_refresh()
 
@@ -169,15 +185,15 @@ class RmsPortSwitch(TeltonikaRmsEntity, SwitchEntity):
         return _supports_port(self._port) or is_switch_device
 
     @property
-    def is_on(self) -> bool | None:
+    def is_on(self) -> bool:
         port = self._port
         if port is None:
-            return False
+            return True
 
         val = port.get("enabled")
         if val is not None:
-            return str(val) == "1"
-        return None
+            return str(val) in ("1", "true", "True")
+        return True
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -203,8 +219,9 @@ class RmsPortSwitch(TeltonikaRmsEntity, SwitchEntity):
             )
         except ConfigEntryAuthFailed as err:
             raise HomeAssistantError(
-                "RMS port control failed. This requires device_configurations:write permissions "
-                "and the device model must support RMS port configuration."
+                "RMS port control failed. The device model may not support RMS remote port configuration, "
+                "or you may need to reauthenticate your Home Assistant integration to activate the "
+                "device_configurations:write permission."
             ) from err
         await self._bundle.port_config.async_request_refresh()
 
@@ -228,7 +245,7 @@ class RmsPortSwitch(TeltonikaRmsEntity, SwitchEntity):
 
 
 def _supports_poe(port: dict[str, Any]) -> bool:
-    return "poe_enable" in port
+    return "poe_enable" in port or port.get("PoE") is not None or port.get("poe") is not None
 
 
 def _supports_port(port: dict[str, Any]) -> bool:

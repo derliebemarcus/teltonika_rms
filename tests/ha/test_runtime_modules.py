@@ -45,6 +45,7 @@ from teltonika_rms.sensor import (
     RmsFirmwareSensor,
     RmsLastSeenSensor,
     RmsModelSensor,
+    RmsPoePowerSensor,
     RmsRouterUptimeSensor,
     RmsSerialSensor,
     RmsSignalStrengthSensor,
@@ -122,7 +123,14 @@ def _bundle(normalized: NormalizedDevice | None) -> Any:
     port_scan = FakeListenerCoordinator(
         {
             "dev-1": [
-                {"id": 0, "name": "port1", "type": "ETH", "devices": [{"ip": "192.168.1.5"}]},
+                {
+                    "id": 0,
+                    "name": "port1",
+                    "type": "ETH",
+                    "devices": [{"ip": "192.168.1.5"}],
+                    "PoE (W)": "1.2",
+                    "PoE": True,
+                },
                 {"id": 1, "name": "port2", "type": "ETH", "devices": []},
             ]
         }
@@ -194,6 +202,7 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     connection_state = RmsConnectionStateSensor(bundle, "dev-1")
     connection_type = RmsConnectionTypeSensor(bundle, "dev-1")
     sim_slot = RmsSimSlotSensor(bundle, "dev-1")
+    poe_power = RmsPoePowerSensor(bundle, "dev-1", "port1")
     reboot = RmsRebootButton(bundle, "dev-1")
     poe = RmsPoeSwitch(bundle, "dev-1", "port1")
     port_sw = RmsPortSwitch(bundle, "dev-1", "port1")
@@ -216,12 +225,13 @@ def test_base_entity_and_platform_entities_expose_values() -> None:
     assert connection_state.native_value == "connected"
     assert connection_type.native_value == "LTE"
     assert sim_slot.native_value == 1
+    assert poe_power.native_value == 1.2
     assert poe.is_on is True
     assert poe.extra_state_attributes["description"] == "tado"
     assert port_sw.is_on is True
     assert port_sw.extra_state_attributes["description"] == "tado"
     assert firmware_update.installed_version == "1.0"
-    assert firmware_update.latest_version == "1.1"
+    assert firmware_update.latest_version == "1.0"
     assert reboot.available is True
     assert tracker.available is True
     assert tracker.latitude == 47.0
@@ -287,22 +297,29 @@ def test_new_sensor_and_update_edge_paths() -> None:
 def test_switch_device_generates_fallback_ports() -> None:
     bundle = _bundle(_normalized())
     bundle.inventory.data["dev-1"] = {"model": "TSW202", "id": "dev-1"}
-    bundle.port_config.data = {}
-    bundle.port_scan.data = {}
+    bundle.port_config.data = {"dev-1": [{"id": "NIL"}]}
+    bundle.port_scan.data = {
+        "dev-1": [
+            {"name": "NIL", "state": "DOWN", "PoE (W)": "2.0"},
+            {"name": "extra_port", "state": "UP"},
+        ]
+    }
 
     added_binary: list[Any] = []
     added_switch: list[Any] = []
+    added_sensor: list[Any] = []
     entry = SimpleNamespace(
         runtime_data=TeltonikaRmsRuntime(bundle=bundle), async_on_unload=lambda cb: None
     )
 
     asyncio.run(binary_setup(None, entry, added_binary.extend))
     asyncio.run(switch_setup(None, entry, added_switch.extend))
+    asyncio.run(sensor_setup(None, entry, added_sensor.extend))
 
-    # Expect 1 online sensor + 8 ethernet ports + 2 sfp ports = 11 binary sensors
-    assert len(added_binary) == 11
-    # Expect 8 ethernet ports + 2 sfp ports = 10 switches
-    assert len(added_switch) == 10
+    # Expect 1 online sensor + 8 ethernet ports + 2 sfp ports + 1 extra_port = 12 binary sensors
+    assert len(added_binary) == 12
+    # Expect 8 ethernet ports + 2 sfp ports + 1 extra_port = 11 switches
+    assert len(added_switch) == 11
 
     # Pick an auto-generated port and ensure it is off (disconnected)
     sfp1 = next((s for s in added_binary if s._attr_unique_id == "dev-1_sfp1_link"), None)
@@ -330,7 +347,7 @@ def test_platform_setup_entry_adds_expected_entities() -> None:
     asyncio.run(tracker_setup(None, entry, added_tracker.extend))
 
     assert len(added_binary) == 4
-    assert len(added_sensor) == 12
+    assert len(added_sensor) == 13
     assert len(added_button) == 1
     assert len(added_switch) == 5
     assert len(added_update) == 1
@@ -490,6 +507,32 @@ def test_poe_switch_updates_port_configuration_and_surfaces_scope_error() -> Non
     with pytest.raises(HomeAssistantError, match="device_configurations:write"):
         asyncio.run(switch.async_turn_on())
 
+    poe_alt = RmsPoeSwitch(bundle, "dev-1", "port1")
+    poe_alt._port_id = "port1"
+
+    # Test fallback poe_enable
+    bundle.port_config.data = {"dev-1": [{"id": "port1", "PoE": True}]}
+    assert poe_alt.is_on is True
+
+    bundle.port_config.data = {"dev-1": [{"id": "port1", "poe": "1"}]}
+    assert poe_alt.is_on is True
+
+    bundle.port_config.data = {"dev-1": [{"id": "port1", "other": "1"}]}
+    assert poe_alt.is_on is False
+
+    bundle.port_config.data = {"dev-1": [{"id": "port1", "PoE": False}]}
+    assert poe_alt.is_on is False
+
+    poe_pow_alt = RmsPoePowerSensor(bundle, "dev-1", "port1")
+    bundle.port_scan.data = {"dev-1": [{"name": "port1", "PoE (W)": "bad"}]}
+    assert poe_pow_alt.native_value is None
+
+    bundle.port_scan.data = {"dev-1": [{"name": "port1"}]}
+    assert poe_pow_alt.native_value is None
+
+    bundle.port_scan.data = {"dev-1": []}
+    assert poe_pow_alt.native_value is None
+
 
 def test_port_switch_uses_port_scan_state_if_config_missing() -> None:
     bundle = _bundle(_normalized())
@@ -504,15 +547,15 @@ def test_port_switch_uses_port_scan_state_if_config_missing() -> None:
     switch_missing = RmsPortSwitch(bundle, "dev-1", "port3")
 
     assert switch_up.available is True
-    assert switch_up.is_on is None
+    assert switch_up.is_on is True
     assert switch_up._port == {"id": "port1", "state": "UP"}
 
     assert switch_down.available is True
-    assert switch_down.is_on is None
+    assert switch_down.is_on is True
     assert switch_down._port == {"id": "port2", "state": "DOWN"}
 
     assert switch_missing.available is True
-    assert switch_missing.is_on is False
+    assert switch_missing.is_on is True
     assert switch_missing._port is None
 
 
@@ -521,7 +564,7 @@ def test_port_switch_handles_missing_port() -> None:
     missing = RmsPortSwitch(bundle, "dev-1", "missing-port")
 
     assert missing.available is False
-    assert missing.is_on is False
+    assert missing.is_on is True
     assert missing.extra_state_attributes["port_id"] == "missing-port"
 
 

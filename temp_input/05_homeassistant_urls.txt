@@ -1,0 +1,5 @@
+- Home Assistant Developer Documentation, Home Page: https://developers.home-assistant.io/docs/development_index/
+- Home Assistant Developer Documentation, Creating your first integration: https://developers.home-assistant.io/docs/creating_component_index
+- Home Assistant Developer Documentation, Development checklist: https://developers.home-assistant.io/docs/development_checklist
+- Home Assistant Developer Documentation, Integration quality scale: https://developers.home-assistant.io/docs/core/integration-quality-scale/
+

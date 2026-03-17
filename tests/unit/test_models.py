@@ -134,7 +134,7 @@ def test_normalize_device_parses_optional_runtime_metrics() -> None:
     assert normalized.temperature == 360
     assert normalized.latest_firmware == "RUT_R_00.07.21.2"
     assert normalized.stable_firmware == "RUT_R_00.07.20.3"
-    assert normalized.firmware_update_available is True
+    assert normalized.firmware_update_available is False
     assert normalized.signal_strength == -79
     assert normalized.wan_state == "Mobile"
     assert normalized.connection_state == "connected"

@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.0-beta10 - 2026-03-16
+
+### New Features
+
+- Added PoE power sensor (`PoE (W)`) for Ethernet ports that expose PoE capabilities.
+- Firmware updates now check strictly against the latest stable firmware instead of the absolute latest firmware.
+- The integration now intelligently auto-populates `switch_port1` through `switch_port8` and `sfp1` through `sfp2` for unlisted disconnected ports on TSW and SWM models to ensure link sensors and switches appear.
+
+### Improvements
+
+- Modified the configuration error on PoE and Port switches to clarify that failing to turn a switch on/off might be due to the device model not supporting remote RMS port administration, rather than only missing scopes.
+
+### Changes
+
+- Ports named `NIL` are now completely ignored and will not generate binary sensors or switch entities.
+
+### Bugfixes
+
+- Fixed disconnected ports for TSW and SWM devices not generating link sensors because they were incorrectly auto-generated with the `port` prefix instead of the `switch_port` prefix.
+- Fixed Ethernet port switches showing as "Off" instead of "On" when their administrative state was inaccessible through the API.
+
 ## 0.9.0-beta9 - 2026-03-16
 
 ### New Features

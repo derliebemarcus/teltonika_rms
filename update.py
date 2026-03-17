@@ -68,7 +68,7 @@ class RmsFirmwareUpdateEntity(TeltonikaRmsEntity, UpdateEntity):
         normalized = self._normalized
         if normalized is None:
             return None
-        return normalized.latest_firmware or normalized.stable_firmware
+        return normalized.stable_firmware
 
     @property
     def release_summary(self) -> str | None:
