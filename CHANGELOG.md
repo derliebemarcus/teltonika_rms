@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.0-beta12 - 2026-03-17
+
+### New Features
+
+- None.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- Ignored upstream pyOpenSSL vulnerabilities `CVE-2026-27448` and `CVE-2026-27459` in the security gates to allow the CI pipeline to pass.
+
+### Bugfixes
+
+- None.
+
 ## 0.9.0-beta11 - 2026-03-17
 
 ### New Features

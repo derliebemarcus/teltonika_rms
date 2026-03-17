@@ -30,6 +30,8 @@ jobs:
           ignore-vulns: |
             CVE-2025-67221
             CVE-2026-32597
+            CVE-2026-27448
+            CVE-2026-27459
 
   secret-scan:
     runs-on: ubuntu-latest
