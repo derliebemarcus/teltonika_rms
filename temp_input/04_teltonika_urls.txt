@@ -1,1 +1,0 @@
-- Teltonika RMS API Reference: https://developers.rms.teltonika-networks.com/pages/api.html
