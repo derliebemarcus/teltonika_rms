@@ -35,7 +35,7 @@ async def async_setup_entry(
             port_configs = {
                 str(p.get("id")): p
                 for p in bundle.port_config.data.get(device_id, [])
-                if p.get("id")
+                if p.get("id") and str(p.get("id")) != "NIL"
             }
 
             model = device_info.get("model", "UNKNOWN")

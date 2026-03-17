@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.0-beta11 - 2026-03-17
+
+### New Features
+
+- None.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Hotfix for TSW and SWM switch ports failing to auto-generate link sensors and switches when the RMS configuration API returns a single empty "NIL" port instead of a truly empty list.
+
 ## 0.9.0-beta10 - 2026-03-16
 
 ### New Features
