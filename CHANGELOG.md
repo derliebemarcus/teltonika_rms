@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.4 - 2026-03-19
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Finalized HACS validation by moving brand assets into the integration directory.
+- Updated GitHub Action workflows and internal tools to support the new `custom_components/teltonika_rms/` repository structure.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed broken paths in GitHub Action workflows that prevented automated releases.
+
 ## 0.9.3 - 2026-03-19
 
 ### New Features
