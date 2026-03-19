@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.2 - 2026-03-19
+
+### New Features
+
+- Added GitHub Action for automated HACS validation to prepare for default repository inclusion.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- None.
+
 ## 0.9.1 - 2026-03-19
 
 ### New Features
