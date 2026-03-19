@@ -7,7 +7,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PARENT = ROOT.parent
+CUSTOM_COMPONENTS = ROOT / "custom_components"
+
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+if str(CUSTOM_COMPONENTS) not in sys.path:
+    sys.path.insert(0, str(CUSTOM_COMPONENTS))

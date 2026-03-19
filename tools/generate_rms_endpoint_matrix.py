@@ -135,7 +135,12 @@ def main() -> int:
         return 1
 
     input_path = Path(sys.argv[1]).expanduser()
-    default_output = Path(__file__).resolve().parent.parent / "endpoint_matrix_frozen.json"
+    default_output = (
+        Path(__file__).resolve().parent.parent
+        / "custom_components"
+        / "teltonika_rms"
+        / "endpoint_matrix_frozen.json"
+    )
     output_path = Path(sys.argv[2]).expanduser() if len(sys.argv) > 2 else default_output
 
     compiled_spec = yaml.safe_load(input_path.read_text(encoding="utf-8"))

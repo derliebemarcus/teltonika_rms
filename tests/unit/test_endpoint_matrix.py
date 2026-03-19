@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from endpoint_matrix import (
+from teltonika_rms.endpoint_matrix import (
     EndpointMatrix,
     EndpointSpec,
     _extract_scopes,

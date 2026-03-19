@@ -2,10 +2,10 @@
 set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"
-MANIFEST="$ROOT/manifest.json"
+MANIFEST="$ROOT/custom_components/teltonika_rms/manifest.json"
 
 if [ ! -f "$MANIFEST" ]; then
-  echo "manifest.json not found in repository root."
+  echo "manifest.json not found in custom_components/teltonika_rms/."
   exit 1
 fi
 

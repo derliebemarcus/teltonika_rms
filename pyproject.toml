@@ -18,24 +18,24 @@ indent-style = "space"
 [tool.mypy]
 python_version = "3.14"
 files = [
-  "__init__.py",
-  "api.py",
-  "application_credentials.py",
-  "binary_sensor.py",
-  "button.py",
-  "config_flow.py",
-  "const.py",
-  "coordinator.py",
-  "device_tracker.py",
-  "diagnostics.py",
-  "endpoint_matrix.py",
-  "entity.py",
-  "exceptions.py",
-  "models.py",
-  "sensor.py",
-  "status_channel.py",
-  "switch.py",
-  "update.py",
+  "custom_components/teltonika_rms/__init__.py",
+  "custom_components/teltonika_rms/api.py",
+  "custom_components/teltonika_rms/application_credentials.py",
+  "custom_components/teltonika_rms/binary_sensor.py",
+  "custom_components/teltonika_rms/button.py",
+  "custom_components/teltonika_rms/config_flow.py",
+  "custom_components/teltonika_rms/const.py",
+  "custom_components/teltonika_rms/coordinator.py",
+  "custom_components/teltonika_rms/device_tracker.py",
+  "custom_components/teltonika_rms/diagnostics.py",
+  "custom_components/teltonika_rms/endpoint_matrix.py",
+  "custom_components/teltonika_rms/entity.py",
+  "custom_components/teltonika_rms/exceptions.py",
+  "custom_components/teltonika_rms/models.py",
+  "custom_components/teltonika_rms/sensor.py",
+  "custom_components/teltonika_rms/status_channel.py",
+  "custom_components/teltonika_rms/switch.py",
+  "custom_components/teltonika_rms/update.py",
 ]
 exclude = "(^tests/|^tools/)"
 check_untyped_defs = true
@@ -46,9 +46,9 @@ warn_unused_ignores = true
 
 [tool.mutmut]
 paths_to_mutate = [
-  "api.py",
-  "models.py",
-  "status_channel.py",
+  "custom_components/teltonika_rms/api.py",
+  "custom_components/teltonika_rms/models.py",
+  "custom_components/teltonika_rms/status_channel.py",
 ]
 pytest_add_cli_args_test_selection = [
   "tests/unit/test_models.py",

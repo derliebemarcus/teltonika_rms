@@ -16,10 +16,11 @@ pytestmark = pytest.mark.ha
 )
 def test_integration_module_imports_with_homeassistant() -> None:
     root = Path(__file__).resolve().parents[2]
+    integration = root / "custom_components" / "teltonika_rms"
     spec = importlib.util.spec_from_file_location(
         "teltonika_rms",
-        root / "__init__.py",
-        submodule_search_locations=[str(root)],
+        integration / "__init__.py",
+        submodule_search_locations=[str(integration)],
     )
     assert spec is not None
     assert spec.loader is not None

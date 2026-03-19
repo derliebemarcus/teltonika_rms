@@ -8,8 +8,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-STRINGS = ROOT / "strings.json"
-TRANSLATIONS_DIR = ROOT / "translations"
+INTEGRATION_DIR = ROOT / "custom_components" / "teltonika_rms"
+STRINGS = INTEGRATION_DIR / "strings.json"
+TRANSLATIONS_DIR = INTEGRATION_DIR / "translations"
 
 PLACEHOLDER_PATTERNS = (
     re.compile(r"__[^_]+__"),

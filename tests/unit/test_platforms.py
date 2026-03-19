@@ -5,12 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from const import UPDATE_PLATFORMS
+from teltonika_rms.const import UPDATE_PLATFORMS
 
 ROOT = Path(__file__).resolve().parents[2]
-MANIFEST = ROOT / "manifest.json"
+MANIFEST = ROOT / "custom_components" / "teltonika_rms" / "manifest.json"
 HACS = ROOT / "hacs.json"
-ROOT_ICON = ROOT / "icon.png"
+ROOT_ICON = ROOT / "custom_components" / "teltonika_rms" / "icon.png"
 BRAND_ICON = ROOT / "brand" / "icon.png"
 
 

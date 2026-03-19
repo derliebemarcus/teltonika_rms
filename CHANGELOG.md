@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.3 - 2026-03-19
+
+### New Features
+
+- Added repository topics to satisfy HACS requirements.
+- Restructured repository to follow standard `custom_components/teltonika_rms/` layout.
+
+### Improvements
+
+- Fixed `hacs.json` by removing the disallowed `domains` key.
+- Updated all local tools and tests to support the new directory structure.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- None.
+
 ## 0.9.2 - 2026-03-19
 
 ### New Features
