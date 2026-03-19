@@ -36,7 +36,7 @@ jobs:
         run: python tools/check_commit_messages.py "${{ steps.range.outputs.range }}"
 
       - name: Validate release notes
-        run: python tools/check_release_notes.py manifest.json CHANGELOG.md
+        run: python tools/check_release_notes.py custom_components/teltonika_rms/manifest.json CHANGELOG.md
 
   static-analysis:
     runs-on: ubuntu-latest

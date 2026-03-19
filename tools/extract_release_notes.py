@@ -11,7 +11,11 @@ from check_release_notes import REQUIRED_HEADINGS, extract_section
 
 
 def main() -> int:
-    manifest_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("manifest.json")
+    manifest_path = (
+        Path(sys.argv[1])
+        if len(sys.argv) > 1
+        else Path("custom_components/teltonika_rms/manifest.json")
+    )
     changelog_path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("CHANGELOG.md")
     output_path = Path(sys.argv[3]) if len(sys.argv) > 3 else None
 

@@ -121,7 +121,7 @@ jobs:
         shell: bash
         run: |
           VERSION="$(
-            python3 -c 'import json, sys; from pathlib import Path; print(str(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")).get("version", "")).strip())' manifest.json
+            python3 -c 'import json, sys; from pathlib import Path; print(str(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")).get("version", "")).strip())' custom_components/teltonika_rms/manifest.json
           )"
           TAG="${{ steps.tag.outputs.tag }}"
 
@@ -132,7 +132,7 @@ jobs:
 
       - name: Extract release notes
         run: |
-          python3 tools/extract_release_notes.py manifest.json CHANGELOG.md release_notes.md
+          python3 tools/extract_release_notes.py custom_components/teltonika_rms/manifest.json CHANGELOG.md release_notes.md
 
       - name: Create or update GitHub release
         uses: actions/github-script@v8

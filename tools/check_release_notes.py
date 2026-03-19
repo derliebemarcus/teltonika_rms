@@ -31,7 +31,11 @@ def extract_section(changelog: str, version: str) -> str:
 
 
 def main() -> int:
-    manifest_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("manifest.json")
+    manifest_path = (
+        Path(sys.argv[1])
+        if len(sys.argv) > 1
+        else Path("custom_components/teltonika_rms/manifest.json")
+    )
     changelog_path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("CHANGELOG.md")
 
     version = str(json.loads(manifest_path.read_text(encoding="utf-8"))["version"]).strip()
