@@ -6,7 +6,6 @@ import asyncio
 import base64
 import importlib
 import json
-import tempfile
 from datetime import timedelta
 from types import SimpleNamespace
 from typing import Any
@@ -591,11 +590,6 @@ def test_integration_setup_entry_propagates_auth_failures(monkeypatch: pytest.Mo
 
     with pytest.raises(ConfigEntryAuthFailed):
         asyncio.run(integration.async_setup_entry(hass, entry))
-
-
-def test_integration_setup_returns_true() -> None:
-    with tempfile.TemporaryDirectory() as _tmp:
-        assert asyncio.run(integration.async_setup(SimpleNamespace(), {})) is True
 
 
 def test_integration_setup_entry_does_not_block_on_optional_port_refreshes(

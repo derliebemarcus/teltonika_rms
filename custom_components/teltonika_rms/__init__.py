@@ -47,11 +47,6 @@ class TeltonikaRmsRuntime:
     remove_service_listener: Callable[[], None] | None = None
 
 
-async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
-    """Set up integration domain."""
-    return True
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
     """Set up Teltonika RMS from config entry."""
     from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
