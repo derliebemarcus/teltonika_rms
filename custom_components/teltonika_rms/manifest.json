@@ -4,18 +4,18 @@
   "codeowners": [
     "@marcus"
   ],
-  "integration_type": "service",
   "config_flow": true,
-  "documentation": "https://github.com/derliebemarcus/teltonika_rms",
-  "issue_tracker": "https://github.com/derliebemarcus/teltonika_rms/issues",
-  "iot_class": "cloud_polling",
-  "quality_scale": "platinum",
-  "loggers": [
-    "custom_components.teltonika_rms"
-  ],
   "dependencies": [
     "application_credentials"
   ],
+  "documentation": "https://github.com/derliebemarcus/teltonika_rms",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/derliebemarcus/teltonika_rms/issues",
+  "loggers": [
+    "custom_components.teltonika_rms"
+  ],
+  "quality_scale": "platinum",
   "requirements": [
     "python-socketio==5.16.1"
   ],
