@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.7 - 2026-03-24
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Updated the integration README.
+- Added a new brand logo.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- None.
+
 ## 0.9.6 - 2026-03-24
 
 ### New Features
