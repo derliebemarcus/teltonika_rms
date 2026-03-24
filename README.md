@@ -42,6 +42,10 @@ The integration connects to the RMS API, discovers your devices, and creates Hom
 - Status-channel handling (`meta.channel`) with Socket.IO first, HTTP polling fallback
 - Low-frequency Ethernet port scans to surface which ports are in use
 
+## Roadmap
+
+See our [ROADMAP.md](ROADMAP.md) for planned features and future improvements.
+
 ## Installation
 
 ### Option 1: Install with HACS
