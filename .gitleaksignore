@@ -1,0 +1,8 @@
+title = "gitleaks ignore file"
+
+[allowlist]
+description = "Ignore known revoked or test secrets in history"
+fingerprints = [
+    "f7561b9454a231b1ce511669a0bfbdff97c81b47:temp_input/03_teltonika_PAT.txt:jwt:1",
+    "f7561b9454a231b1ce511669a0bfbdff97c81b47:temp_input/03_teltonika_PAT.txt:jwt:2"
+]
