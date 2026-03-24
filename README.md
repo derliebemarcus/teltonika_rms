@@ -8,6 +8,20 @@
 [![Coverage Status](https://img.shields.io/coverallsCoverage/github/derliebemarcus/teltonika_rms?branch=main&style=for-the-badge)](https://coveralls.io/github/derliebemarcus/teltonika_rms)
 [![Teltonika Networks](https://img.shields.io/badge/Teltonika%20Networks-0054A6?style=for-the-badge)](https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product)
 
+## Table of Contents
+
+- [Summary](#summary)
+- [What This Component Provides](#what-this-component-provides)
+- [Roadmap](#roadmap)
+- [Installation](#installation)
+- [Removal](#removal)
+- [Credentials Setup](#credentials-setup)
+- [Configuration in Home Assistant](#configuration-in-home-assistant)
+- [Endpoint Matrix](#endpoint-matrix)
+- [Conventions and Tests](#conventions-and-tests)
+- [Git Hooks and Version Tags](#git-hooks-and-version-tags)
+- [About Teltonika](#about-teltonika)
+
 ## Summary
 
 A custom Home Assistant integration for monitoring devices managed with Teltonika RMS, with optional reboot and PoE control actions from Home Assistant. 
@@ -15,12 +29,6 @@ A custom Home Assistant integration for monitoring devices managed with Teltonik
 The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, firmware availability, Ethernet port usage, timestamps, and optional location tracking.
 
 **Supported Devices:** Though the plugin should support all Teltonika devices, it was tested only with RUTX50, TAP200, and TSW202. So those three are the supported devices.
-
-## About Teltonika
-
-[Teltonika](https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product) is a prominent Lithuanian high-tech company group specializing in Internet of Things (IoT) solutions. Founded in 1998 by Arvydas Paukštys, the company began in a small dormitory kitchen and has since grown into a global leader in telematics and networking equipment.
-
-Operating worldwide, Teltonika designs and manufactures all of its products in-house in Lithuania to ensure the highest standards of quality and reliability. Their extensive product portfolio includes industrial 4G/5G routers (like the RUTX50), network switches (like the TSW202), GPS vehicle trackers, smart EV chargers, and telemedicine devices.
 
 ## What This Component Provides
 
@@ -220,6 +228,12 @@ This will:
 - let GitHub Actions create or update the matching entry on the GitHub Releases page after `Quality Gates` and `Tests and Coverage` both succeed
 
 If a tag was pushed successfully but the GitHub release needs manual repair, open `Actions -> Publish Release -> Run workflow` and enter the existing tag, for example `v0.6.1`.
+
+## About Teltonika
+
+[Teltonika](https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product) is a Lithuanian tech company group specializing in IoT solutions. Founded in 1998, it has since grown into a global provider of telematics and networking equipment.
+
+Their portfolio includes industrial 4G/5G routers, network switches, GPS vehicle trackers, smart EV chargers, and telemedicine devices.
 
 <br/>
 
