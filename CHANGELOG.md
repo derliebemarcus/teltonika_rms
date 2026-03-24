@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.9 - 2026-03-24
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Restructured the README to include a comprehensive Table of Contents.
+- Updated the Teltonika tracking links and references in the README documentation.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- None.
+
 ## 0.9.8 - 2026-03-24
 
 ### New Features
