@@ -1,7 +1,6 @@
-# Teltonika RMS Home Assistant Integration
+# [Teltonika](https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product) RMS Home Assistant Integration
 
- ![Teltonika RMS Logo](custom_components/teltonika_rms/brand/icon48.png)
-
+ [![Teltonika RMS Logo](custom_components/teltonika_rms/brand/icon48.png)](https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product)
 [![HACS Badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/derliebemarcus/teltonika_rms?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
 [![License](https://img.shields.io/badge/License-MIT-1f6feb?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/blob/main/LICENSE)
@@ -16,6 +15,12 @@ A custom Home Assistant integration for monitoring devices managed with Teltonik
 The integration connects to the RMS API, discovers your devices, and creates Home Assistant entities for connectivity, diagnostics, firmware availability, Ethernet port usage, timestamps, and optional location tracking.
 
 **Supported Devices:** Though the plugin should support all Teltonika devices, it was tested only with RUTX50, TAP200, and TSW202. So those three are the supported devices.
+
+## About Teltonika
+
+[Teltonika](https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product) is a prominent Lithuanian high-tech company group specializing in Internet of Things (IoT) solutions. Founded in 1998 by Arvydas Paukštys, the company began in a small dormitory kitchen and has since grown into a global leader in telematics and networking equipment.
+
+Operating worldwide, Teltonika designs and manufactures all of its products in-house in Lithuania to ensure the highest standards of quality and reliability. Their extensive product portfolio includes industrial 4G/5G routers (like the RUTX50), network switches (like the TSW202), GPS vehicle trackers, smart EV chargers, and telemedicine devices.
 
 ## What This Component Provides
 
