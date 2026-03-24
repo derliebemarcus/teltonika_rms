@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.6 - 2026-03-24
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Updated the integration brand icon.
+- Added `.gitleaksignore` and ignored `temp_input` directory to resolve GitHub Actions secret-scan failures.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed GitHub Actions quality workflow crashing on force pushes due to missing 'before' commit in `github.event.before`.
+
 ## 0.9.5 - 2026-03-19
 
 ### New Features
