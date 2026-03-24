@@ -29,7 +29,11 @@ jobs:
           elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
             echo "range=HEAD^..HEAD" >> "$GITHUB_OUTPUT"
           else
-            echo "range=${{ github.event.before }}..${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            if git rev-parse --quiet --verify "${{ github.event.before }}^{commit}" > /dev/null; then
+              echo "range=${{ github.event.before }}..${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            else
+              echo "range=HEAD^..HEAD" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Validate commit messages
