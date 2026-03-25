@@ -1,6 +1,5 @@
 [run]
 source = .
-dynamic_context = test_function
 omit =
     tests/*
     tools/*
