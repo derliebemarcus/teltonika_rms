@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from teltonika_rms.const import DOMAIN, DEFAULT_STATE_INTERVAL, UPDATE_PLATFORMS
+from teltonika_rms.const import DEFAULT_STATE_INTERVAL, DOMAIN, UPDATE_PLATFORMS
 
 
 # Find the true project root by looking for custom_components

@@ -48,8 +48,12 @@ def parse_rms_timestamp(value: str | None) -> datetime | None:
     """Parse RMS UTC timestamps in Y-m-d H:i:s format."""
     if not value:
         return None
+
+    # Handle ISO 8601 variations by cleaning the string
+    cleaned_value = value.replace("T", " ").split(".")[0].replace("Z", "")
+
     try:
-        parsed = datetime.strptime(value, RMS_TIMESTAMP_FORMAT)
+        parsed = datetime.strptime(cleaned_value, RMS_TIMESTAMP_FORMAT)
     except ValueError:
         return None
     return parsed.replace(tzinfo=UTC)
