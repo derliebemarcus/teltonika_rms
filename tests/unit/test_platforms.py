@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from teltonika_rms.const import DOMAIN, UPDATE_PLATFORMS
+from teltonika_rms.const import DOMAIN, DEFAULT_STATE_INTERVAL, UPDATE_PLATFORMS
 
 
 # Find the true project root by looking for custom_components
@@ -46,3 +46,8 @@ def test_hacs_root_icon_matches_brand_icon() -> None:
 def test_domain_constant_is_correct() -> None:
     """Test that the DOMAIN constant is correct."""
     assert DOMAIN == "teltonika_rms"
+
+
+def test_default_state_interval_constant_is_correct() -> None:
+    """Test that the DEFAULT_STATE_INTERVAL constant is correct."""
+    assert DEFAULT_STATE_INTERVAL == 300
