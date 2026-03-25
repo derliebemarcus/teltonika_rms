@@ -42,5 +42,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: mutmut-results
-          path: .mutmut-cache
+          path: mutants/.mutmut-cache
           if-no-files-found: ignore
