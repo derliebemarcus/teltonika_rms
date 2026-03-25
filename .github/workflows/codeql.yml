@@ -20,7 +20,7 @@ concurrency:
 jobs:
   analyze:
     name: CodeQL
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, linux, X64]
     timeout-minutes: 30
     strategy:
       fail-fast: false
