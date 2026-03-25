@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import pytest
+
 from teltonika_rms.models import (
     first_value,
     has_location_coordinates,
@@ -15,10 +17,20 @@ from teltonika_rms.models import (
 )
 
 
-def test_parse_rms_timestamp_utc() -> None:
-    parsed = parse_rms_timestamp("2026-03-11 14:00:00")
+@pytest.mark.parametrize(
+    "value",
+    [
+        "2026-03-11 14:00:00",
+        "2026-03-11T14:00:00Z",
+        "2026-03-11T14:00:00.000Z",
+    ],
+)
+def test_parse_rms_timestamp_utc(value: str) -> None:
+    """Test that parse_rms_timestamp correctly parses UTC timestamps."""
+    parsed = parse_rms_timestamp(value)
     assert parsed is not None
     assert parsed.tzinfo == UTC
+    assert parsed.isoformat() == "2026-03-11T14:00:00+00:00"
 
 
 def test_parse_rms_timestamp_invalid_returns_none() -> None:
