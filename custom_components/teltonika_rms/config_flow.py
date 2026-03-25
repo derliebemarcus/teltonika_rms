@@ -23,6 +23,7 @@ from .const import (
     CONF_ENABLE_LOCATION,
     CONF_ESTIMATED_DEVICES,
     CONF_INVENTORY_INTERVAL,
+    CONF_MONITORING_CONFIG_ID,
     CONF_PAT_TOKEN,
     CONF_SPEC_PATH,
     CONF_STATE_INTERVAL,
@@ -207,6 +208,9 @@ class TeltonikaRmsOptionsFlow(OptionsFlow):
                 vol.Optional(CONF_DEVICE_STATUS, default=merged[CONF_DEVICE_STATUS]): str,
                 vol.Optional(CONF_SPEC_PATH, default=merged[CONF_SPEC_PATH]): str,
                 vol.Required(CONF_ENABLE_LOCATION, default=merged[CONF_ENABLE_LOCATION]): bool,
+                vol.Optional(
+                    CONF_MONITORING_CONFIG_ID, default=merged.get(CONF_MONITORING_CONFIG_ID, 0)
+                ): vol.All(vol.Coerce(int), vol.Range(min=0)),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

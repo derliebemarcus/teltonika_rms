@@ -746,3 +746,104 @@ def test_api_extract_nested_data_lists() -> None:
         ]
     }
     assert _extract_port_configurations(config_payload) == [{"id": "c1"}]
+
+
+@pytest.mark.parametrize(
+    ("config_id", "keys", "expected_params"),
+    [
+        (123, None, {"config_id": 123}),
+        (None, ["temp", "hum"], {"keys": "temp,hum"}),
+        (0, ["status"], {"keys": "status"}),  # 0 config_id should be treated as None
+    ],
+)
+def test_api_get_device_history_uses_correct_params(
+    config_id: int | None,
+    keys: list[str] | None,
+    expected_params: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that async_get_device_history forms the correct request parameters."""
+    device_id = "test-device"
+    from_time = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
+    to_time = datetime(2026, 1, 1, 1, 0, 0, tzinfo=UTC)
+    interval = "1h"
+
+    response = FakeResponse(200, {"success": True, "data": [{"val": 1}], "meta": {}})
+    auth = FakeAuthClient([response])
+    matrix = _matrix()
+    monkeypatch.setitem(
+        matrix.endpoints, "device_history", EndpointSpec("/devices/{id}/history", tuple(), "safe")
+    )
+    client = RmsApiClient(auth, matrix)
+
+    history = asyncio.run(
+        client.async_get_device_history(
+            device_id=device_id,
+            from_time=from_time,
+            to_time=to_time,
+            interval=interval,
+            config_id=config_id,
+            keys=keys,
+        )
+    )
+
+    assert history == [{"val": 1}]
+    assert auth.calls[0]["method"] == "GET"
+    assert auth.calls[0]["url"].endswith(f"/devices/{device_id}/history")
+    assert auth.calls[0]["params"] == {
+        "from": "2026-01-01T00:00:00+00:00",
+        "to": "2026-01-01T01:00:00+00:00",
+        "interval": "1h",
+        **expected_params,
+    }
+
+
+def test_api_get_device_history_returns_empty_on_error_or_missing_endpoint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that async_get_device_history handles errors and missing endpoints gracefully."""
+    device_id = "test-device"
+    from_time = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
+    to_time = datetime(2026, 1, 1, 1, 0, 0, tzinfo=UTC)
+    interval = "1h"
+
+    # Missing endpoint
+    client = RmsApiClient(FakeAuthClient([]), EndpointMatrix(source="test", endpoints={}))
+    history = asyncio.run(
+        client.async_get_device_history(
+            device_id=device_id,
+            from_time=from_time,
+            to_time=to_time,
+            interval=interval,
+            keys=["temp"],
+        )
+    )
+    assert history == []
+
+    # API error
+    client = RmsApiClient(FakeAuthClient([FakeResponse(500, {"error": "bad"})]), _matrix())
+    history = asyncio.run(
+        client.async_get_device_history(
+            device_id=device_id,
+            from_time=from_time,
+            to_time=to_time,
+            interval=interval,
+            keys=["temp"],
+        )
+    )
+    assert history == []
+
+    # Non-list data
+    client = RmsApiClient(
+        FakeAuthClient([FakeResponse(200, {"success": True, "data": "bad", "meta": {}})]), _matrix()
+    )
+    history = asyncio.run(
+        client.async_get_device_history(
+            device_id=device_id,
+            from_time=from_time,
+            to_time=to_time,
+            interval=interval,
+            keys=["temp"],
+        )
+    )
+    assert history == []

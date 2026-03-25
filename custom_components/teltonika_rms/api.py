@@ -219,6 +219,36 @@ class RmsApiClient:
             return [item for item in data if isinstance(item, dict)]
         return []
 
+    async def async_get_device_history(
+        self,
+        device_id: str,
+        from_time: datetime,
+        to_time: datetime,
+        interval: str,
+        *,
+        config_id: int | None = None,
+        keys: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Fetch historical monitoring data for a device."""
+        history_path = self._matrix.format_path("device_history", id=device_id)
+        if not history_path:
+            return []
+
+        params: dict[str, Any] = {
+            "from": from_time.isoformat(timespec="seconds"),
+            "to": to_time.isoformat(timespec="seconds"),
+            "interval": interval,
+        }
+        if config_id and config_id > 0:
+            params["config_id"] = config_id
+        elif keys:
+            params["keys"] = ",".join(keys)
+
+        data, _meta = await self.async_request("GET", history_path, params=params)
+        if isinstance(data, list):
+            return [item for item in data if isinstance(item, dict)]
+        return []
+
     async def async_get_device_ethernet_ports(self, device_id: str) -> list[dict[str, Any]] | None:
         """Fetch Ethernet port usage data for one device."""
         data, meta = await self.async_request(

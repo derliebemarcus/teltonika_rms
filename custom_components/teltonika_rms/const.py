@@ -31,6 +31,7 @@ CONF_DEVICE_STATUS = "device_status"
 CONF_ESTIMATED_DEVICES = "estimated_devices"
 CONF_SPEC_PATH = "spec_path"
 CONF_ENABLE_LOCATION = "enable_location"
+CONF_MONITORING_CONFIG_ID = "monitoring_config_id"
 
 DEFAULT_INVENTORY_INTERVAL = 3600
 DEFAULT_STATE_INTERVAL = 300

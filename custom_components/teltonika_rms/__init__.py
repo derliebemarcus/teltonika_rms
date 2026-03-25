@@ -19,6 +19,8 @@ from .const import (
     SERVICE_REFRESH,
 )
 
+SERVICE_GET_DEVICE_HISTORY = "get_device_history"
+
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
@@ -123,6 +125,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
     if not hass.services.has_service(DOMAIN, SERVICE_REFRESH):
         hass.services.async_register(DOMAIN, SERVICE_REFRESH, _build_refresh_handler(hass))
 
+    if not hass.services.has_service(DOMAIN, SERVICE_GET_DEVICE_HISTORY):
+        hass.services.async_register(
+            DOMAIN, SERVICE_GET_DEVICE_HISTORY, _build_history_handler(hass)
+        )
+
     return True
 
 
@@ -134,6 +141,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: Any) -> bool:
 
     if not hass.config_entries.async_entries(DOMAIN):
         hass.services.async_remove(DOMAIN, SERVICE_REFRESH)
+        hass.services.async_remove(DOMAIN, SERVICE_GET_DEVICE_HISTORY)
     return True
 
 
@@ -154,6 +162,95 @@ def _build_refresh_handler(hass: HomeAssistant):
             await async_refresh_all(runtime.bundle)
 
     return _async_handle_refresh
+
+
+def _build_history_handler(hass: HomeAssistant):
+    from datetime import datetime
+
+    import voluptuous as vol
+
+    from .api import RmsApiClient
+
+    # Validate input types for the service call
+    HISTORY_SCHEMA = vol.Schema(
+        {
+            vol.Required("device_id"): str,
+            vol.Required("from_time"): vol.Coerce(datetime),
+            vol.Required("to_time"): vol.Coerce(datetime),
+            vol.Required("interval"): str,
+            vol.Optional("config_id", default=0): vol.All(vol.Coerce(int), vol.Range(min=0)),
+            vol.Optional("keys"): vol.All(str, lambda v: [k.strip() for k in v.split(",")]),
+        }
+    )
+
+    async def _async_handle_get_device_history(call: Any) -> None:
+        try:
+            validated_data = HISTORY_SCHEMA(call.data)
+        except vol.Invalid as err:
+            LOGGER.error("Invalid service call data for get_device_history: %s", err)
+            return
+
+        device_id = validated_data["device_id"]
+        from_time = validated_data["from_time"]
+        to_time = validated_data["to_time"]
+        interval = validated_data["interval"]
+        config_id = validated_data.get("config_id")
+        keys = validated_data.get("keys")
+
+        if config_id == 0:
+            config_id = None
+
+        if not config_id and not keys:
+            LOGGER.error(
+                "Service get_device_history requires either 'config_id' or 'keys' to be provided."
+            )
+            return
+
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            runtime: TeltonikaRmsRuntime | None = getattr(entry, "runtime_data", None)
+            if runtime is None:
+                continue
+            api: RmsApiClient = runtime.bundle.api
+
+            try:
+                history_data = await api.async_get_device_history(
+                    device_id=device_id,
+                    from_time=from_time,
+                    to_time=to_time,
+                    interval=interval,
+                    config_id=config_id,
+                    keys=keys,
+                )
+                hass.bus.async_fire(
+                    f"{DOMAIN}_device_history",
+                    {
+                        "device_id": device_id,
+                        "from_time": from_time.isoformat(),
+                        "to_time": to_time.isoformat(),
+                        "interval": interval,
+                        "config_id": config_id,
+                        "keys": keys,
+                        "data": history_data,
+                    },
+                )
+                LOGGER.debug(
+                    "Published %s_device_history event for device %s with %s records.",
+                    DOMAIN,
+                    device_id,
+                    len(history_data),
+                )
+            except Exception as err:  # pylint: disable=broad-except-clause
+                LOGGER.error("Failed to fetch device history for %s: %s", device_id, err)
+                hass.bus.async_fire(
+                    f"{DOMAIN}_device_history_error",
+                    {
+                        "device_id": device_id,
+                        "error": str(err),
+                    },
+                )
+                return
+
+    return _async_handle_get_device_history
 
 
 def _merged_options(entry: Any) -> dict[str, Any]:

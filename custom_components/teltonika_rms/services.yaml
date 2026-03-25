@@ -1,3 +1,45 @@
 refresh:
   name: Refresh RMS Data
   description: Trigger immediate inventory and state refresh for all Teltonika RMS entries.
+
+get_device_history:
+  name: Get Device History
+  description: Get historical monitoring data for a Teltonika RMS device.
+  fields:
+    device_id:
+      name: Device ID
+      description: The ID of the device to fetch history for.
+      required: true
+      selector:
+        text:
+    from_time:
+      name: From Time
+      description: Start time for the historical data (ISO 8601 format, e.g., '2026-01-01T00:00:00Z').
+      required: true
+      selector:
+        datetime:
+    to_time:
+      name: To Time
+      description: End time for the historical data (ISO 8601 format, e.g., '2026-01-01T23:59:59Z').
+      required: true
+      selector:
+        datetime:
+    interval:
+      name: Interval
+      description: Data aggregation interval (e.g., '1h', '30m', '1d').
+      required: true
+      selector:
+        text:
+    config_id:
+      name: Monitoring Config ID
+      description: Optional monitoring config ID for predefined historical parameters.
+      required: false
+      selector:
+        number:
+          min: 0
+    keys:
+      name: Keys
+      description: Optional comma-separated list of parameter keys to fetch (e.g., 'gps_coordinates,signal_strength'). Only used if Monitoring Config ID is not provided.
+      required: false
+      selector:
+        text:
