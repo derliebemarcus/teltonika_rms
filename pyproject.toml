@@ -45,6 +45,7 @@ warn_unused_configs = true
 warn_unused_ignores = true
 
 [tool.mutmut]
+debug = true
 paths_to_mutate = [
   "custom_components/teltonika_rms/__init__.py",
   "custom_components/teltonika_rms/const.py",

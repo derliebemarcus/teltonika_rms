@@ -6,7 +6,7 @@
 [![Downloads](https://img.shields.io/github/downloads/derliebemarcus/teltonika_rms/total?style=for-the-badge)](https://github.com/derliebemarcus/teltonika_rms/releases)
 [![Coverage Status](https://img.shields.io/coverallsCoverage/github/derliebemarcus/teltonika_rms?branch=main&style=for-the-badge)](https://coveralls.io/github/derliebemarcus/teltonika_rms)
 
-<a href="https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product">
+<a href="https://www.teltonika-networks.com?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="custom_components/teltonika_rms/brand/TELTONIKA-LOGO-WHITE-RGB.png">
     <source media="(prefers-color-scheme: light)" srcset="custom_components/teltonika_rms/brand/TELTONIKA-LOGO-BLUE-RGB.png">
@@ -243,7 +243,7 @@ If a tag was pushed successfully but the GitHub release needs manual repair, ope
 
 ## About Teltonika
 
-[Teltonika](https://www.teltonika-networks.com/products/embedded-systems/calyx?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product) is a Lithuanian tech company group specializing in IoT solutions. Founded in 1998, it has since grown into a global provider of telematics and networking equipment.
+[Teltonika](https://www.teltonika-networks.com?utm_source=store&utm_medium=referral&utm_campaign=rms&utm_term=homeassistant&utm_content=product) is a Lithuanian tech company group specializing in IoT solutions. Founded in 1998, it has since grown into a global provider of telematics and networking equipment.
 
 Their portfolio includes industrial 4G/5G routers, network switches, GPS vehicle trackers, smart EV chargers, and telemedicine devices.
 
