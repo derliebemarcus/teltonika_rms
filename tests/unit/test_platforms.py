@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from teltonika_rms.const import UPDATE_PLATFORMS
+from teltonika_rms.const import DOMAIN, UPDATE_PLATFORMS
 
 
 # Find the true project root by looking for custom_components
@@ -41,3 +41,8 @@ def test_hacs_root_icon_matches_brand_icon() -> None:
     assert ROOT_ICON.exists()
     assert BRAND_ICON.exists()
     assert ROOT_ICON.read_bytes() == BRAND_ICON.read_bytes()
+
+
+def test_domain_constant_is_correct() -> None:
+    """Test that the DOMAIN constant is correct."""
+    assert DOMAIN == "teltonika_rms"
