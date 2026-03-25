@@ -22,6 +22,10 @@ concurrency:
 jobs:
   publish:
     runs-on: [self-hosted, linux, X64]
+    env:
+      PYENV_ROOT: /opt/github/pyenv
+      PATH: /opt/github/pyenv/shims:/opt/github/pyenv/bin:${PATH}
+      PYENV_VERSION: "3.14"
 
     steps:
       - name: Resolve target tag
@@ -46,12 +50,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ steps.tag.outputs.tag }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.14"
-
       - name: Resolve target commit
         id: target
         shell: bash
