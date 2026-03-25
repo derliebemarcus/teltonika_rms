@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   mutmut:
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, linux, X64]
     timeout-minutes: 45
 
     steps:
