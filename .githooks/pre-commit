@@ -64,6 +64,7 @@ ensure_package "socketio" "python-socketio==5.11.2"
 ensure_package "ruff" "ruff"
 ensure_package "mypy" "mypy>=1.15"
 ensure_package "pytest_asyncio" "pytest-asyncio<0.24,>=0.23"
+ensure_package "pip_audit" "pip-audit"
 
 echo "[pre-commit] Running ruff auto-fixes..."
 "$PYTHON_BIN" -m ruff format .
@@ -84,6 +85,18 @@ fi
 echo "[pre-commit] Running mypy type check..."
 if ! "$PYTHON_BIN" -m mypy .; then
   echo "[pre-commit] Type checking failed. Fix mypy errors before committing."
+  exit 1
+fi
+
+echo "[pre-commit] Checking translation consistency..."
+if ! "$PYTHON_BIN" tools/check_translations.py; then
+  echo "[pre-commit] Translation check failed."
+  exit 1
+fi
+
+echo "[pre-commit] Checking release notes format..."
+if ! "$PYTHON_BIN" tools/check_release_notes.py custom_components/teltonika_rms/manifest.json CHANGELOG.md; then
+  echo "[pre-commit] Release notes check failed."
   exit 1
 fi
 
