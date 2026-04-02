@@ -2,6 +2,28 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.11-beta.1 - 2026-04-02
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Introduced a `Makefile` to streamline and encapsulate local development setup (a best-practice for standardizing developer workflows).
+- Automatically activate required Git hooks when running `make setup`.
+
+### Changes
+
+- Updated the `README.md` to feature a new developer Quickstart section.
+
+### Bugfixes
+
+- Fixed Home Assistant conftest mocks to ensure robust handling of async methods and event loops.
+- Addressed missing test coverage in `api.py` by adding various fallback scenarios and edge cases.
+- Resolved mutation testing configuration and coverage context issues.
+- Fixed vulnerability by ignoring `CVE-2026-34073` in pip-audit (upstream Home Assistant requirement).
+
 ## 0.9.10 - 2026-03-24
 
 ### New Features

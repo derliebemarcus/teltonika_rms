@@ -180,6 +180,14 @@ python3 tools/generate_rms_endpoint_matrix.py /path/to/compiled.yaml
 
 ## Conventions and Tests
 
+### Quickstart for Developers
+
+To instantly set up your local development environment with all required dependencies and activated Git Hooks (best-practice), run:
+
+```bash
+make setup
+```
+
 - Development conventions are aligned with Home Assistant custom integration guidance:
   - [Home Assistant Developer Docs](https://developers.home-assistant.io/docs/development_index/)
 - Translation consistency can be validated with:
@@ -208,7 +216,7 @@ Note: HA-related tests under `tests/ha/` will only run in a suitable Home Assist
 Install repository hooks once:
 
 ```bash
-tools/install_git_hooks.sh
+make setup
 ```
 
 `pre-commit` hook behavior:
