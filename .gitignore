@@ -34,10 +34,4 @@ mutants/
 default/
 
 # External information directories
-additional_input/
-
-AGENTS.md
-
-temp_input/
-social_media_posts.md
-
+gitignore/

@@ -6,7 +6,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from .const import (
     AUTH_MODE_OAUTH2,
@@ -214,10 +214,8 @@ def _build_history_handler(hass: HomeAssistant):
             )
             return
 
-        for entry in await hass.config_entries.async_entries(DOMAIN):
-            runtime: TeltonikaRmsRuntime | None = cast(
-                TeltonikaRmsRuntime, getattr(entry, "runtime_data", None)
-            )
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            runtime: TeltonikaRmsRuntime | None = getattr(entry, "runtime_data", None)
             if runtime is None:
                 continue
             api: RmsApiClient = runtime.bundle.api

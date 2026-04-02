@@ -847,3 +847,37 @@ def test_api_get_device_history_returns_empty_on_error_or_missing_endpoint(
         )
     )
     assert history == []
+
+
+def test_api_get_device_state_handles_all_missing_paths() -> None:
+    """Test that async_get_device_state returns empty dict when no paths are configured."""
+    matrix = EndpointMatrix(source="test", endpoints={})
+    client = RmsApiClient(FakeAuthClient([]), matrix)
+    assert asyncio.run(client.async_get_device_state("1")) == {}
+
+
+def test_api_get_device_state_handles_non_dict_state_response() -> None:
+    """Test that async_get_device_state falls back when state endpoint returns non-dict."""
+    # State endpoint returns a list (non-dict), then detail returns dict
+    auth = FakeAuthClient(
+        [
+            FakeResponse(200, {"success": True, "data": [], "meta": {}}),
+            FakeResponse(200, {"success": True, "data": {"id": "1"}, "meta": {}}),
+        ]
+    )
+    client = RmsApiClient(auth, _matrix())
+    assert asyncio.run(client.async_get_device_state("1")) == {"id": "1"}
+
+
+def test_api_get_device_ethernet_ports_returns_none_on_no_data_no_meta() -> None:
+    """Test that async_get_device_ethernet_ports returns None when both data and meta are missing."""
+    auth = FakeAuthClient([FakeResponse(200, {"success": True, "data": None, "meta": {}})])
+    client = RmsApiClient(auth, _matrix())
+    assert asyncio.run(client.async_get_device_ethernet_ports("42")) is None
+
+
+def test_api_get_device_wireless_returns_empty_on_non_list_data() -> None:
+    """Test that async_get_device_wireless returns empty list when data is not a list."""
+    auth = FakeAuthClient([FakeResponse(200, {"success": True, "data": {"bad": True}, "meta": {}})])
+    client = RmsApiClient(auth, _matrix())
+    assert asyncio.run(client.async_get_device_wireless("1")) == []

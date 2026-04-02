@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Generator
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
-from homeassistant.config_entries import ConfigEntriesFlowManager, ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
+from custom_components.teltonika_rms import TeltonikaRmsRuntime
 from custom_components.teltonika_rms.const import DOMAIN
 from custom_components.teltonika_rms.coordinator import CoordinatorBundle
 
@@ -27,14 +28,37 @@ def auto_enable_patching() -> str:
 def hass(mock_coordinator_bundle: CoordinatorBundle) -> Generator[HomeAssistant]:
     """Mock HomeAssistant fixture."""
     _hass = AsyncMock(spec=HomeAssistant)
+
+    # Track listeners for events
+    _listeners = {}
+
+    def async_listen_once(event_type, listener):
+        _listeners[event_type] = listener
+        return lambda: _listeners.pop(event_type, None)
+
+    def async_fire(event_type, event_data):
+        if event_type in _listeners:
+            listener = _listeners.pop(event_type)
+            listener(MagicMock(data=event_data))
+
     mock_config_entry = AsyncMock(spec=ConfigEntry)
     mock_config_entry.domain = DOMAIN
-    mock_config_entry.runtime_data = mock_coordinator_bundle
+    mock_config_entry.runtime_data = TeltonikaRmsRuntime(bundle=mock_coordinator_bundle)
 
-    _hass.config_entries = AsyncMock(spec=ConfigEntriesFlowManager)
-    _hass.config_entries.async_entries = AsyncMock(return_value=[mock_config_entry])
-    _hass.bus = AsyncMock()
-    _hass.bus.async_listen_once = AsyncMock()
+    _hass.config_entries = MagicMock()
+    _hass.config_entries._entries = [mock_config_entry]
+    _hass.config_entries.async_entries = MagicMock(
+        side_effect=lambda domain=None: [
+            e
+            for e in _hass.config_entries._entries
+            if domain is None or getattr(e, "domain", None) == domain
+        ]
+    )
+    _hass.config_entries.async_unload_platforms = AsyncMock(return_value=True)
+    _hass.config_entries.async_unload_entry = AsyncMock(return_value=True)
+    _hass.bus = MagicMock()
+    _hass.bus.async_fire = MagicMock(side_effect=async_fire)
+    _hass.bus.async_listen_once = AsyncMock(side_effect=async_listen_once)
     _hass.services = AsyncMock()
     _hass.services.has_service.return_value = False
     _hass.services.async_register = AsyncMock()

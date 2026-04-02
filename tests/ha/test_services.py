@@ -220,3 +220,55 @@ async def test_unload_removes_history_service(hass: HomeAssistant) -> None:
             AsyncMock(domain=DOMAIN, runtime_data=AsyncMock())
         )
         assert not await hass.services.has_service(DOMAIN, SERVICE_GET_DEVICE_HISTORY)
+
+
+@pytest.mark.asyncio
+async def test_refresh_service_handles_missing_runtime_data(hass: HomeAssistant) -> None:
+    """Test that the refresh service gracefully handles entries with missing runtime data."""
+    from custom_components.teltonika_rms import _build_refresh_handler
+
+    mock_entry_no_runtime = AsyncMock()
+    mock_entry_no_runtime.domain = DOMAIN
+    mock_entry_no_runtime.runtime_data = None
+
+    hass.config_entries._entries = [mock_entry_no_runtime]
+
+    handler = _build_refresh_handler(hass)
+    # This should not raise any error and should skip the entry
+    await handler(AsyncMock())
+
+
+@pytest.mark.asyncio
+async def test_history_service_handles_missing_runtime_data(hass: HomeAssistant) -> None:
+    """Test that the history service gracefully handles entries with missing runtime data."""
+    mock_entry_no_runtime = AsyncMock()
+    mock_entry_no_runtime.domain = DOMAIN
+    mock_entry_no_runtime.runtime_data = None
+
+    hass.config_entries._entries = [mock_entry_no_runtime]
+
+    handler = _build_history_handler(hass)
+    await handler(
+        AsyncMock(
+            data={
+                "device_id": "test-device-id",
+                "from_time": datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC).isoformat(),
+                "to_time": datetime(2026, 1, 1, 1, 0, 0, tzinfo=UTC).isoformat(),
+                "interval": "1h",
+                "config_id": 123,
+            }
+        )
+    )
+
+
+@pytest.mark.asyncio
+async def test_unload_entry_failure_returns_false(hass: HomeAssistant) -> None:
+    """Test that async_unload_entry returns False when platform unloading fails."""
+    from custom_components.teltonika_rms import async_unload_entry
+
+    mock_entry = AsyncMock()
+    # Mock unload failure
+    hass.config_entries.async_unload_platforms.return_value = False
+
+    result = await async_unload_entry(hass, mock_entry)
+    assert result is False
