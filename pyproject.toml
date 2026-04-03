@@ -8,8 +8,25 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
-ignore = ["E501"]
+select = ["E", "F", "I", "UP", "D"]
+ignore = [
+  "E501",
+  "D102", # Missing docstring in public method (often overridden in HA)
+  "D103", # Missing docstring in public function
+  "D104", # Missing docstring in public package
+  "D105", # Missing docstring in magic method
+  "D107", # Missing docstring in __init__
+  "D202", # Missing docstring in public module
+  "D203", # 1 blank line required before class docstring
+  "D213", # Multi-line docstring summary should start at the second line
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"tools/*" = ["D"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -18,26 +35,13 @@ indent-style = "space"
 [tool.mypy]
 python_version = "3.14"
 files = [
-  "custom_components/teltonika_rms/__init__.py",
-  "custom_components/teltonika_rms/api.py",
-  "custom_components/teltonika_rms/application_credentials.py",
-  "custom_components/teltonika_rms/binary_sensor.py",
-  "custom_components/teltonika_rms/button.py",
-  "custom_components/teltonika_rms/config_flow.py",
-  "custom_components/teltonika_rms/const.py",
-  "custom_components/teltonika_rms/coordinator.py",
-  "custom_components/teltonika_rms/device_tracker.py",
-  "custom_components/teltonika_rms/diagnostics.py",
-  "custom_components/teltonika_rms/endpoint_matrix.py",
-  "custom_components/teltonika_rms/entity.py",
-  "custom_components/teltonika_rms/exceptions.py",
-  "custom_components/teltonika_rms/models.py",
-  "custom_components/teltonika_rms/sensor.py",
-  "custom_components/teltonika_rms/status_channel.py",
-  "custom_components/teltonika_rms/switch.py",
-  "custom_components/teltonika_rms/update.py",
+  "custom_components",
+  "tests",
+  "tools"
 ]
-exclude = "(^tests/|^tools/|^mutants/|^default/)"
+exclude = "(^mutants/|^default/|\\.venv)"
+strict = true
+
 check_untyped_defs = true
 ignore_missing_imports = true
 warn_redundant_casts = true

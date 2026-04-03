@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
+from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -13,8 +14,6 @@ from homeassistant.core import HomeAssistant
 from custom_components.teltonika_rms import TeltonikaRmsRuntime
 from custom_components.teltonika_rms.const import DOMAIN
 from custom_components.teltonika_rms.coordinator import CoordinatorBundle
-
-pytest_plugins = ("pytest_asyncio",)
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -30,13 +29,13 @@ def hass(mock_coordinator_bundle: CoordinatorBundle) -> Generator[HomeAssistant]
     _hass = AsyncMock(spec=HomeAssistant)
 
     # Track listeners for events
-    _listeners = {}
+    _listeners: dict[str, Any] = {}
 
-    def async_listen_once(event_type, listener):
+    def async_listen_once(event_type: str, listener: Any) -> Any:
         _listeners[event_type] = listener
         return lambda: _listeners.pop(event_type, None)
 
-    def async_fire(event_type, event_data):
+    def async_fire(event_type: str, event_data: Any) -> None:
         if event_type in _listeners:
             listener = _listeners.pop(event_type)
             listener(MagicMock(data=event_data))
@@ -67,7 +66,7 @@ def hass(mock_coordinator_bundle: CoordinatorBundle) -> Generator[HomeAssistant]
         "custom_components.teltonika_rms.PLATFORMS",
         ["binary_sensor", "sensor", "device_tracker"],
     ):
-        yield _hass
+        yield cast(HomeAssistant, _hass)
 
 
 @pytest.fixture

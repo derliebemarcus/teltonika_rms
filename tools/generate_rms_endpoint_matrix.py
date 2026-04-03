@@ -6,11 +6,12 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import yaml
 
 
-def _extract_scopes(operation: dict, default_security: list) -> list[str]:
+def _extract_scopes(operation: dict[str, Any], default_security: list[Any]) -> list[str]:
     scopes: list[str] = []
     security = operation.get("security", default_security)
     if not isinstance(security, list):
@@ -52,7 +53,7 @@ def _is_aggregate_status_candidate(path: str) -> bool:
     return lower.endswith("/status") and "/connect/" not in lower
 
 
-def build_matrix(compiled_spec: dict) -> dict:
+def build_matrix(compiled_spec: dict[str, Any]) -> dict[str, Any]:
     paths = compiled_spec.get("paths", {})
     default_security = compiled_spec.get("security", [])
     buckets: dict[str, list[tuple[str, list[str]]]] = {
@@ -106,7 +107,7 @@ def build_matrix(compiled_spec: dict) -> dict:
         ),
     }
 
-    endpoints: dict[str, dict] = {}
+    endpoints: dict[str, dict[str, Any]] = {}
     for key, default_value in defaults.items():
         selected = _pick_best(buckets[key])
         if selected:

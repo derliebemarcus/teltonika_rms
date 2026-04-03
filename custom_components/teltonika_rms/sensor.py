@@ -171,6 +171,8 @@ class _BaseDiagnosticSensor(TeltonikaRmsEntity, SensorEntity):
 
 
 class RmsModelSensor(_BaseDiagnosticSensor):
+    """Model sensor."""
+
     entity_key = "model"
     _attr_translation_key = "model"
     _attr_icon = "mdi:chip"
@@ -180,6 +182,8 @@ class RmsModelSensor(_BaseDiagnosticSensor):
 
 
 class RmsFirmwareSensor(_BaseDiagnosticSensor):
+    """Firmware sensor."""
+
     entity_key = "firmware"
     _attr_translation_key = "firmware"
     _attr_icon = "mdi:update"
@@ -189,6 +193,8 @@ class RmsFirmwareSensor(_BaseDiagnosticSensor):
 
 
 class RmsSerialSensor(_BaseDiagnosticSensor):
+    """Serial number sensor."""
+
     entity_key = "serial"
     _attr_translation_key = "serial"
     _attr_icon = "mdi:identifier"
@@ -234,6 +240,8 @@ class _OptionalDiagnosticSensor(_BaseDiagnosticSensor):
 
 
 class RmsClientsCountSensor(_OptionalDiagnosticSensor):
+    """Clients count sensor."""
+
     entity_key = "clients_count"
     _attr_name = "Clients Count"
     _attr_icon = "mdi:account-multiple"
@@ -243,6 +251,8 @@ class RmsClientsCountSensor(_OptionalDiagnosticSensor):
 
 
 class RmsRouterUptimeSensor(_OptionalDiagnosticSensor):
+    """Router uptime sensor."""
+
     entity_key = "router_uptime"
     _attr_name = "Router Uptime"
     _attr_icon = "mdi:timer-outline"
@@ -261,6 +271,8 @@ class RmsRouterUptimeSensor(_OptionalDiagnosticSensor):
 
 
 class RmsTemperatureSensor(_OptionalDiagnosticSensor):
+    """Temperature sensor."""
+
     entity_key = "temperature"
     _attr_name = "Temperature"
     _attr_icon = "mdi:thermometer"
@@ -280,6 +292,8 @@ class RmsTemperatureSensor(_OptionalDiagnosticSensor):
 
 
 class RmsSignalStrengthSensor(_OptionalDiagnosticSensor):
+    """Signal strength sensor."""
+
     entity_key = "signal_strength"
     _attr_name = "Signal Strength"
     _attr_icon = "mdi:signal"
@@ -291,6 +305,8 @@ class RmsSignalStrengthSensor(_OptionalDiagnosticSensor):
 
 
 class RmsWanStateSensor(_OptionalDiagnosticSensor):
+    """WAN state sensor."""
+
     entity_key = "wan_state"
     _attr_name = "WAN State"
     _attr_icon = "mdi:wan"
@@ -300,6 +316,8 @@ class RmsWanStateSensor(_OptionalDiagnosticSensor):
 
 
 class RmsConnectionStateSensor(_OptionalDiagnosticSensor):
+    """Connection state sensor."""
+
     entity_key = "connection_state"
     _attr_name = "Connection State"
     _attr_icon = "mdi:network-outline"
@@ -309,6 +327,8 @@ class RmsConnectionStateSensor(_OptionalDiagnosticSensor):
 
 
 class RmsConnectionTypeSensor(_OptionalDiagnosticSensor):
+    """Connection type sensor."""
+
     entity_key = "connection_type"
     _attr_name = "Connection Type"
     _attr_icon = "mdi:radio-tower"
@@ -318,6 +338,8 @@ class RmsConnectionTypeSensor(_OptionalDiagnosticSensor):
 
 
 class RmsSimSlotSensor(_OptionalDiagnosticSensor):
+    """SIM slot sensor."""
+
     entity_key = "sim_slot"
     _attr_name = "SIM Slot"
     _attr_icon = "mdi:sim"

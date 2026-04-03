@@ -59,7 +59,9 @@ class CoordinatorBundle:
 class InventoryCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
     """Fetches inventory data on lower cadence."""
 
-    def __init__(self, hass: HomeAssistant, api: RmsApiClient, options: dict[str, Any]) -> None:
+    def __init__(
+        self, hass: HomeAssistant, api: RmsApiClient, options: dict[str, Any], entry: Any = None
+    ) -> None:
         self._api = api
         self._tags = normalize_tags(str(options.get(CONF_TAGS, "")))
         self._device_status = str(options.get(CONF_DEVICE_STATUS, "")).strip() or None
@@ -69,6 +71,7 @@ class InventoryCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             LOGGER,
             name="Teltonika RMS inventory",
             update_interval=timedelta(seconds=max(60, interval)),
+            config_entry=entry,
         )
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
@@ -100,6 +103,7 @@ class StateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         api: RmsApiClient,
         inventory: InventoryCoordinator,
         options: dict[str, Any],
+        entry: Any = None,
     ) -> None:
         self._api = api
         self._inventory = inventory
@@ -113,6 +117,7 @@ class StateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             LOGGER,
             name="Teltonika RMS state",
             update_interval=timedelta(seconds=max(60, self._state_interval)),
+            config_entry=entry,
         )
 
     @property
@@ -223,6 +228,7 @@ class PortScanCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]
         hass: HomeAssistant,
         api: RmsApiClient,
         inventory: InventoryCoordinator,
+        entry: Any = None,
     ) -> None:
         self._api = api
         self._inventory = inventory
@@ -232,6 +238,7 @@ class PortScanCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]]]
             LOGGER,
             name="Teltonika RMS ethernet port scan",
             update_interval=timedelta(seconds=DEFAULT_PORT_SCAN_INTERVAL),
+            config_entry=entry,
         )
         self.data = {}
 
@@ -268,6 +275,7 @@ class PortConfigCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]
         hass: HomeAssistant,
         api: RmsApiClient,
         inventory: InventoryCoordinator,
+        entry: Any = None,
     ) -> None:
         self._api = api
         self._inventory = inventory
@@ -277,6 +285,7 @@ class PortConfigCoordinator(DataUpdateCoordinator[dict[str, list[dict[str, Any]]
             LOGGER,
             name="Teltonika RMS port configuration",
             update_interval=timedelta(seconds=DEFAULT_PORT_CONFIG_INTERVAL),
+            config_entry=entry,
         )
         self.data = {}
 

@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 import pytest
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientResponse, ClientSession
 from homeassistant.exceptions import ConfigEntryAuthFailed
-from teltonika_rms.api import (
+
+from custom_components.teltonika_rms.api import (
     OAuth2RmsAuthClient,
     PatRmsAuthClient,
     RmsApiClient,
+    RmsAuthClient,
     _async_retry_sleep,
     _coerce_list,
     _coerce_state_map,
@@ -26,8 +28,8 @@ from teltonika_rms.api import (
     estimate_monthly_requests,
     normalize_tags,
 )
-from teltonika_rms.endpoint_matrix import EndpointMatrix, EndpointSpec
-from teltonika_rms.exceptions import RmsApiError, RmsAuthError
+from custom_components.teltonika_rms.endpoint_matrix import EndpointMatrix, EndpointSpec
+from custom_components.teltonika_rms.exceptions import RmsApiError, RmsAuthError
 
 pytestmark = pytest.mark.ha
 
@@ -62,7 +64,9 @@ class FakeResponse:
 
 
 class FakeAuthClient:
-    def __init__(self, responses: list[Any], token: str | None = "token") -> None:
+    def __init__(
+        self, responses: list[FakeResponse | Exception], token: str | None = "token"
+    ) -> None:
         self._responses = list(responses)
         self._token = token
         self.calls: list[dict[str, Any]] = []
@@ -75,7 +79,7 @@ class FakeAuthClient:
         params: dict[str, Any] | None,
         json: dict[str, Any] | None,
         timeout: int,
-    ) -> FakeResponse:
+    ) -> ClientResponse:
         self.calls.append(
             {
                 "method": method,
@@ -88,7 +92,7 @@ class FakeAuthClient:
         response = self._responses.pop(0)
         if isinstance(response, Exception):
             raise response
-        return response
+        return cast(ClientResponse, response)
 
     async def async_get_access_token(self) -> str | None:
         return self._token
@@ -98,9 +102,9 @@ class FakeSession:
     def __init__(self) -> None:
         self.calls: list[dict[str, Any]] = []
 
-    async def request(self, method: str, url: str, **kwargs: Any) -> FakeResponse:
+    async def request(self, method: str, url: str, **kwargs: Any) -> ClientResponse:
         self.calls.append({"method": method, "url": url, **kwargs})
-        return FakeResponse(200, {"ok": True})
+        return cast(ClientResponse, FakeResponse(200, {"ok": True}))
 
 
 class FakeOAuthSession:
@@ -109,9 +113,9 @@ class FakeOAuthSession:
         self.token: dict[str, Any] = {"access_token": "oauth-token"}
         self.ensure_calls = 0
 
-    async def async_request(self, method: str, url: str, **kwargs: Any) -> FakeResponse:
+    async def async_request(self, method: str, url: str, **kwargs: Any) -> ClientResponse:
         self.calls.append({"method": method, "url": url, **kwargs})
-        return FakeResponse(200, {"ok": True})
+        return cast(ClientResponse, FakeResponse(200, {"ok": True}))
 
     async def async_ensure_token_valid(self) -> None:
         self.ensure_calls += 1
@@ -136,7 +140,7 @@ def _matrix(*, aggregate: bool = True) -> EndpointMatrix:
 
 def test_pat_auth_client_adds_bearer_token() -> None:
     session = FakeSession()
-    client = PatRmsAuthClient(session, " secret-token ")
+    client = PatRmsAuthClient(cast(ClientSession, session), " secret-token ")
 
     asyncio.run(
         client.async_request("GET", "https://example.test", params={"a": 1}, json=None, timeout=30)
@@ -149,7 +153,7 @@ def test_pat_auth_client_adds_bearer_token() -> None:
 def test_api_accessors_expose_matrix_and_access_token() -> None:
     auth = FakeAuthClient([], token="abc")
     matrix = _matrix()
-    client = RmsApiClient(auth, matrix)
+    client = RmsApiClient(cast(RmsAuthClient, auth), matrix)
 
     assert client.endpoint_matrix is matrix
     assert asyncio.run(client.async_get_access_token()) == "abc"
@@ -200,7 +204,7 @@ def test_api_request_retries_on_retry_after(monkeypatch: pytest.MonkeyPatch) -> 
     async def _sleep(delay: float) -> None:
         sleeps.append(delay)
 
-    monkeypatch.setattr("teltonika_rms.api.asyncio.sleep", _sleep)
+    monkeypatch.setattr("custom_components.teltonika_rms.api.asyncio.sleep", _sleep)
     first = FakeResponse(429, {"retry": True}, headers={"Retry-After": "0"})
     second = FakeResponse(200, {"success": True, "data": {"ok": True}, "meta": {}})
     client = RmsApiClient(FakeAuthClient([first, second]), _matrix())
@@ -232,7 +236,7 @@ def test_api_request_wraps_network_error_after_retries(monkeypatch: pytest.Monke
     async def _sleep(delay: float) -> None:
         return None
 
-    monkeypatch.setattr("teltonika_rms.api.asyncio.sleep", _sleep)
+    monkeypatch.setattr("custom_components.teltonika_rms.api.asyncio.sleep", _sleep)
     client = RmsApiClient(FakeAuthClient([ClientError("boom")] * 5), _matrix())
 
     with pytest.raises(RmsApiError, match="network error"):
@@ -407,12 +411,10 @@ def test_api_get_device_port_configurations_handles_status_channel_and_missing_v
                 "response_state": "completed",
             }
 
-    client = RmsApiClient(
-        FakeAuthClient(
-            [FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-config"}})]
-        ),
-        _matrix(),
+    auth = FakeAuthClient(
+        [FakeResponse(200, {"success": True, "data": None, "meta": {"channel": "port-config"}})]
     )
+    client = RmsApiClient(cast(RmsAuthClient, auth), _matrix())
     client.set_status_channel_manager(FakeChannelManager())
 
     ports = asyncio.run(client.async_get_device_port_configurations("42"))
@@ -422,9 +424,9 @@ def test_api_get_device_port_configurations_handles_status_channel_and_missing_v
         {"id": "port2", ".type": "switch_port", "poe_enable": "0"},
         {"id": "sfp1", ".type": "switch_port"},
     ]
-    assert client._auth.calls[0]["method"] == "POST"
-    assert client._auth.calls[0]["url"].endswith("/devices/configurator/configuration")
-    assert client._auth.calls[0]["json"] == {
+    assert auth.calls[0]["method"] == "POST"
+    assert auth.calls[0]["url"].endswith("/devices/configurator/configuration")
+    assert auth.calls[0]["json"] == {
         "device_id": 42,
         "endpoints": [{"path": "/ports_settings/config"}],
     }
@@ -689,15 +691,17 @@ def test_api_helper_functions_cover_error_paths(monkeypatch: pytest.MonkeyPatch)
         _parse_envelope({"success": False, "errors": ["bad"]})
 
     response = FakeResponse(200, text="raw-body", json_error=ValueError("bad json"))
-    assert asyncio.run(_safe_json(response)) == {"raw": "raw-body"}
+    assert asyncio.run(_safe_json(cast(ClientResponse, response))) == {"raw": "raw-body"}
 
     delays: list[float] = []
 
     async def _sleep(delay: float) -> None:
         delays.append(delay)
 
-    monkeypatch.setattr("teltonika_rms.api.asyncio.sleep", _sleep)
-    asyncio.run(_async_retry_sleep(FakeResponse(429, headers={"Retry-After": "x"}), 0))
+    monkeypatch.setattr("custom_components.teltonika_rms.api.asyncio.sleep", _sleep)
+    asyncio.run(
+        _async_retry_sleep(cast(ClientResponse, FakeResponse(429, headers={"Retry-After": "x"})), 0)
+    )
     assert len(delays) == 1
     delay = _retry_delay(3)
     assert 8.0 <= delay <= 8.5
@@ -733,7 +737,10 @@ def test_api_get_device_wireless_handles_missing_and_success() -> None:
 
 
 def test_api_extract_nested_data_lists() -> None:
-    from teltonika_rms.api import _extract_ethernet_ports, _extract_port_configurations
+    from custom_components.teltonika_rms.api import (
+        _extract_ethernet_ports,
+        _extract_port_configurations,
+    )
 
     nested_payload = {"123": [{"status": "completed", "ports": [{"id": "p1"}]}]}
     assert _extract_ethernet_ports("123", nested_payload) == [{"id": "p1"}]
@@ -881,3 +888,15 @@ def test_api_get_device_wireless_returns_empty_on_non_list_data() -> None:
     auth = FakeAuthClient([FakeResponse(200, {"success": True, "data": {"bad": True}, "meta": {}})])
     client = RmsApiClient(auth, _matrix())
     assert asyncio.run(client.async_get_device_wireless("1")) == []
+
+
+def test_api_list_devices_logs_contract_violation(caplog: pytest.LogCaptureFixture) -> None:
+    """Test that API raises a controlled error and logs contract drift."""
+    # Data is missing the required 'id' field
+    auth = FakeAuthClient(
+        [FakeResponse(200, {"success": True, "data": [{"name": "bad"}], "meta": {}})]
+    )
+    client = RmsApiClient(cast(RmsAuthClient, auth), _matrix())
+    with pytest.raises(RmsApiError, match="schema changed"):
+        asyncio.run(client.async_list_devices())
+    assert "API contract violation in devices_list" in caplog.text

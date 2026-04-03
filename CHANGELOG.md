@@ -6,23 +6,27 @@ All notable changes to this project are documented in this file.
 
 ### New Features
 
-- None.
+- Added Pydantic v2 runtime contract validation for RMS device-list, device-detail, and device-state payloads so upstream API schema drift fails with controlled integration errors.
+- Added Syrupy snapshot coverage for diagnostics output to lock the JSON structure exposed to Home Assistant support tooling.
 
 ### Improvements
 
-- Introduced a `Makefile` to streamline and encapsulate local development setup (a best-practice for standardizing developer workflows).
-- Automatically activate required Git hooks when running `make setup`.
+- Enforced mypy strict mode across the integration code and test suite, including the Home Assistant-heavy mock/runtime tests.
+- Activated Ruff PEP257 docstring enforcement and kept the public diagnostic sensor classes documented.
+- Pinned the developer dependency set with `pip-tools`, added a checked-in `requirements.txt` lockfile, and added CI drift detection for the lockfile.
+- Added automatic virtualenv maintenance so activating `.venv` or `.venv-test` upgrades `pip`.
+- Hardened the local pre-push gate so OSV-Scanner is mandatory before pushes.
 
 ### Changes
 
-- Updated the `README.md` to feature a new developer Quickstart section.
+- Updated the developer README to document contract tests, snapshot tests, lockfile maintenance, strict static analysis, and automatic virtualenv pip maintenance.
+- Updated release automation so beta tags publish as prereleases while production tags are explicitly marked as the latest release.
 
 ### Bugfixes
 
-- Fixed Home Assistant conftest mocks to ensure robust handling of async methods and event loops.
-- Addressed missing test coverage in `api.py` by adding various fallback scenarios and edge cases.
-- Resolved mutation testing configuration and coverage context issues.
-- Fixed vulnerability by ignoring `CVE-2026-34073` in pip-audit (upstream Home Assistant requirement).
+- Fixed API contract-drift handling to raise `RmsApiError` instead of continuing with unsafe best-effort parsing.
+- Resolved strict-typing issues in HA runtime tests, mock fixtures, and config-entry test scaffolding.
+- Fixed the lockfile consistency workflow to compile with Python 3.14, matching the checked-in lockfile.
 
 ## 0.9.10 - 2026-03-24
 

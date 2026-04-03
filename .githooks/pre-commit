@@ -65,6 +65,20 @@ ensure_package "ruff" "ruff"
 ensure_package "mypy" "mypy>=1.15"
 ensure_package "pytest_asyncio" "pytest-asyncio<0.24,>=0.23"
 ensure_package "pip_audit" "pip-audit"
+ensure_package "piptools" "pip-tools"
+ensure_package "pydantic" "pydantic>=2.0"
+ensure_package "syrupy" "syrupy>=4.0"
+
+echo "[pre-commit] Checking lockfile consistency..."
+if ! "$PYTHON_BIN" -m piptools compile requirements-dev.txt -o /tmp/requirements.txt.tmp >/dev/null 2>&1; then
+  echo "[pre-commit] Failed to compile requirements-dev.txt."
+  exit 1
+fi
+if ! diff requirements.txt /tmp/requirements.txt.tmp >/dev/null 2>&1; then
+  echo "[pre-commit] lockfile (requirements.txt) is out of sync with requirements-dev.txt."
+  echo "[pre-commit] Run 'make lock' to update."
+  exit 1
+fi
 
 echo "[pre-commit] Running ruff auto-fixes..."
 "$PYTHON_BIN" -m ruff format .

@@ -20,7 +20,7 @@ PLACEHOLDER_PATTERNS = (
 )
 
 
-def _flatten(node: Any, prefix: str = "") -> dict[str, str]:
+def _flatten(node: Any, prefix: str = "") -> dict[str, Any]:
     output: dict[str, str] = {}
     if isinstance(node, dict):
         for key, value in node.items():
@@ -32,7 +32,9 @@ def _flatten(node: Any, prefix: str = "") -> dict[str, str]:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    from typing import cast
+
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
 def main() -> int:

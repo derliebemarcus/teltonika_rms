@@ -1,0 +1,29 @@
+# serializer version: 1
+# name: test_async_get_config_entry_diagnostics
+  dict({
+    'entry': dict({
+      'data': dict({
+        'access_token': '**REDACTED**',
+        'auth_mode': 'pat',
+        'pat_token': '**REDACTED**',
+      }),
+      'entry_id': 'test-entry-id',
+      'options': dict({
+        'test_option': True,
+      }),
+      'title': 'Test Entry',
+    }),
+    'runtime': dict({
+      'aggregate_state_available': True,
+      'auth_mode': 'pat',
+      'endpoint_matrix_paths': dict({
+        'test_endpoint': '/test/path',
+      }),
+      'endpoint_matrix_source': 'test-source',
+      'inventory_devices': 2,
+      'monthly_request_estimate': 100,
+      'request_counter': 42,
+      'state_devices': 1,
+    }),
+  })
+# ---

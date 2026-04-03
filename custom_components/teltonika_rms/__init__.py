@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from datetime import UTC
 from typing import TYPE_CHECKING, Any
@@ -94,10 +94,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: Any) -> bool:
     status_manager = RmsStatusChannelManager(api)
     api.set_status_channel_manager(status_manager)
 
-    inventory = InventoryCoordinator(hass, api, _merged_options(entry))
-    state = StateCoordinator(hass, api, inventory, _merged_options(entry))
-    port_scan = PortScanCoordinator(hass, api, inventory)
-    port_config = PortConfigCoordinator(hass, api, inventory)
+    inventory = InventoryCoordinator(hass, api, _merged_options(entry), entry)
+    state = StateCoordinator(hass, api, inventory, _merged_options(entry), entry)
+    port_scan = PortScanCoordinator(hass, api, inventory, entry)
+    port_config = PortConfigCoordinator(hass, api, inventory, entry)
     bundle = CoordinatorBundle(
         inventory=inventory,
         state=state,
@@ -151,7 +151,7 @@ async def async_reload_entry(hass: HomeAssistant, entry: Any) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
 
 
-def _build_refresh_handler(hass: HomeAssistant):
+def _build_refresh_handler(hass: HomeAssistant) -> Callable[[Any], Coroutine[Any, Any, None]]:
     from .coordinator import async_refresh_all
 
     async def _async_handle_refresh(call: Any) -> None:
@@ -165,7 +165,7 @@ def _build_refresh_handler(hass: HomeAssistant):
     return _async_handle_refresh
 
 
-def _build_history_handler(hass: HomeAssistant):
+def _build_history_handler(hass: HomeAssistant) -> Callable[[Any], Coroutine[Any, Any, None]]:
     from datetime import datetime
 
     import voluptuous as vol

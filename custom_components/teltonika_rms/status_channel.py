@@ -102,7 +102,9 @@ class RmsStatusChannelManager:
         while datetime.now(tz=UTC) < deadline:
             payload = await self._api_client.async_poll_status_channel(channel_id)
             if payload and _is_terminal(payload):
-                return payload
+                from typing import cast
+
+                return cast(dict[str, Any], payload)
             await asyncio.sleep(2)
         return None
 

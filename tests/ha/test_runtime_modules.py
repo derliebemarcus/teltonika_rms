@@ -6,23 +6,24 @@ import asyncio
 import tempfile
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import UpdateFailed
-from teltonika_rms import TeltonikaRmsRuntime
-from teltonika_rms.binary_sensor import (
+
+from custom_components.teltonika_rms import TeltonikaRmsRuntime
+from custom_components.teltonika_rms.binary_sensor import (
     RmsOnlineBinarySensor,
     RmsPortLinkBinarySensor,
 )
-from teltonika_rms.binary_sensor import (
+from custom_components.teltonika_rms.binary_sensor import (
     async_setup_entry as binary_setup,
 )
-from teltonika_rms.button import RmsRebootButton
-from teltonika_rms.button import async_setup_entry as button_setup
-from teltonika_rms.coordinator import (
+from custom_components.teltonika_rms.button import RmsRebootButton
+from custom_components.teltonika_rms.button import async_setup_entry as button_setup
+from custom_components.teltonika_rms.coordinator import (
     CoordinatorBundle,
     InventoryCoordinator,
     PortConfigCoordinator,
@@ -31,14 +32,17 @@ from teltonika_rms.coordinator import (
     async_refresh_all,
     validate_request_budget,
 )
-from teltonika_rms.device_tracker import RmsDeviceTracker
-from teltonika_rms.device_tracker import async_setup_entry as tracker_setup
-from teltonika_rms.diagnostics import TO_REDACT, async_get_config_entry_diagnostics
-from teltonika_rms.endpoint_matrix import EndpointMatrix, EndpointSpec
-from teltonika_rms.entity import TeltonikaRmsEntity
-from teltonika_rms.exceptions import RmsApiError
-from teltonika_rms.models import NormalizedDevice
-from teltonika_rms.sensor import (
+from custom_components.teltonika_rms.device_tracker import RmsDeviceTracker
+from custom_components.teltonika_rms.device_tracker import async_setup_entry as tracker_setup
+from custom_components.teltonika_rms.diagnostics import (
+    TO_REDACT,
+    async_get_config_entry_diagnostics,
+)
+from custom_components.teltonika_rms.endpoint_matrix import EndpointMatrix, EndpointSpec
+from custom_components.teltonika_rms.entity import TeltonikaRmsEntity
+from custom_components.teltonika_rms.exceptions import RmsApiError
+from custom_components.teltonika_rms.models import NormalizedDevice
+from custom_components.teltonika_rms.sensor import (
     RmsClientsCountSensor,
     RmsConnectionStateSensor,
     RmsConnectionTypeSensor,
@@ -53,20 +57,25 @@ from teltonika_rms.sensor import (
     RmsTemperatureSensor,
     RmsWanStateSensor,
 )
-from teltonika_rms.sensor import (
+from custom_components.teltonika_rms.sensor import (
     async_setup_entry as sensor_setup,
 )
-from teltonika_rms.status_channel import (
+from custom_components.teltonika_rms.status_channel import (
     RmsStatusChannelManager,
     _coerce_payload,
     _is_terminal,
 )
-from teltonika_rms.switch import RmsPoeSwitch
-from teltonika_rms.switch import async_setup_entry as switch_setup
-from teltonika_rms.update import RmsFirmwareUpdateEntity
-from teltonika_rms.update import async_setup_entry as update_setup
+from custom_components.teltonika_rms.switch import RmsPoeSwitch
+from custom_components.teltonika_rms.switch import async_setup_entry as switch_setup
+from custom_components.teltonika_rms.update import RmsFirmwareUpdateEntity
+from custom_components.teltonika_rms.update import async_setup_entry as update_setup
 
 pytestmark = pytest.mark.ha
+MOCK_HASS: Any = None
+
+
+def _add_entities(target: list[Any]) -> Any:
+    return cast(Any, target.extend)
 
 
 class FakeListenerCoordinator:
@@ -305,13 +314,13 @@ def test_switch_device_generates_fallback_ports() -> None:
     added_binary: list[Any] = []
     added_switch: list[Any] = []
     added_sensor: list[Any] = []
-    entry = SimpleNamespace(
+    entry: Any = SimpleNamespace(
         runtime_data=TeltonikaRmsRuntime(bundle=bundle), async_on_unload=lambda cb: None
     )
 
-    asyncio.run(binary_setup(None, entry, added_binary.extend))
-    asyncio.run(switch_setup(None, entry, added_switch.extend))
-    asyncio.run(sensor_setup(None, entry, added_sensor.extend))
+    asyncio.run(binary_setup(MOCK_HASS, entry, _add_entities(added_binary)))
+    asyncio.run(switch_setup(MOCK_HASS, entry, _add_entities(added_switch)))
+    asyncio.run(sensor_setup(MOCK_HASS, entry, _add_entities(added_sensor)))
 
     # Expect 1 online sensor + 8 ethernet ports + 2 sfp ports + 1 extra_port = 12 binary sensors
     assert len(added_binary) == 12
@@ -328,7 +337,7 @@ def test_switch_device_generates_fallback_ports() -> None:
 def test_platform_setup_entry_adds_expected_entities() -> None:
     bundle = _bundle(_normalized())
     runtime = TeltonikaRmsRuntime(bundle=bundle)
-    entry = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
+    entry: Any = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
     added_binary: list[Any] = []
     added_sensor: list[Any] = []
     added_button: list[Any] = []
@@ -336,12 +345,12 @@ def test_platform_setup_entry_adds_expected_entities() -> None:
     added_update: list[Any] = []
     added_tracker: list[Any] = []
 
-    asyncio.run(binary_setup(None, entry, added_binary.extend))
-    asyncio.run(sensor_setup(None, entry, added_sensor.extend))
-    asyncio.run(button_setup(None, entry, added_button.extend))
-    asyncio.run(switch_setup(None, entry, added_switch.extend))
-    asyncio.run(update_setup(None, entry, added_update.extend))
-    asyncio.run(tracker_setup(None, entry, added_tracker.extend))
+    asyncio.run(binary_setup(MOCK_HASS, entry, _add_entities(added_binary)))
+    asyncio.run(sensor_setup(MOCK_HASS, entry, _add_entities(added_sensor)))
+    asyncio.run(button_setup(MOCK_HASS, entry, _add_entities(added_button)))
+    asyncio.run(switch_setup(MOCK_HASS, entry, _add_entities(added_switch)))
+    asyncio.run(update_setup(MOCK_HASS, entry, _add_entities(added_update)))
+    asyncio.run(tracker_setup(MOCK_HASS, entry, _add_entities(added_tracker)))
 
     assert len(added_binary) == 4
     assert len(added_sensor) == 13
@@ -361,7 +370,7 @@ def test_sensor_and_update_setup_skip_duplicates_and_optional_entities() -> None
     bundle.port_scan.data = {"dev-1": [{"name": "lan1"}, {"name": ""}]}
     runtime = TeltonikaRmsRuntime(bundle=bundle)
     unloaders: list[Any] = []
-    entry = SimpleNamespace(
+    entry: Any = SimpleNamespace(
         runtime_data=runtime,
         async_on_unload=unloaders.append,
     )
@@ -369,9 +378,9 @@ def test_sensor_and_update_setup_skip_duplicates_and_optional_entities() -> None
     added_switch: list[Any] = []
     added_update: list[Any] = []
 
-    asyncio.run(sensor_setup(None, entry, added_sensor.extend))
-    asyncio.run(switch_setup(None, entry, added_switch.extend))
-    asyncio.run(update_setup(None, entry, added_update.extend))
+    asyncio.run(sensor_setup(MOCK_HASS, entry, _add_entities(added_sensor)))
+    asyncio.run(switch_setup(MOCK_HASS, entry, _add_entities(added_switch)))
+    asyncio.run(update_setup(MOCK_HASS, entry, _add_entities(added_update)))
 
     assert len(added_switch) == 0
     assert added_update == []
@@ -391,12 +400,12 @@ def test_sensor_and_update_setup_skip_duplicates_and_optional_entities() -> None
 
     bundle_with_update = _bundle(_normalized())
     runtime_with_update = TeltonikaRmsRuntime(bundle=bundle_with_update)
-    entry_with_update = SimpleNamespace(
+    entry_with_update: Any = SimpleNamespace(
         runtime_data=runtime_with_update,
         async_on_unload=lambda cb: None,
     )
     added_update_once: list[Any] = []
-    asyncio.run(update_setup(None, entry_with_update, added_update_once.extend))
+    asyncio.run(update_setup(MOCK_HASS, entry_with_update, _add_entities(added_update_once)))
     assert len(added_update_once) == 1
     for listener in bundle_with_update.inventory.listeners:
         listener()
@@ -411,7 +420,7 @@ def test_update_setup_can_add_entity_after_state_listener_refresh() -> None:
 
     bundle = _bundle(normalized)
     runtime = TeltonikaRmsRuntime(bundle=bundle)
-    entry = SimpleNamespace(
+    entry: Any = SimpleNamespace(
         runtime_data=runtime,
         async_on_unload=lambda cb: None,
     )
@@ -419,7 +428,7 @@ def test_update_setup_can_add_entity_after_state_listener_refresh() -> None:
 
     bundle.merged_device = lambda device_id: current["value"] if device_id == "dev-1" else None
 
-    asyncio.run(update_setup(None, entry, added_update.extend))
+    asyncio.run(update_setup(MOCK_HASS, entry, _add_entities(added_update)))
     assert added_update == []
 
     current["value"] = _normalized()
@@ -530,10 +539,10 @@ def test_poe_switch_handles_missing_port_and_setup_skips_invalid_ports() -> None
         ]
     }
     runtime = TeltonikaRmsRuntime(bundle=bundle)
-    entry = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
+    entry: Any = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
     added_switch: list[Any] = []
 
-    asyncio.run(switch_setup(None, entry, added_switch.extend))
+    asyncio.run(switch_setup(MOCK_HASS, entry, _add_entities(added_switch)))
 
     assert added_switch == []
 
@@ -548,8 +557,8 @@ def test_coordinator_bundle_and_budget_validation() -> None:
         state=state,  # type: ignore[arg-type]
         port_scan=FakeListenerCoordinator(),  # type: ignore[arg-type]
         port_config=FakeListenerCoordinator(),  # type: ignore[arg-type]
-        status_channels=SimpleNamespace(),
-        api=SimpleNamespace(),
+        status_channels=cast(Any, SimpleNamespace()),
+        api=cast(Any, SimpleNamespace()),
     )
 
     merged = bundle.merged_device("dev-1")
@@ -572,7 +581,13 @@ def test_coordinator_constructors_cover_default_option_parsing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def _fake_super_init(
-        self: Any, hass: Any, logger: Any, *, name: str, update_interval: timedelta
+        self: Any,
+        hass: Any,
+        logger: Any,
+        *,
+        name: str,
+        update_interval: timedelta,
+        config_entry: Any = None,
     ) -> None:
         self.hass = hass
         self.logger = logger
@@ -612,6 +627,10 @@ def test_coordinator_constructors_cover_default_option_parsing(
 
     assert inventory._tags == ["alpha", "beta"]
     assert inventory._device_status == "online"
+    assert inventory.update_interval is not None
+    assert state.update_interval is not None
+    assert port_scan.update_interval is not None
+    assert port_config.update_interval is not None
     assert int(inventory.update_interval.total_seconds()) == 60
     assert state._enable_location is False
     assert state._estimated_devices == 5
@@ -621,7 +640,7 @@ def test_coordinator_constructors_cover_default_option_parsing(
 
 
 def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.MonkeyPatch) -> None:
-    inventory = object.__new__(InventoryCoordinator)
+    inventory: Any = object.__new__(InventoryCoordinator)
     inventory._api = SimpleNamespace(
         async_list_devices=lambda **kwargs: asyncio.sleep(
             0, result=[{"id": "dev-1", "name": "Router"}]
@@ -633,7 +652,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     updated = asyncio.run(inventory._async_update_data())
     assert updated == {"dev-1": {"id": "dev-1", "name": "Router"}}
 
-    failing_inventory = object.__new__(InventoryCoordinator)
+    failing_inventory: Any = object.__new__(InventoryCoordinator)
     failing_inventory._api = SimpleNamespace(
         async_list_devices=lambda **kwargs: asyncio.sleep(0, result=None)
     )
@@ -647,7 +666,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     with pytest.raises(UpdateFailed):
         asyncio.run(failing_inventory._async_update_data())
 
-    inventory_skip = object.__new__(InventoryCoordinator)
+    inventory_skip: Any = object.__new__(InventoryCoordinator)
     inventory_skip._api = SimpleNamespace(
         async_list_devices=lambda **kwargs: asyncio.sleep(
             0, result=[{"id": "dev-1"}, {"name": "missing"}]
@@ -657,7 +676,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     inventory_skip._device_status = None
     assert asyncio.run(inventory_skip._async_update_data()) == {"dev-1": {"id": "dev-1"}}
 
-    state = object.__new__(StateCoordinator)
+    state: Any = object.__new__(StateCoordinator)
     state._api = SimpleNamespace(
         endpoint_matrix=_matrix(aggregate=False),
         async_get_states_for_devices=lambda device_ids, max_per_cycle: asyncio.sleep(
@@ -696,11 +715,11 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     with pytest.raises(ConfigEntryAuthFailed):
         asyncio.run(state._async_update_data())
 
-    state_empty = object.__new__(StateCoordinator)
+    state_empty: Any = object.__new__(StateCoordinator)
     state_empty._inventory = SimpleNamespace(data={}, update_interval=timedelta(seconds=900))
     assert asyncio.run(state_empty._async_update_data()) == {}
 
-    port_scan = object.__new__(PortScanCoordinator)
+    port_scan: Any = object.__new__(PortScanCoordinator)
     port_scan._api = SimpleNamespace(
         async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(
             0, result=[{"name": "port1"}]
@@ -716,7 +735,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     port_scan._api.async_get_device_ethernet_ports = _raise_ports
     assert asyncio.run(port_scan._async_update_data()) == {}
 
-    auth_port_scan = object.__new__(PortScanCoordinator)
+    auth_port_scan: Any = object.__new__(PortScanCoordinator)
     auth_port_scan._api = SimpleNamespace()
     auth_port_scan._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}})
     auth_port_scan._scope_warning_logged = False
@@ -728,7 +747,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     assert asyncio.run(auth_port_scan._async_update_data()) == {}
     assert auth_port_scan._scope_warning_logged is True
 
-    empty_port_scan = object.__new__(PortScanCoordinator)
+    empty_port_scan: Any = object.__new__(PortScanCoordinator)
     empty_port_scan._api = SimpleNamespace(
         async_get_device_ethernet_ports=lambda device_id: asyncio.sleep(
             0, result=[{"name": "unused"}]
@@ -737,7 +756,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     empty_port_scan._inventory = SimpleNamespace(data={})
     assert asyncio.run(empty_port_scan._async_update_data()) == {}
 
-    port_config = object.__new__(PortConfigCoordinator)
+    port_config: Any = object.__new__(PortConfigCoordinator)
     port_config._api = SimpleNamespace(
         async_get_device_port_configurations=lambda device_id: asyncio.sleep(
             0, result=[{"id": "port1", "poe_enable": "1"}]
@@ -755,7 +774,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     port_config._api.async_get_device_port_configurations = _raise_bad_config
     assert asyncio.run(port_config._async_update_data()) == {}
 
-    auth_port_config = object.__new__(PortConfigCoordinator)
+    auth_port_config: Any = object.__new__(PortConfigCoordinator)
     auth_port_config._api = SimpleNamespace()
     auth_port_config._inventory = SimpleNamespace(data={"dev-1": {"id": "dev-1"}})
     auth_port_config._scope_warning_logged = False
@@ -767,7 +786,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
     assert asyncio.run(auth_port_config._async_update_data()) == {}
     assert auth_port_config._scope_warning_logged is True
 
-    empty_port_config = object.__new__(PortConfigCoordinator)
+    empty_port_config: Any = object.__new__(PortConfigCoordinator)
     empty_port_config._api = SimpleNamespace(
         async_get_device_port_configurations=lambda device_id: asyncio.sleep(
             0, result=[{"id": "port1", "poe_enable": "1"}]
@@ -778,7 +797,7 @@ def test_inventory_and_state_coordinator_update_methods(monkeypatch: pytest.Monk
 
 
 def test_coordinator_handles_auth_failed_and_refresh_all() -> None:
-    inventory = object.__new__(InventoryCoordinator)
+    inventory: Any = object.__new__(InventoryCoordinator)
 
     async def _auth_fail(**kwargs: Any) -> Any:
         raise ConfigEntryAuthFailed("denied")
@@ -789,7 +808,7 @@ def test_coordinator_handles_auth_failed_and_refresh_all() -> None:
     with pytest.raises(ConfigEntryAuthFailed):
         asyncio.run(inventory._async_update_data())
 
-    bundle = SimpleNamespace(
+    bundle: Any = SimpleNamespace(
         inventory=FakeListenerCoordinator(),
         state=FakeListenerCoordinator(),
         port_scan=FakeListenerCoordinator(),
@@ -806,7 +825,7 @@ def test_state_coordinator_handles_location_errors(monkeypatch: pytest.MonkeyPat
     async def _raise_location(device_id: str) -> Any:
         raise RmsApiError("bad location")
 
-    state = object.__new__(StateCoordinator)
+    state: Any = object.__new__(StateCoordinator)
     state._api = SimpleNamespace(
         endpoint_matrix=_matrix(aggregate=False),
         async_get_states_for_devices=lambda device_ids, max_per_cycle: asyncio.sleep(
@@ -829,12 +848,12 @@ def test_state_coordinator_handles_location_errors(monkeypatch: pytest.MonkeyPat
 
 
 def test_diagnostics_redacts_sensitive_fields() -> None:
-    bundle = SimpleNamespace(
+    bundle: Any = SimpleNamespace(
         api=SimpleNamespace(request_counter=7, endpoint_matrix=_matrix()),
         inventory=SimpleNamespace(data={"a": {}}),
         state=SimpleNamespace(data={"a": {}}),
     )
-    entry = SimpleNamespace(
+    entry: Any = SimpleNamespace(
         entry_id="entry-1",
         title="Teltonika RMS",
         data={"access_token": "secret", "pat_token": "secret", "auth_mode": "pat", "other": "keep"},
@@ -842,7 +861,7 @@ def test_diagnostics_redacts_sensitive_fields() -> None:
         runtime_data=TeltonikaRmsRuntime(bundle=bundle),
     )
 
-    diagnostics = asyncio.run(async_get_config_entry_diagnostics(None, entry))
+    diagnostics = asyncio.run(async_get_config_entry_diagnostics(MOCK_HASS, entry))
 
     assert diagnostics["entry"]["data"]["other"] == "keep"
     for key in TO_REDACT:
@@ -882,7 +901,7 @@ def test_status_channel_manager_and_helpers(monkeypatch: pytest.MonkeyPatch) -> 
     async def _sleep(delay: float) -> None:
         return None
 
-    monkeypatch.setattr("teltonika_rms.status_channel.asyncio.sleep", _sleep)
+    monkeypatch.setattr("custom_components.teltonika_rms.status_channel.asyncio.sleep", _sleep)
     assert asyncio.run(polling_manager._async_wait_via_polling("abc", 2)) == {"status": "done"}
     assert asyncio.run(polling_manager._async_wait_via_socket("abc", 1)) is None
 
@@ -930,7 +949,7 @@ def test_status_channel_socket_success_and_disconnect(monkeypatch: pytest.Monkey
             self.connected = False
 
     monkeypatch.setattr(
-        "teltonika_rms.status_channel.socketio",
+        "custom_components.teltonika_rms.status_channel.socketio",
         SimpleNamespace(AsyncClient=FakeAsyncClient),
     )
     manager = RmsStatusChannelManager(
@@ -966,7 +985,7 @@ def test_status_channel_socket_handles_connect_failures_and_emit_errors(
             self.connected = False
 
     monkeypatch.setattr(
-        "teltonika_rms.status_channel.socketio",
+        "custom_components.teltonika_rms.status_channel.socketio",
         SimpleNamespace(AsyncClient=FakeAsyncClient),
     )
     manager = RmsStatusChannelManager(
@@ -980,7 +999,7 @@ def test_status_channel_socket_handles_connect_failures_and_emit_errors(
             raise RuntimeError("connect failed")
 
     monkeypatch.setattr(
-        "teltonika_rms.status_channel.socketio",
+        "custom_components.teltonika_rms.status_channel.socketio",
         SimpleNamespace(AsyncClient=FailingClient),
     )
     assert asyncio.run(manager._async_wait_via_socket("abc", 1)) is None
@@ -1001,11 +1020,11 @@ def test_status_channel_polling_times_out(monkeypatch: pytest.MonkeyPatch) -> No
 
     class FakeDateTime(datetime):
         @classmethod
-        def now(cls, tz: Any = None) -> datetime:
-            return next(times)
+        def now(cls, tz: Any = None) -> FakeDateTime:
+            return cast(FakeDateTime, next(times))
 
-    monkeypatch.setattr("teltonika_rms.status_channel.asyncio.sleep", _sleep)
-    monkeypatch.setattr("teltonika_rms.status_channel.datetime", FakeDateTime)
+    monkeypatch.setattr("custom_components.teltonika_rms.status_channel.asyncio.sleep", _sleep)
+    monkeypatch.setattr("custom_components.teltonika_rms.status_channel.datetime", FakeDateTime)
     manager = RmsStatusChannelManager(
         SimpleNamespace(
             async_poll_status_channel=_pending,
@@ -1051,10 +1070,10 @@ def test_missing_coverage_lines() -> None:
     no_metrics.sim_slot = None
     no_metrics_bundle = _bundle(no_metrics)
     added_sensor: list[Any] = []
-    entry = SimpleNamespace(
+    entry: Any = SimpleNamespace(
         runtime_data=TeltonikaRmsRuntime(bundle=no_metrics_bundle), async_on_unload=lambda cb: None
     )
-    asyncio.run(sensor_setup(None, entry, added_sensor.extend))
+    asyncio.run(sensor_setup(MOCK_HASS, entry, _add_entities(added_sensor)))
 
     # sensor.py: 109
     no_metrics_bundle.port_scan.data = {"dev-1": [{"name": "port1", "PoE (W)": None, "PoE": True}]}
@@ -1071,7 +1090,7 @@ def test_missing_coverage_lines() -> None:
 
     # Check that added_switch is empty since empty port string is filtered
     added_switch: list[Any] = []
-    asyncio.run(switch_setup(None, entry, added_switch.extend))
+    asyncio.run(switch_setup(MOCK_HASS, entry, _add_entities(added_switch)))
 
 
 def test_binary_sensor_removes_switch_prefix() -> None:
@@ -1079,10 +1098,10 @@ def test_binary_sensor_removes_switch_prefix() -> None:
     bundle.inventory.data["dev-1"]["model"] = "TSW202"
     bundle.port_config.data["dev-1"] = [{"id": "switch_port1"}]
     runtime = TeltonikaRmsRuntime(bundle=bundle)
-    entry = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
+    entry: Any = SimpleNamespace(runtime_data=runtime, async_on_unload=lambda cb: None)
 
     added_binary: list[Any] = []
-    asyncio.run(binary_setup(None, entry, added_binary.extend))
+    asyncio.run(binary_setup(MOCK_HASS, entry, _add_entities(added_binary)))
 
     port1 = next((s for s in added_binary if s._attr_unique_id == "dev-1_port1_link"), None)
     assert port1 is not None

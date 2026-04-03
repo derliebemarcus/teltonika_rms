@@ -12,10 +12,16 @@ from typing import Any, Protocol
 from aiohttp import ClientError, ClientResponse, ClientSession, ClientTimeout
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session
+from pydantic import ValidationError
 
 from .const import API_BASE_URL, MAX_MONTHLY_REQUESTS, REQUEST_BUDGET_HEADROOM, STATUS_BASE_URL
 from .endpoint_matrix import EndpointMatrix
 from .exceptions import RmsApiError
+from .models_api import (
+    DeviceDetailResponse,
+    DeviceListResponse,
+    DeviceStateResponse,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -169,6 +175,7 @@ class RmsApiClient:
 
             data, meta = await self.async_request("GET", path, params=params)
             batch = _coerce_list(data)
+            _validate_contract_list(batch, "devices_list", DeviceListResponse)
             devices.extend(batch)
 
             if not _has_next_page(batch, meta, page_size):
@@ -186,6 +193,7 @@ class RmsApiClient:
             try:
                 data, _meta = await self.async_request("GET", state_path, allow_not_found=True)
                 if isinstance(data, dict):
+                    _validate_contract_payload(data, "device_state", DeviceStateResponse)
                     return data
             except RmsApiError:
                 LOGGER.debug("State endpoint failed for %s, falling back to detail", device_id)
@@ -193,6 +201,7 @@ class RmsApiClient:
         if detail_path:
             data, _meta = await self.async_request("GET", detail_path, allow_not_found=True)
             if isinstance(data, dict):
+                _validate_contract_payload(data, "device_detail", DeviceDetailResponse)
                 return data
 
         return {}
@@ -484,6 +493,32 @@ def _parse_envelope(payload: Any) -> tuple[Any, dict[str, Any]]:
     return payload.get("data"), payload.get("meta") or {}
 
 
+def _validate_contract_list(
+    data: list[dict[str, Any]],
+    endpoint_name: str,
+    response_model: type[DeviceListResponse],
+) -> None:
+    """Validate a list-style RMS payload and raise a controlled error on drift."""
+    try:
+        response_model.model_validate({"data": data})
+    except ValidationError as err:
+        LOGGER.warning("API contract violation in %s: %s", endpoint_name, err)
+        raise RmsApiError(f"RMS schema changed for {endpoint_name}") from err
+
+
+def _validate_contract_payload(
+    data: dict[str, Any],
+    endpoint_name: str,
+    response_model: type[DeviceDetailResponse] | type[DeviceStateResponse],
+) -> None:
+    """Validate a dict-style RMS payload and raise a controlled error on drift."""
+    try:
+        response_model.model_validate({"data": data})
+    except ValidationError as err:
+        LOGGER.warning("API contract violation in %s: %s", endpoint_name, err)
+        raise RmsApiError(f"RMS schema changed for {endpoint_name}") from err
+
+
 def _coerce_list(data: Any) -> list[dict[str, Any]]:
     if isinstance(data, list):
         return [item for item in data if isinstance(item, dict)]
@@ -531,7 +566,7 @@ def _has_next_page(batch: list[dict[str, Any]], meta: dict[str, Any], page_size:
 
 
 def _retry_delay(attempt: int) -> float:
-    return min(2**attempt, 30) + random.uniform(0.0, 0.5)
+    return float(min(2**attempt, 30)) + random.uniform(0.0, 0.5)
 
 
 async def _async_retry_sleep(response: ClientResponse, attempt: int) -> None:

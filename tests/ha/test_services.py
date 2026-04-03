@@ -3,25 +3,25 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from homeassistant.core import HomeAssistant
 
-from custom_components.teltonika_rms import DOMAIN, SERVICE_GET_DEVICE_HISTORY
-from custom_components.teltonika_rms.__init__ import (
+from custom_components.teltonika_rms import (
+    SERVICE_GET_DEVICE_HISTORY,
     _build_history_handler,
 )  # Import the handler directly
-from custom_components.teltonika_rms.coordinator import CoordinatorBundle
+from custom_components.teltonika_rms.const import DOMAIN
 
 pytestmark = pytest.mark.ha
 
 
 @pytest.mark.asyncio
 async def test_get_device_history_service_calls_api_and_fires_event(
-    hass: HomeAssistant,
-    mock_rms_api_client: AsyncMock,
-    mock_coordinator_bundle: CoordinatorBundle,
+    hass: Any,
+    mock_rms_api_client: Any,
+    mock_coordinator_bundle: Any,
 ) -> None:
     """Test that the get_device_history service calls the API and fires an event."""
     mock_rms_api_client.async_get_device_history.return_value = [
@@ -33,7 +33,7 @@ async def test_get_device_history_service_calls_api_and_fires_event(
     mock_config_entry.runtime_data = AsyncMock(bundle=mock_coordinator_bundle)
     hass.config_entries._entries = [mock_config_entry]
 
-    events = []
+    events: list[Any] = []
     await hass.bus.async_listen_once(f"{DOMAIN}_device_history", lambda e: events.append(e))
 
     # Directly call the service handler with mocked call data
@@ -72,9 +72,9 @@ async def test_get_device_history_service_calls_api_and_fires_event(
 
 @pytest.mark.asyncio
 async def test_get_device_history_service_handles_keys_param(
-    hass: HomeAssistant,
-    mock_rms_api_client: AsyncMock,
-    mock_coordinator_bundle: CoordinatorBundle,
+    hass: Any,
+    mock_rms_api_client: Any,
+    mock_coordinator_bundle: Any,
 ) -> None:
     """Test that the get_device_history service correctly passes keys to the API."""
     mock_rms_api_client.async_get_device_history.return_value = [
@@ -86,7 +86,7 @@ async def test_get_device_history_service_handles_keys_param(
     mock_config_entry.runtime_data = AsyncMock(bundle=mock_coordinator_bundle)
     hass.config_entries._entries = [mock_config_entry]
 
-    events = []
+    events: list[Any] = []
     await hass.bus.async_listen_once(f"{DOMAIN}_device_history", lambda e: events.append(e))
 
     handler = _build_history_handler(hass)
@@ -119,9 +119,9 @@ async def test_get_device_history_service_handles_keys_param(
 
 @pytest.mark.asyncio
 async def test_get_device_history_service_fires_error_event_on_api_failure(
-    hass: HomeAssistant,
-    mock_rms_api_client: AsyncMock,
-    mock_coordinator_bundle: CoordinatorBundle,
+    hass: Any,
+    mock_rms_api_client: Any,
+    mock_coordinator_bundle: Any,
 ) -> None:
     """Test that the get_device_history service fires an error event on API failure."""
     mock_rms_api_client.async_get_device_history.side_effect = Exception("API down")
@@ -131,7 +131,7 @@ async def test_get_device_history_service_fires_error_event_on_api_failure(
     mock_config_entry.runtime_data = AsyncMock(bundle=mock_coordinator_bundle)
     hass.config_entries._entries = [mock_config_entry]
 
-    error_events = []
+    error_events: list[Any] = []
     await hass.bus.async_listen_once(
         f"{DOMAIN}_device_history_error", lambda e: error_events.append(e)
     )
@@ -156,9 +156,9 @@ async def test_get_device_history_service_fires_error_event_on_api_failure(
 
 @pytest.mark.asyncio
 async def test_get_device_history_service_invalid_input_no_api_call(
-    hass: HomeAssistant,
-    mock_rms_api_client: AsyncMock,
-    mock_coordinator_bundle: CoordinatorBundle,
+    hass: Any,
+    mock_rms_api_client: Any,
+    mock_coordinator_bundle: Any,
 ) -> None:
     """Test that the service does not call the API with invalid input."""
     mock_config_entry = AsyncMock()
@@ -167,7 +167,7 @@ async def test_get_device_history_service_invalid_input_no_api_call(
     hass.config_entries._entries = [mock_config_entry]
 
     # Missing device_id
-    with patch("custom_components.teltonika_rms.__init__.LOGGER.error") as mock_logger_error:
+    with patch("custom_components.teltonika_rms.LOGGER.error") as mock_logger_error:
         handler = _build_history_handler(hass)
         await handler(
             AsyncMock(
@@ -185,7 +185,7 @@ async def test_get_device_history_service_invalid_input_no_api_call(
 
     # Missing config_id and keys
     mock_rms_api_client.async_get_device_history.reset_mock()
-    with patch("custom_components.teltonika_rms.__init__.LOGGER.error") as mock_logger_error:
+    with patch("custom_components.teltonika_rms.LOGGER.error") as mock_logger_error:
         handler = _build_history_handler(hass)
         await handler(
             AsyncMock(
@@ -202,12 +202,12 @@ async def test_get_device_history_service_invalid_input_no_api_call(
 
 
 @pytest.mark.asyncio
-async def test_unload_removes_history_service(hass: HomeAssistant) -> None:
+async def test_unload_removes_history_service(hass: Any) -> None:
     """Test that the get_device_history service is removed on unload."""
     # Assume service is registered
     await hass.services.async_register(DOMAIN, SERVICE_GET_DEVICE_HISTORY, AsyncMock())
     # Mock _merged_options to avoid dependency issues during unload test
-    with patch("custom_components.teltonika_rms.__init__._merged_options", return_value={}):
+    with patch("custom_components.teltonika_rms._merged_options", return_value={}):
         hass.config_entries.async_unload_platforms.return_value = True
         result = await hass.config_entries.async_unload_platforms(
             AsyncMock(), []
@@ -223,7 +223,7 @@ async def test_unload_removes_history_service(hass: HomeAssistant) -> None:
 
 
 @pytest.mark.asyncio
-async def test_refresh_service_handles_missing_runtime_data(hass: HomeAssistant) -> None:
+async def test_refresh_service_handles_missing_runtime_data(hass: Any) -> None:
     """Test that the refresh service gracefully handles entries with missing runtime data."""
     from custom_components.teltonika_rms import _build_refresh_handler
 
@@ -239,7 +239,7 @@ async def test_refresh_service_handles_missing_runtime_data(hass: HomeAssistant)
 
 
 @pytest.mark.asyncio
-async def test_history_service_handles_missing_runtime_data(hass: HomeAssistant) -> None:
+async def test_history_service_handles_missing_runtime_data(hass: Any) -> None:
     """Test that the history service gracefully handles entries with missing runtime data."""
     mock_entry_no_runtime = AsyncMock()
     mock_entry_no_runtime.domain = DOMAIN
@@ -262,7 +262,7 @@ async def test_history_service_handles_missing_runtime_data(hass: HomeAssistant)
 
 
 @pytest.mark.asyncio
-async def test_unload_entry_failure_returns_false(hass: HomeAssistant) -> None:
+async def test_unload_entry_failure_returns_false(hass: Any) -> None:
     """Test that async_unload_entry returns False when platform unloading fails."""
     from custom_components.teltonika_rms import async_unload_entry
 

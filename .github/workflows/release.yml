@@ -144,6 +144,7 @@ jobs:
             const body = fs.readFileSync("release_notes.md", "utf8");
 
             const isPrerelease = tag.includes("-beta");
+            const makeLatest = isPrerelease ? "false" : "true";
 
             try {
               const existing = await github.rest.repos.getReleaseByTag({
@@ -160,6 +161,7 @@ jobs:
                 name: `Release ${tag}`,
                 body,
                 prerelease: isPrerelease,
+                make_latest: makeLatest,
               });
               core.info(`Updated release ${tag}.`);
             } catch (error) {
@@ -174,6 +176,7 @@ jobs:
                 name: `Release ${tag}`,
                 body,
                 prerelease: isPrerelease,
+                make_latest: makeLatest,
               });
               core.info(`Created release ${tag}.`);
             }
@@ -193,4 +196,3 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -f "$FLOATING_TAG" "$SHA"
           git push origin -f "refs/tags/$FLOATING_TAG"
-

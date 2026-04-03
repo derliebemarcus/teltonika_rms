@@ -5,7 +5,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 import pytest
-from teltonika_rms.models import (
+
+from custom_components.teltonika_rms.models import (
     first_value,
     has_location_coordinates,
     normalize_device,

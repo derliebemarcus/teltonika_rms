@@ -188,6 +188,10 @@ To instantly set up your local development environment with all required depende
 make setup
 ```
 
+`make setup` also installs a virtualenv activation hook that runs `pip install --upgrade pip` whenever a developer enters `.venv` or `.venv-test`.
+
+You can run code quality tools and tests using the `Makefile` (e.g., `make lint`, `make test`, `make mutate`, `make audit`, `make osv`, `make hassfest`, `make validate`, `make lock`, `make snapshot`, `make contract`).
+
 - Development conventions are aligned with Home Assistant custom integration guidance:
   - [Home Assistant Developer Docs](https://developers.home-assistant.io/docs/development_index/)
 - Translation consistency can be validated with:
@@ -199,6 +203,17 @@ python3 tools/check_translations.py
 - Test suite follows HA-style layout under:
   - `tests/unit/` (runs without Home Assistant dependencies)
   - `tests/ha/` (requires Home Assistant Python dependencies)
+- The RMS API client performs runtime contract validation with `pydantic` models, and dedicated contract coverage lives in:
+  - `tests/unit/test_api_contract.py`
+- Diagnostics payload stability is protected by Syrupy snapshots:
+  - `tests/ha/test_diagnostics_snapshots.py`
+- Dependencies are pinned with `pip-tools`:
+  - update the lockfile with `make lock`
+  - CI rejects drift between `requirements-dev.txt` and `requirements.txt`
+- Static analysis is enforced with:
+  - `ruff check .`
+  - `ruff format --check .`
+  - `mypy .`
 
 - Run tests with:
 
@@ -232,6 +247,8 @@ make setup
 
 `pre-push` hook behavior:
 
+- Runs OSV-Scanner via Docker and blocks the push if vulnerabilities are found
+- Fails closed when Docker is unavailable so vulnerability scanning cannot be skipped silently
 - Ensures a version tag `v<manifest.version>` exists before push
 - Ensures the tag is part of current branch history
 

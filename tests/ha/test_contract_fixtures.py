@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from teltonika_rms.api import _coerce_list, _parse_envelope
-from teltonika_rms.models import normalize_device
+from custom_components.teltonika_rms.api import _coerce_list, _parse_envelope
+from custom_components.teltonika_rms.models import normalize_device
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "rms"
 
