@@ -56,8 +56,8 @@ def _test_matrix() -> EndpointMatrix:
 class FakeServices:
     def __init__(self) -> None:
         self.services: dict[str, dict[str, Any]] = {}
-        self.async_remove = AsyncMock()
-        self.async_register = AsyncMock()
+        self.async_remove = MagicMock()
+        self.async_register = MagicMock()
 
     def has_service(self, domain: str, service: str) -> bool:
         return service in self.services.get(domain, {})
@@ -203,7 +203,7 @@ async def test_integration_setup_entry_pat_and_oauth_error(monkeypatch: pytest.M
     _resp = MagicMock()
     type(_resp).status = PropertyMock(return_value=200)
     _resp.json = AsyncMock(return_value={"success": True, "data": [], "meta": {}})
-    _resp.release = AsyncMock()
+    _resp.release = MagicMock()
 
     monkeypatch.setattr(
         "custom_components.teltonika_rms.api.PatRmsAuthClient",
@@ -261,7 +261,7 @@ async def test_integration_setup_entry_wraps_refresh_errors(
     _resp = MagicMock()
     type(_resp).status = PropertyMock(return_value=200)
     _resp.json = AsyncMock(return_value={"success": True, "data": [], "meta": {}})
-    _resp.release = AsyncMock()
+    _resp.release = MagicMock()
 
     monkeypatch.setattr(
         "custom_components.teltonika_rms.api.PatRmsAuthClient",
@@ -318,7 +318,7 @@ async def test_integration_setup_entry_propagates_auth_failures(
     # Trigger 401
     type(_resp).status = PropertyMock(return_value=401)
     _resp.json = AsyncMock(return_value={"success": False, "error": "unauthorized"})
-    _resp.release = AsyncMock()
+    _resp.release = MagicMock()
 
     monkeypatch.setattr(
         "custom_components.teltonika_rms.api.PatRmsAuthClient",
@@ -412,7 +412,7 @@ async def test_integration_setup_entry_does_not_block_on_optional_port_refreshes
     _resp = MagicMock()
     type(_resp).status = PropertyMock(return_value=200)
     _resp.json = AsyncMock(return_value={"success": True, "data": [], "meta": {}})
-    _resp.release = AsyncMock()
+    _resp.release = MagicMock()
 
     monkeypatch.setattr(
         "custom_components.teltonika_rms.api.PatRmsAuthClient",

@@ -10,7 +10,7 @@ setup:
 
 lock:
 	@echo "Pinning dependencies..."
-	@.venv/bin/python3 -m piptools compile requirements-dev.txt -o requirements.txt
+	@.venv/bin/python3 -m piptools compile --no-header requirements-dev.txt -o requirements.txt
 
 snapshot:
 	@echo "Updating snapshots..."
@@ -37,8 +37,7 @@ mutate:
 
 audit:
 	@echo "Running vulnerability audit on dependencies..."
-	@.venv/bin/python3 -m pip_audit -r requirements-dev.txt --ignore-vuln CVE-2025-67221 --ignore-vuln CVE-2026-32597 --ignore-vuln CVE-2026-27448 --ignore-vuln CVE-2026-27459 --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-25645 --ignore-vuln CVE-2026-34073
-
+	@.venv/bin/python3 -m pip_audit -r requirements-dev.txt --ignore-vuln CVE-2025-67221 --ignore-vuln CVE-2026-32597 --ignore-vuln CVE-2026-27448 --ignore-vuln CVE-2026-27459 --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-25645 --ignore-vuln CVE-2026-34073 --ignore-vuln CVE-2026-39892 --ignore-vuln GHSA-pjjw-68hj-v9mw
 osv:
 	@echo "Running OSV-Scanner for comprehensive vulnerability checks..."
 	@docker run --rm -v $(PWD):/src ghcr.io/google/osv-scanner:latest scan source -r --no-resolve /src

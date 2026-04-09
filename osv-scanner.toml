@@ -9,3 +9,15 @@ reason = "Dependency of Home Assistant, currently accepted risk."
 [[IgnoredVulns]]
 id = "GHSA-752w-5fwx-jx9f"
 reason = "Dependency of Home Assistant, currently accepted risk."
+
+[[IgnoredVulns]]
+id = "GHSA-p423-j2cm-9vmq"
+reason = "Dependency of Home Assistant, currently accepted risk."
+
+[[IgnoredVulns]]
+id = "CVE-2026-32597"
+reason = "Dependency of Home Assistant, currently accepted risk until upstream fixes it."
+
+[[IgnoredVulns]]
+id = "GHSA-pjjw-68hj-v9mw"
+reason = "Dependency of Home Assistant (uv), currently accepted risk until upstream fixes it."

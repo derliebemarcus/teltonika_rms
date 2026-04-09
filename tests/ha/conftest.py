@@ -57,11 +57,12 @@ def hass(mock_coordinator_bundle: CoordinatorBundle) -> Generator[HomeAssistant]
     _hass.config_entries.async_unload_entry = AsyncMock(return_value=True)
     _hass.bus = MagicMock()
     _hass.bus.async_fire = MagicMock(side_effect=async_fire)
-    _hass.bus.async_listen_once = AsyncMock(side_effect=async_listen_once)
-    _hass.services = AsyncMock()
+    _hass.bus.async_listen_once = MagicMock(side_effect=async_listen_once)
+    _hass.async_create_task = MagicMock()
+    _hass.services = MagicMock()
     _hass.services.has_service.return_value = False
-    _hass.services.async_register = AsyncMock()
-    _hass.services.async_remove = AsyncMock()
+    _hass.services.async_register = MagicMock()
+    _hass.services.async_remove = MagicMock()
     with patch(
         "custom_components.teltonika_rms.PLATFORMS",
         ["binary_sensor", "sensor", "device_tracker"],

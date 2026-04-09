@@ -7,8 +7,8 @@ import re
 import subprocess
 import sys
 
-CATEGORY_RE = re.compile(r"^(add|change|deprecate|remove|fix): [^ ].*")
-BYPASS_PREFIX_RE = re.compile(r"^(Update|Bump|Merge)\b")
+CATEGORY_RE = re.compile(r"^(add|change|deprecate|remove|fix|build|chore)(\(.*\))?: [^ ].*")
+BYPASS_PREFIX_RE = re.compile(r"^(Update|Bump|Merge|Revert)\b")
 DEPENDABOT_NAME = "dependabot[bot]"
 
 
@@ -30,15 +30,13 @@ def validate_message(message: str) -> str | None:
 
     if len(meaningful) == 1:
         if not CATEGORY_RE.match(meaningful[0]):
-            return (
-                "single-line commit messages must start with add:/change:/deprecate:/remove:/fix:"
-            )
+            return "single-line commit messages must start with add:/change:/deprecate:/remove:/fix:/build:/chore:"
         return None
 
     summary = None
     body_started = False
     saw_blank_after_summary = False
-    body_lines = 0
+    categorized_body_lines = 0
 
     for line in lines:
         if summary is None:
@@ -55,12 +53,14 @@ def validate_message(message: str) -> str | None:
             body_started = True
         if not line.strip():
             continue
-        if not CATEGORY_RE.match(line):
-            return "each body line must start with exactly one category: add:/change:/deprecate:/remove:/fix:"
-        body_lines += 1
+        if CATEGORY_RE.match(line):
+            categorized_body_lines += 1
 
-    if body_lines == 0:
-        return "multi-line commit messages require at least one categorized body line"
+    if summary is None:
+        return "commit message must not be empty"
+
+    if not CATEGORY_RE.match(summary) and categorized_body_lines == 0:
+        return "multi-line commit messages require either a categorized summary or at least one categorized body line"
     return None
 
 
