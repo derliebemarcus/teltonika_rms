@@ -34,7 +34,7 @@ async def test_get_device_history_service_calls_api_and_fires_event(
     hass.config_entries._entries = [mock_config_entry]
 
     events: list[Any] = []
-    await hass.bus.async_listen_once(f"{DOMAIN}_device_history", lambda e: events.append(e))
+    hass.bus.async_listen_once(f"{DOMAIN}_device_history", lambda e: events.append(e))
 
     # Directly call the service handler with mocked call data
     handler = _build_history_handler(hass)
@@ -87,7 +87,7 @@ async def test_get_device_history_service_handles_keys_param(
     hass.config_entries._entries = [mock_config_entry]
 
     events: list[Any] = []
-    await hass.bus.async_listen_once(f"{DOMAIN}_device_history", lambda e: events.append(e))
+    hass.bus.async_listen_once(f"{DOMAIN}_device_history", lambda e: events.append(e))
 
     handler = _build_history_handler(hass)
     await handler(
@@ -132,9 +132,7 @@ async def test_get_device_history_service_fires_error_event_on_api_failure(
     hass.config_entries._entries = [mock_config_entry]
 
     error_events: list[Any] = []
-    await hass.bus.async_listen_once(
-        f"{DOMAIN}_device_history_error", lambda e: error_events.append(e)
-    )
+    hass.bus.async_listen_once(f"{DOMAIN}_device_history_error", lambda e: error_events.append(e))
 
     handler = _build_history_handler(hass)
     await handler(
@@ -205,7 +203,7 @@ async def test_get_device_history_service_invalid_input_no_api_call(
 async def test_unload_removes_history_service(hass: Any) -> None:
     """Test that the get_device_history service is removed on unload."""
     # Assume service is registered
-    await hass.services.async_register(DOMAIN, SERVICE_GET_DEVICE_HISTORY, AsyncMock())
+    hass.services.async_register(DOMAIN, SERVICE_GET_DEVICE_HISTORY, AsyncMock())
     # Mock _merged_options to avoid dependency issues during unload test
     with patch("custom_components.teltonika_rms._merged_options", return_value={}):
         hass.config_entries.async_unload_platforms.return_value = True
@@ -219,7 +217,7 @@ async def test_unload_removes_history_service(hass: Any) -> None:
         await hass.config_entries.async_unload_entry(
             AsyncMock(domain=DOMAIN, runtime_data=AsyncMock())
         )
-        assert not await hass.services.has_service(DOMAIN, SERVICE_GET_DEVICE_HISTORY)
+        assert not hass.services.has_service(DOMAIN, SERVICE_GET_DEVICE_HISTORY)
 
 
 @pytest.mark.asyncio

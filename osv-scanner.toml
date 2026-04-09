@@ -9,3 +9,7 @@ reason = "Dependency of Home Assistant, currently accepted risk."
 [[IgnoredVulns]]
 id = "GHSA-752w-5fwx-jx9f"
 reason = "Dependency of Home Assistant, currently accepted risk."
+
+[[IgnoredVulns]]
+id = "GHSA-p423-j2cm-9vmq"
+reason = "Dependency of Home Assistant, currently accepted risk."

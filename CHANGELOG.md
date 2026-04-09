@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.11-beta.2 - 2026-04-09
+
+### New Features
+
+- None.
+
+### Improvements
+
+- None.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Relaxed commit message validation rules to allow optional scopes (e.g., `build(deps):`) and more common prefixes.
+- Resolved `RuntimeWarning` issues in tests where non-coroutine Home Assistant methods were being mocked as `AsyncMock` or awaited.
+
 ## 0.9.11-beta.1 - 2026-04-02
 
 ### New Features
