@@ -53,8 +53,8 @@ jobs:
         run: |
           python -m venv .venv
           source .venv/bin/activate
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements-dev.txt
+          python -m pip install --upgrade pip --index-url https://artifacts.home.siczb.de/repository/pypi-proxy/simple/
+          python -m pip install --index-url https://artifacts.home.siczb.de/repository/pypi-proxy/simple/ -r requirements-dev.txt
 
       - name: Run Ruff lint
         run: |
@@ -75,6 +75,24 @@ jobs:
         run: |
           source .venv/bin/activate
           python tools/check_translations.py
+
+  sonarqube:
+    runs-on: [self-hosted, linux, X64]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarqube.home.siczb.de
+        with:
+          args: >
+            -Dsonar.projectKey=teltonika_rms
+            -Dsonar.python.version=3.14
+            -Dsonar.sources=custom_components/teltonika_rms
+            -Dsonar.tests=tests
 
   workflow-lint:
     runs-on: ubuntu-latest

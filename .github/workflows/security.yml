@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m venv .venv
           source .venv/bin/activate
-          python -m pip install -r requirements-dev.txt
+          python -m pip install --index-url https://artifacts.home.siczb.de/repository/pypi-proxy/simple/ -r requirements-dev.txt
 
       - name: Audit Python dependencies
         uses: pypa/gh-action-pip-audit@v1.1.0
