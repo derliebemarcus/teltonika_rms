@@ -43,6 +43,7 @@ jobs:
             CVE-2026-25645
             CVE-2026-34073
             CVE-2026-39892
+            GHSA-pjjw-68hj-v9mw
 
   secret-scan:
     runs-on: ubuntu-latest
