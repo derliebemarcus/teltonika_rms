@@ -1,4 +1,4 @@
-name: Quality Gates
+name: Continuous Integration
 
 on:
   push:
@@ -76,12 +76,61 @@ jobs:
           source .venv/bin/activate
           python tools/check_translations.py
 
+  tests:
+    runs-on: [self-hosted, linux, X64]
+    env:
+      PYENV_ROOT: /opt/github/pyenv
+      PATH: /opt/github/pyenv/shims:/opt/github/pyenv/bin:/usr/local/bin:/usr/bin:/bin
+      PYENV_VERSION: "3.14"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Install test dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip --index-url https://artifacts.home.siczb.de/repository/pypi-proxy/simple/
+          python -m pip install --index-url https://artifacts.home.siczb.de/repository/pypi-proxy/simple/ -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        run: |
+          source .venv/bin/activate
+          python -m pytest \
+            tests/unit \
+            tests/ha \
+            --cov=. \
+            --cov-config=.coveragerc \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing
+
+      - name: Enforce coverage floor
+        run: |
+          source .venv/bin/activate
+          python tools/check_coverage_threshold.py coverage.xml 97.1
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.xml
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
   sonarqube:
     runs-on: [self-hosted, linux, X64]
+    needs: [tests]
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -93,6 +142,7 @@ jobs:
             -Dsonar.python.version=3.14
             -Dsonar.sources=custom_components/teltonika_rms
             -Dsonar.tests=tests
+            -Dsonar.python.coverage.reportPaths=coverage.xml
 
   workflow-lint:
     runs-on: ubuntu-latest
