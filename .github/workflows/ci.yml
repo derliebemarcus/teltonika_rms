@@ -131,6 +131,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-report
+          path: .
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
