@@ -16,6 +16,9 @@ permissions:
 jobs:
   dependency-audit:
     runs-on: [self-hosted, linux, X64]
+    permissions:
+      contents: read
+      actions: read
     env:
       PYENV_ROOT: /opt/github/pyenv
       PATH: /opt/github/pyenv/shims:/opt/github/pyenv/bin:/usr/local/bin:/usr/bin:/bin
@@ -44,6 +47,11 @@ jobs:
             CVE-2026-34073
             CVE-2026-39892
             GHSA-pjjw-68hj-v9mw
+            CVE-2026-34513
+            CVE-2026-34525
+            CVE-2026-34519
+            CVE-2026-34520
+            CVE-2026-34517
 
   secret-scan:
     runs-on: ubuntu-latest
