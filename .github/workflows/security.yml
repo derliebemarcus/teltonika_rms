@@ -37,6 +37,7 @@ jobs:
         with:
           virtual-environment: .venv
           inputs: requirements-dev.txt
+          pip-index-url: https://artifacts.home.siczb.de/repository/pypi-proxy/simple/
           ignore-vulns: |
             CVE-2025-67221
             CVE-2026-32597
