@@ -20,7 +20,7 @@ PARALLEL_UPDATES = 0
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    _hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
@@ -31,8 +31,8 @@ async def async_setup_entry(
     @callback
     def _add_new_entities() -> None:
         new_entities: list[SensorEntity] = []
-        for device_id, device_info in bundle.inventory.data.items():
-            normalized = bundle.merged_device(device_id)
+
+        def _create_standard_sensors(device_id: str, normalized: NormalizedDevice) -> None:
             for entity_cls in (
                 RmsModelSensor,
                 RmsFirmwareSensor,
@@ -50,55 +50,58 @@ async def async_setup_entry(
                 if not entity_cls.should_create(normalized):
                     continue
                 unique = f"{device_id}_{entity_cls.entity_key}"
-                if unique in known:
-                    continue
-                known.add(unique)
-                new_entities.append(entity_cls(bundle, device_id))
+                if unique not in known:
+                    known.add(unique)
+                    new_entities.append(entity_cls(bundle, device_id))
+
+        def _create_poe_sensors(device_id: str, device_info: dict[str, Any]) -> None:
             model = device_info.get("model", "UNKNOWN")
             is_switch_device = model.startswith("TSW") or model.startswith("SWM")
             is_poe_capable_series = model.startswith(("OTD", "SWM", "TSW")) or (
                 model.startswith("RUT") and not model.startswith(("RUTX", "RUTM"))
             )
 
-            if is_poe_capable_series:
-                port_configs = {
-                    str(p.get("id")): p
-                    for p in bundle.port_config.data.get(device_id, [])
-                    if p.get("id") and str(p.get("id")) != "NIL"
-                }
+            if not is_poe_capable_series:
+                return
 
-                if is_switch_device and not port_configs:
-                    for i in range(1, 9):
-                        port_configs[f"port{i}"] = {"id": f"port{i}"}
-                    for i in range(1, 3):
-                        port_configs[f"sfp{i}"] = {"id": f"sfp{i}"}
+            port_configs = {
+                str(p.get("id")): p
+                for p in bundle.port_config.data.get(device_id, [])
+                if p.get("id") and str(p.get("id")) != "NIL"
+            }
 
-                for scan_port in bundle.port_scan.data.get(device_id, []):
-                    port_name = str(scan_port.get("name") or "").strip()
-                    if port_name == "NIL":
-                        continue
-                    if port_name and port_name not in port_configs:
-                        port_configs[port_name] = {"id": port_name}
-                    elif port_name in port_configs:
-                        # Merge scan data into config for PoE detection
-                        port_configs[port_name].update(scan_port)
+            if is_switch_device and not port_configs:
+                for i in range(1, 9):
+                    port_configs[f"port{i}"] = {"id": f"port{i}"}
+                for i in range(1, 3):
+                    port_configs[f"sfp{i}"] = {"id": f"sfp{i}"}
 
-                ports = [p for p in port_configs.values() if str(p.get("id")) != "NIL"]
+            for scan_port in bundle.port_scan.data.get(device_id, []):
+                port_name = str(scan_port.get("name") or "").strip()
+                if port_name == "NIL":
+                    continue
+                if port_name and port_name not in port_configs:
+                    port_configs[port_name] = {"id": port_name}
+                elif port_name in port_configs:
+                    port_configs[port_name].update(scan_port)
 
-                for port in ports:
-                    port_id = str(port.get("id") or "").strip()
-                    if not port_id:
-                        continue
-                    if (
-                        port.get("PoE") is not None
-                        or port.get("poe") is not None
-                        or port.get("poe_enable") is not None
-                        or port.get("PoE (W)") is not None
-                    ):
-                        unique_poe_power = f"{device_id}_{port_id}_poe_w"
-                        if unique_poe_power not in known:
-                            known.add(unique_poe_power)
-                            new_entities.append(RmsPoePowerSensor(bundle, device_id, port_id))
+            for port in port_configs.values():
+                port_id = str(port.get("id") or "").strip()
+                if not port_id or str(port.get("id")) == "NIL":
+                    continue
+                if any(
+                    port.get(k) is not None
+                    for k in ("PoE", "poe", "poe_enable", "PoE (W)")
+                ):
+                    unique_poe_power = f"{device_id}_{port_id}_poe_w"
+                    if unique_poe_power not in known:
+                        known.add(unique_poe_power)
+                        new_entities.append(RmsPoePowerSensor(bundle, device_id, port_id))
+
+        for device_id, device_info in bundle.inventory.data.items():
+            normalized = bundle.merged_device(device_id)
+            _create_standard_sensors(device_id, normalized)
+            _create_poe_sensors(device_id, device_info)
 
         if new_entities:
             async_add_entities(new_entities)

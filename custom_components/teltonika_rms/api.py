@@ -407,43 +407,58 @@ class RmsApiClient:
 
         for attempt in range(_MAX_RETRIES + 1):
             self._increment_request_counter()
-            response: ClientResponse | None = None
             try:
-                response = await self._auth.async_request(
-                    method,
-                    url,
-                    params=params,
-                    json=json_body,
-                    timeout=_DEFAULT_TIMEOUT,
+                return await self._async_perform_request_attempt(
+                    method, url, params, json_body, attempt, allow_not_found
                 )
-                if response.status in (401, 403):
-                    raise ConfigEntryAuthFailed("Teltonika RMS auth failed or missing scopes")
-
-                if allow_not_found and response.status == 404:
-                    return None, {}
-
-                if response.status in _RETRIABLE_STATUS_CODES and attempt < _MAX_RETRIES:
-                    await _async_retry_sleep(response, attempt)
-                    continue
-
-                if response.status >= 400:
-                    body = await _safe_json(response)
-                    raise RmsApiError(f"RMS request failed ({response.status}): {body}")
-
-                payload = await _safe_json(response)
-                data, meta = _parse_envelope(payload)
-                return data, meta
+            except _RetryRequest:
+                continue
             except ConfigEntryAuthFailed:
                 raise
             except ClientError as err:
                 if attempt >= _MAX_RETRIES:
                     raise RmsApiError(f"RMS network error: {err}") from err
                 await asyncio.sleep(_retry_delay(attempt))
-            finally:
-                if response is not None:
-                    response.release()
 
         raise RmsApiError("Unexpected retry exhaustion")
+
+    async def _async_perform_request_attempt(
+        self,
+        method: str,
+        url: str,
+        params: dict[str, Any] | None,
+        json_body: dict[str, Any] | None,
+        attempt: int,
+        allow_not_found: bool,
+    ) -> tuple[Any, dict[str, Any]]:
+        response: ClientResponse | None = None
+        try:
+            response = await self._auth.async_request(
+                method,
+                url,
+                params=params,
+                json=json_body,
+                timeout=_DEFAULT_TIMEOUT,
+            )
+            if response.status in (401, 403):
+                raise ConfigEntryAuthFailed("Teltonika RMS auth failed or missing scopes")
+
+            if allow_not_found and response.status == 404:
+                return None, {}
+
+            if response.status in _RETRIABLE_STATUS_CODES and attempt < _MAX_RETRIES:
+                await _async_retry_sleep(response, attempt)
+                raise _RetryRequest()
+
+            if response.status >= 400:
+                body = await _safe_json(response)
+                raise RmsApiError(f"RMS request failed ({response.status}): {body}")
+
+            payload = await _safe_json(response)
+            return _parse_envelope(payload)
+        finally:
+            if response is not None:
+                response.release()
 
     async def _resolve_meta_channel(self, meta: dict[str, Any], current_data: Any) -> Any:
         channel = meta.get("channel")
@@ -664,43 +679,57 @@ def _extract_port_configurations(payload: Any) -> list[dict[str, Any]] | None:
         return None
 
     if isinstance(payload, list):
-        if payload and all(
-            isinstance(item, dict) and isinstance(item.get("data"), list) for item in payload
-        ):
-            rows: list[dict[str, Any]] = []
-            for item in payload:
-                rows.extend(row for row in item["data"] if isinstance(row, dict))
-            return rows
-        return [item for item in payload if isinstance(item, dict)]
+        return _extract_list_payload(payload)
 
     if not isinstance(payload, dict):
         return None
 
-    # Handle device-grouped configurator payloads (e.g. {"1791608": [{"status": "completed", "data": [{"data": [...]}]}]})
-    if all(isinstance(v, list) for k, v in payload.items() if str(k).isdigit() or "-" in str(k)):
-        for events in payload.values():
-            if not isinstance(events, list) or not events:
-                continue
-            for event in reversed(events):
-                if not isinstance(event, dict):
-                    continue
-                inner_data = event.get("data")
-                if isinstance(inner_data, list):
-                    for inner_item in inner_data:
-                        if isinstance(inner_item, dict) and isinstance(
-                            inner_item.get("data"), list
-                        ):
-                            return [row for row in inner_item["data"] if isinstance(row, dict)]
+    # Handle device-grouped configurator payloads
+    if any(str(k).isdigit() or "-" in str(k) for k in payload):
+        extracted = _extract_grouped_payload(payload)
+        if extracted is not None:
+            return extracted
 
+    return _extract_data_field(payload)
+
+
+def _extract_list_payload(payload: list[Any]) -> list[dict[str, Any]]:
+    if all(isinstance(item, dict) and isinstance(item.get("data"), list) for item in payload):
+        rows: list[dict[str, Any]] = []
+        for item in payload:
+            rows.extend(row for row in item["data"] if isinstance(row, dict))
+        return rows
+    return [item for item in payload if isinstance(item, dict)]
+
+
+def _extract_grouped_payload(payload: dict[str, Any]) -> list[dict[str, Any]] | None:
+    for events in payload.values():
+        if not isinstance(events, list) or not events:
+            continue
+        for event in reversed(events):
+            if not isinstance(event, dict):
+                continue
+            inner_data = event.get("data")
+            if not isinstance(inner_data, list):
+                continue
+            for inner_item in inner_data:
+                if isinstance(inner_item, dict) and isinstance(inner_item.get("data"), list):
+                    return [row for row in inner_item["data"] if isinstance(row, dict)]
+    return None
+
+
+def _extract_data_field(payload: dict[str, Any]) -> list[dict[str, Any]]:
     items = payload.get("data")
     if not isinstance(items, list):
         return []
 
     for item in items:
-        if not isinstance(item, dict):
-            continue
-        data = item.get("data")
-        if isinstance(data, list):
-            return [row for row in data if isinstance(row, dict)]
-
+        if isinstance(item, dict):
+            data = item.get("data")
+            if isinstance(data, list):
+                return [row for row in data if isinstance(row, dict)]
     return []
+
+
+class _RetryRequest(Exception):
+    """Internal signal to retry the current request."""

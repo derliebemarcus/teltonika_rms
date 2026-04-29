@@ -15,7 +15,7 @@ TO_REDACT = {"access_token", "refresh_token", "token", "client_secret", "pat_tok
 
 
 async def async_get_config_entry_diagnostics(
-    hass: HomeAssistant,
+    _hass: HomeAssistant,
     config_entry: ConfigEntry,
 ) -> dict[str, Any]:
     """Return redacted diagnostics for this config entry."""

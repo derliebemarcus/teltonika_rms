@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from datetime import UTC
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from .const import (
@@ -165,36 +165,40 @@ def _build_refresh_handler(hass: HomeAssistant) -> Callable[[Any], Coroutine[Any
     return _async_handle_refresh
 
 
-def _build_history_handler(hass: HomeAssistant) -> Callable[[Any], Coroutine[Any, Any, None]]:
-    from datetime import datetime
+def _parse_datetime_string(value: str) -> datetime:
+    """Parse ISO-formatted datetime strings from service calls."""
+    try:
+        return datetime.fromisoformat(value).replace(tzinfo=UTC)
+    except ValueError as err:
+        from voluptuous import Invalid
 
+        raise Invalid(f"Invalid datetime format: {value}") from err
+
+
+def _get_history_schema() -> Any:
     import voluptuous as vol
 
-    from .api import RmsApiClient
-
-    # Helper to parse ISO-formatted datetime strings from service calls
-    def parse_datetime_string(value: str) -> datetime:
-        try:
-            return datetime.fromisoformat(value).replace(tzinfo=UTC)
-        except ValueError as err:
-            raise vol.Invalid(f"Invalid datetime format: {value}") from err
-
-    # Validate input types for the service call
-    HISTORY_SCHEMA = vol.Schema(
+    return vol.Schema(
         {
             vol.Required("device_id"): str,
-            vol.Required("from_time"): parse_datetime_string,
-            vol.Required("to_time"): parse_datetime_string,
+            vol.Required("from_time"): _parse_datetime_string,
+            vol.Required("to_time"): _parse_datetime_string,
             vol.Required("interval"): str,
             vol.Optional("config_id", default=0): vol.All(vol.Coerce(int), vol.Range(min=0)),
             vol.Optional("keys"): vol.All(str, lambda v: [k.strip() for k in v.split(",")]),
         }
     )
 
+
+def _build_history_handler(hass: HomeAssistant) -> Callable[[Any], Coroutine[Any, Any, None]]:
+    from .api import RmsApiClient
+
+    history_schema = _get_history_schema()
+
     async def _async_handle_get_device_history(call: Any) -> None:
         try:
-            validated_data = HISTORY_SCHEMA(call.data)
-        except vol.Invalid as err:
+            validated_data = history_schema(call.data)
+        except Exception as err:  # vol.Invalid
             LOGGER.error("Invalid service call data for get_device_history: %s", err)
             return
 

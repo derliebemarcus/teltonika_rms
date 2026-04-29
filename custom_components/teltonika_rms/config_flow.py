@@ -133,18 +133,20 @@ class OAuth2FlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, doma
         oauth_data = dict(data)
         oauth_data[CONF_AUTH_MODE] = AUTH_MODE_OAUTH2
 
-        if self.source == "reauth":
-            if self._reauth_entry is not None:
-                if (
-                    unique_id
-                    and self._reauth_entry.unique_id
-                    and self._reauth_entry.unique_id != unique_id
-                ):
-                    return self.async_abort(reason="wrong_account")
-                return self.async_update_reload_and_abort(
-                    self._reauth_entry,
-                    data_updates=oauth_data,
-                )
+        if (
+            self.source == "reauth"
+            and self._reauth_entry is not None
+            and unique_id
+            and self._reauth_entry.unique_id
+            and self._reauth_entry.unique_id != unique_id
+        ):
+            return self.async_abort(reason="wrong_account")
+
+        if self.source == "reauth" and self._reauth_entry is not None:
+            return self.async_update_reload_and_abort(
+                self._reauth_entry,
+                data_updates=oauth_data,
+            )
 
         return self.async_create_entry(
             title="Teltonika RMS",
@@ -231,7 +233,7 @@ def _extract_subject_from_token(data: dict[str, Any]) -> str | None:
     try:
         decoded = base64.urlsafe_b64decode(padded.encode("utf-8")).decode("utf-8")
         payload = json.loads(decoded)
-    except (ValueError, json.JSONDecodeError):
+    except ValueError:
         return None
     subject = payload.get("sub")
     return str(subject) if subject is not None else None

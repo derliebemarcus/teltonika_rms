@@ -17,7 +17,7 @@ PARALLEL_UPDATES = 0
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    _hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
@@ -28,12 +28,8 @@ async def async_setup_entry(
     @callback
     def _add_new_entities() -> None:
         new_entities: list[BinarySensorEntity] = []
-        for device_id, device_info in bundle.inventory.data.items():
-            unique = f"{device_id}_online"
-            if unique not in known:
-                known.add(unique)
-                new_entities.append(RmsOnlineBinarySensor(bundle, device_id))
 
+        def _collect_port_ids(device_id: str, device_info: dict[str, Any]) -> set[str]:
             port_ids: set[str] = set()
             for p in bundle.port_config.data.get(device_id, []):
                 pid = str(p.get("id") or "").strip()
@@ -43,9 +39,7 @@ async def async_setup_entry(
                     port_ids.add(pid)
 
             model = device_info.get("model", "UNKNOWN")
-            is_switch_device = model.startswith("TSW") or model.startswith("SWM")
-
-            if is_switch_device:
+            if model.startswith(("TSW", "SWM")):
                 for i in range(1, 9):
                     port_ids.add(f"port{i}")
                 for i in range(1, 3):
@@ -55,12 +49,20 @@ async def async_setup_entry(
                 pid = str(port.get("name") or "").strip()
                 if pid and pid != "NIL":
                     port_ids.add(pid)
+            return port_ids
 
-            for port_id in sorted(port_ids):
+        for device_id, device_info in bundle.inventory.data.items():
+            unique = f"{device_id}_online"
+            if unique not in known:
+                known.add(unique)
+                new_entities.append(RmsOnlineBinarySensor(bundle, device_id))
+
+            for port_id in sorted(_collect_port_ids(device_id, device_info)):
                 unique_port = f"{device_id}_{port_id}_link"
                 if unique_port not in known:
                     known.add(unique_port)
                     new_entities.append(RmsPortLinkBinarySensor(bundle, device_id, port_id))
+
         if new_entities:
             async_add_entities(new_entities)
 
