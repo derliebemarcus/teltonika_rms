@@ -56,44 +56,24 @@ async def async_setup_entry(
 
         def _create_poe_sensors(device_id: str, device_info: dict[str, Any]) -> None:
             model = device_info.get("model", "UNKNOWN")
-            is_switch_device = model.startswith("TSW") or model.startswith("SWM")
-            is_poe_capable_series = model.startswith(("OTD", "SWM", "TSW")) or (
+            is_poe_series = model.startswith(("OTD", "SWM", "TSW")) or (
                 model.startswith("RUT") and not model.startswith(("RUTX", "RUTM"))
             )
-
-            if not is_poe_capable_series:
+            if not is_poe_series:
                 return
 
-            port_configs = {
-                str(p.get("id")): p
-                for p in bundle.port_config.data.get(device_id, [])
-                if p.get("id") and str(p.get("id")) != "NIL"
-            }
+            ports = _get_initial_ports(bundle, device_id, model)
+            _apply_scan_results(bundle, device_id, ports)
 
-            if is_switch_device and not port_configs:
-                for i in range(1, 9):
-                    port_configs[f"port{i}"] = {"id": f"port{i}"}
-                for i in range(1, 3):
-                    port_configs[f"sfp{i}"] = {"id": f"sfp{i}"}
-
-            for scan_port in bundle.port_scan.data.get(device_id, []):
-                port_name = str(scan_port.get("name") or "").strip()
-                if port_name == "NIL":
-                    continue
-                if port_name and port_name not in port_configs:
-                    port_configs[port_name] = {"id": port_name}
-                elif port_name in port_configs:
-                    port_configs[port_name].update(scan_port)
-
-            for port in port_configs.values():
-                port_id = str(port.get("id") or "").strip()
-                if not port_id or str(port.get("id")) == "NIL":
+            for port in ports.values():
+                pid = str(port.get("id") or "").strip()
+                if not pid or pid == "NIL":
                     continue
                 if any(port.get(k) is not None for k in ("PoE", "poe", "poe_enable", "PoE (W)")):
-                    unique_poe_power = f"{device_id}_{port_id}_poe_w"
-                    if unique_poe_power not in known:
-                        known.add(unique_poe_power)
-                        new_entities.append(RmsPoePowerSensor(bundle, device_id, port_id))
+                    unique_id = f"{device_id}_{pid}_poe_w"
+                    if unique_id not in known:
+                        known.add(unique_id)
+                        new_entities.append(RmsPoePowerSensor(bundle, device_id, pid))
 
         for device_id, device_info in bundle.inventory.data.items():
             if normalized := bundle.merged_device(device_id):
@@ -107,6 +87,36 @@ async def async_setup_entry(
     entry.async_on_unload(bundle.inventory.async_add_listener(_add_new_entities))
     entry.async_on_unload(bundle.state.async_add_listener(_add_new_entities))
     entry.async_on_unload(bundle.port_scan.async_add_listener(_add_new_entities))
+
+
+def _get_initial_ports(
+    bundle: CoordinatorBundle, device_id: str, model: str
+) -> dict[str, dict[str, Any]]:
+    """Initialize port mapping from configuration data."""
+    ports = {
+        str(p.get("id")): p
+        for p in bundle.port_config.data.get(device_id, [])
+        if p.get("id") and str(p.get("id")) != "NIL"
+    }
+    if (model.startswith("TSW") or model.startswith("SWM")) and not ports:
+        for i in range(1, 9):
+            ports[f"port{i}"] = {"id": f"port{i}"}
+        for i in range(1, 3):
+            ports[f"sfp{i}"] = {"id": f"sfp{i}"}
+    return ports
+
+
+def _apply_scan_results(
+    bundle: CoordinatorBundle, device_id: str, ports: dict[str, dict[str, Any]]
+) -> None:
+    """Merge scanning results into the port mapping."""
+    for scan_port in bundle.port_scan.data.get(device_id, []):
+        name = str(scan_port.get("name") or "").strip()
+        if not name or name == "NIL":
+            continue
+        if name not in ports:
+            ports[name] = {"id": name}
+        ports[name].update(scan_port)
 
 
 class RmsPoePowerSensor(TeltonikaRmsEntity, SensorEntity):

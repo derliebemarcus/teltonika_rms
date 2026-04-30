@@ -703,18 +703,26 @@ def _extract_list_payload(payload: list[Any]) -> list[dict[str, Any]]:
 
 
 def _extract_grouped_payload(payload: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """Find data rows in a grouped payload structure."""
     for events in payload.values():
         if not isinstance(events, list) or not events:
             continue
-        for event in reversed(events):
-            if not isinstance(event, dict):
-                continue
-            inner_data = event.get("data")
-            if not isinstance(inner_data, list):
-                continue
-            for inner_item in inner_data:
-                if isinstance(inner_item, dict) and isinstance(inner_item.get("data"), list):
-                    return [row for row in inner_item["data"] if isinstance(row, dict)]
+        if found := _find_data_in_events(events):
+            return found
+    return None
+
+
+def _find_data_in_events(events: list[Any]) -> list[dict[str, Any]] | None:
+    """Process a list of events to find embedded data rows."""
+    for event in reversed(events):
+        if not isinstance(event, dict):
+            continue
+        inner_data = event.get("data")
+        if not isinstance(inner_data, list):
+            continue
+        for inner_item in inner_data:
+            if isinstance(inner_item, dict) and isinstance(inner_item.get("data"), list):
+                return [row for row in inner_item["data"] if isinstance(row, dict)]
     return None
 
 

@@ -31,6 +31,7 @@ async def async_setup_entry(
 
         def _collect_port_ids(device_id: str, device_info: dict[str, Any]) -> set[str]:
             port_ids: set[str] = set()
+            # 1. From configuration
             for p in bundle.port_config.data.get(device_id, []):
                 pid = str(p.get("id") or "").strip()
                 if pid and pid != "NIL":
@@ -38,13 +39,13 @@ async def async_setup_entry(
                         pid = pid[7:]
                     port_ids.add(pid)
 
+            # 2. Default switch ports
             model = device_info.get("model", "UNKNOWN")
             if model.startswith(("TSW", "SWM")):
-                for i in range(1, 9):
-                    port_ids.add(f"port{i}")
-                for i in range(1, 3):
-                    port_ids.add(f"sfp{i}")
+                port_ids.update(f"port{i}" for i in range(1, 9))
+                port_ids.update(f"sfp{i}" for i in range(1, 3))
 
+            # 3. From scanning
             for port in bundle.port_scan.data.get(device_id, []):
                 pid = str(port.get("name") or "").strip()
                 if pid and pid != "NIL":

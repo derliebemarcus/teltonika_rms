@@ -77,18 +77,23 @@ bluetooth-auto-recovery==1.5.3
     # via habluetooth
 bluetooth-data-tools==1.28.4
     # via habluetooth
-boto3==1.42.97
-    # via pycognito
-botocore==1.42.97
+boto3==1.43.0
     # via
+    #   -r requirements-dev.txt
+    #   pycognito
+botocore==1.43.0
+    # via
+    #   -r requirements-dev.txt
     #   boto3
     #   s3transfer
 btsocket==0.3.0
     # via
     #   bluetooth-auto-recovery
     #   habluetooth
-build==1.4.4
-    # via pip-tools
+build==1.5.0
+    # via
+    #   -r requirements-dev.txt
+    #   pip-tools
 certifi==2026.4.22
     # via
     #   homeassistant
@@ -328,8 +333,10 @@ rich==15.0.0
     # via textual
 ruff==0.15.12
     # via -r requirements-dev.txt
-s3transfer==0.16.1
-    # via boto3
+s3transfer==0.17.0
+    # via
+    #   -r requirements-dev.txt
+    #   boto3
 securetar==2026.4.0
     # via homeassistant
 sentence-stream==1.3.0
@@ -354,8 +361,10 @@ syrupy==5.1.0
     # via -r requirements-dev.txt
 text-unidecode==1.3
     # via python-slugify
-textual==8.2.4
-    # via mutmut
+textual==8.2.5
+    # via
+    #   -r requirements-dev.txt
+    #   mutmut
 types-pyyaml==6.0.12.20260408
     # via -r requirements-dev.txt
 typing-extensions==4.15.0
