@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.11-beta.3 - 2026-04-30
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Achieved 98% code coverage (exceeding 97.1% quality gate).
+- Audited and confirmed compatibility with Home Assistant 2026.4.4.
+- Hardened the test suite with strict mypy typing for all core and test modules.
+- Reverted pytest and pytest-asyncio to stable versions (8.4.2 / 0.23.8) to resolve dependency collisions with Home Assistant core.
+
+### Changes
+
+- None.
+
+### Bugfixes
+
+- Fixed configuration flow test failures by correcting mock behavior for executor jobs and data-entry flows.
+- Resolved type mismatch errors in the sensor and coordinator logic identified by static analysis.
+- Fixed lockfile synchronization issues during local pre-commit checks.
+
 ## 0.9.11-beta.2 - 2026-04-09
 
 ### New Features

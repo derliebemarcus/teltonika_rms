@@ -27,6 +27,8 @@ def auto_enable_patching() -> str:
 def hass(mock_coordinator_bundle: CoordinatorBundle) -> Generator[HomeAssistant]:
     """Mock HomeAssistant fixture."""
     _hass = AsyncMock(spec=HomeAssistant)
+    _hass.data = {}
+    _hass.async_add_executor_job = AsyncMock()
 
     # Track listeners for events
     _listeners: dict[str, Any] = {}
@@ -46,6 +48,8 @@ def hass(mock_coordinator_bundle: CoordinatorBundle) -> Generator[HomeAssistant]
 
     _hass.config_entries = MagicMock()
     _hass.config_entries._entries = [mock_config_entry]
+    _hass.config_entries.async_forward_entry_setups = AsyncMock()
+    _hass.config_entries.async_unload_platforms = AsyncMock()
     _hass.config_entries.async_entries = MagicMock(
         side_effect=lambda domain=None: [
             e
@@ -55,6 +59,8 @@ def hass(mock_coordinator_bundle: CoordinatorBundle) -> Generator[HomeAssistant]
     )
     _hass.config_entries.async_unload_platforms = AsyncMock(return_value=True)
     _hass.config_entries.async_unload_entry = AsyncMock(return_value=True)
+    _hass.config_entries.flow = MagicMock()
+    _hass.config_entries.flow.async_progress_by_handler = MagicMock(return_value=[])
     _hass.bus = MagicMock()
     _hass.bus.async_fire = MagicMock(side_effect=async_fire)
     _hass.bus.async_listen_once = MagicMock(side_effect=async_listen_once)

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -141,14 +139,11 @@ async def test_options_flow_budget_exceeded(hass: HomeAssistant) -> None:
         "device_status": "online",
     }
 
-    # Create a future for async_add_executor_job
-    future: asyncio.Future[Any] = asyncio.Future()
     mock_matrix = MagicMock()
     mock_matrix.path_for.return_value = None
-    future.set_result(mock_matrix)
 
     with (
-        patch.object(hass, "async_add_executor_job", return_value=future),
+        patch.object(hass, "async_add_executor_job", return_value=mock_matrix),
         patch(
             "custom_components.teltonika_rms.config_flow.estimate_monthly_requests",
             return_value=9999999,
@@ -176,13 +171,11 @@ async def test_options_flow_success(hass: HomeAssistant) -> None:
         "enable_location": True,
     }
 
-    future: asyncio.Future[Any] = asyncio.Future()
     mock_matrix = MagicMock()
     mock_matrix.path_for.return_value = None
-    future.set_result(mock_matrix)
 
     with (
-        patch.object(hass, "async_add_executor_job", return_value=future),
+        patch.object(hass, "async_add_executor_job", return_value=mock_matrix),
         patch(
             "custom_components.teltonika_rms.config_flow.estimate_monthly_requests",
             return_value=100,

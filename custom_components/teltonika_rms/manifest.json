@@ -19,5 +19,5 @@
   "requirements": [
     "python-socketio==5.16.1"
   ],
-  "version": "0.9.11-beta.2"
+  "version": "0.9.11-beta.3"
 }

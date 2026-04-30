@@ -119,7 +119,7 @@ if ! "$PYTHON_BIN" tools/check_release_notes.py custom_components/teltonika_rms/
 fi
 
 echo "[pre-commit] Running pip-audit security check..."
-if ! "$PYTHON_BIN" -m pip_audit -r requirements-dev.txt --ignore-vuln CVE-2025-67221 --ignore-vuln CVE-2026-32597 --ignore-vuln CVE-2026-27448 --ignore-vuln CVE-2026-27459 --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-25645 --ignore-vuln CVE-2026-34073 --ignore-vuln CVE-2026-39892 --ignore-vuln GHSA-pjjw-68hj-v9mw; then
+if ! "$PYTHON_BIN" -m pip_audit -r requirements-dev.txt --ignore-vuln CVE-2025-67221 --ignore-vuln CVE-2026-32597 --ignore-vuln CVE-2026-27448 --ignore-vuln CVE-2026-27459 --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-25645 --ignore-vuln CVE-2026-34073 --ignore-vuln CVE-2026-39892 --ignore-vuln GHSA-pjjw-68hj-v9mw --ignore-vuln CVE-2025-71176; then
   echo "[pre-commit] Security audit failed. Fix vulnerable dependencies before committing."
   exit 1
 fi

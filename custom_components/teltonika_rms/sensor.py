@@ -89,18 +89,15 @@ async def async_setup_entry(
                 port_id = str(port.get("id") or "").strip()
                 if not port_id or str(port.get("id")) == "NIL":
                     continue
-                if any(
-                    port.get(k) is not None
-                    for k in ("PoE", "poe", "poe_enable", "PoE (W)")
-                ):
+                if any(port.get(k) is not None for k in ("PoE", "poe", "poe_enable", "PoE (W)")):
                     unique_poe_power = f"{device_id}_{port_id}_poe_w"
                     if unique_poe_power not in known:
                         known.add(unique_poe_power)
                         new_entities.append(RmsPoePowerSensor(bundle, device_id, port_id))
 
         for device_id, device_info in bundle.inventory.data.items():
-            normalized = bundle.merged_device(device_id)
-            _create_standard_sensors(device_id, normalized)
+            if normalized := bundle.merged_device(device_id):
+                _create_standard_sensors(device_id, normalized)
             _create_poe_sensors(device_id, device_info)
 
         if new_entities:
