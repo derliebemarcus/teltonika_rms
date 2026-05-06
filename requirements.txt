@@ -90,7 +90,7 @@ btsocket==0.3.0
     # via
     #   bluetooth-auto-recovery
     #   habluetooth
-build==1.4.3
+build==1.5.0
     # via
     #   -r requirements-dev.txt
     #   pip-tools
