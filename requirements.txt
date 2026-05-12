@@ -62,7 +62,7 @@ bcrypt==5.0.0
     # via homeassistant
 bidict==0.23.1
     # via python-socketio
-bleak==3.0.1
+bleak==3.0.2
     # via
     #   bleak-retry-connector
     #   bluetooth-adapters
