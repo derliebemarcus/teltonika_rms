@@ -75,7 +75,7 @@ bluetooth-adapters==2.1.1
     #   habluetooth
 bluetooth-auto-recovery==1.5.3
     # via habluetooth
-bluetooth-data-tools==1.28.4
+bluetooth-data-tools==1.29.1
     # via habluetooth
 boto3==1.42.88
     # via
