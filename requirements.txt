@@ -314,7 +314,7 @@ python-slugify==8.0.4
     # via homeassistant
 python-socketio==5.16.2
     # via -r requirements-dev.txt
-pytz==2026.1.post1
+pytz==2026.2
     # via astral
 pyyaml==6.0.3
     # via
