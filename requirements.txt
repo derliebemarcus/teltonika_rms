@@ -186,7 +186,7 @@ josepy==2.2.0
     #   hass-nabucasa
 libcst==1.8.6
     # via mutmut
-librt==0.9.0
+librt==0.11.0
     # via mypy
 linkify-it-py==2.1.0
     # via markdown-it-py
