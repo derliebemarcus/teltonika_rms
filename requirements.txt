@@ -201,7 +201,7 @@ markupsafe==3.0.3
     # via jinja2
 mashumaro==3.20
     # via webrtc-models
-mdit-py-plugins==0.5.0
+mdit-py-plugins==0.6.1
     # via textual
 mdurl==0.1.2
     # via markdown-it-py
