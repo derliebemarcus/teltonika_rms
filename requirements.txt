@@ -15,7 +15,7 @@ syrupy==5.1.0
 pip-tools==7.5.3
 pip-audit
 boto3==1.43.17
-botocore==1.42.88
+botocore==1.43.17
 s3transfer==0.16.0
 textual==8.2.3
 build==1.5.0
