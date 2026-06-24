@@ -53,6 +53,23 @@ jobs:
             CVE-2026-34519
             CVE-2026-34520
             CVE-2026-34517
+            CVE-2026-34993
+            CVE-2026-47265
+            CVE-2026-54273
+            CVE-2026-54279
+            CVE-2026-54277
+            CVE-2026-50269
+            CVE-2026-54276
+            CVE-2026-54278
+            CVE-2026-54280
+            CVE-2026-54274
+            CVE-2026-54275
+            GHSA-537c-gmf6-5ccf
+            PYSEC-2026-175
+            PYSEC-2026-176
+            PYSEC-2026-177
+            PYSEC-2026-178
+            PYSEC-2026-179
 
   secret-scan:
     runs-on: ubuntu-latest

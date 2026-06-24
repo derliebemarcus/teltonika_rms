@@ -7,9 +7,7 @@ import re
 import subprocess
 import sys
 
-CATEGORY_RE = re.compile(
-    r"^(add|change|deprecate|remove|fix|build|chore|ci|docs)(\(.*\))?: [^ ].*"
-)
+CATEGORY_RE = re.compile(r"^(add|change|deprecate|remove|fix|build|chore|ci|docs)(\(.*\))?: [^ ].*")
 BYPASS_PREFIX_RE = re.compile(r"^(Update|Bump|Merge|Revert)\b")
 DEPENDABOT_NAME = "dependabot[bot]"
 
