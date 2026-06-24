@@ -14,7 +14,7 @@
   ],
   "prHourlyLimit": 2,
   "prConcurrentLimit": 5,
-  "platformAutomerge": true,
+  "platformAutomerge": false,
   "vulnerabilityAlerts": {
     "labels": [
       "security",
