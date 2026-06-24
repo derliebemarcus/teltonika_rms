@@ -23,6 +23,12 @@ if ! "$CONTAINER_ENGINE" run --rm -v "$ROOT:/src" ghcr.io/google/osv-scanner:lat
   exit 1
 fi
 
+BRANCH="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [ "$BRANCH" != "main" ]; then
+  echo "[pre-push] Skipping release tag check on branch ${BRANCH:-detached HEAD}."
+  exit 0
+fi
+
 VERSION="$(
   python3 - "$MANIFEST" <<'PY'
 import json

@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 
-CATEGORY_RE = re.compile(r"^(add|change|deprecate|remove|fix|build|chore)(\(.*\))?: [^ ].*")
+CATEGORY_RE = re.compile(r"^(add|change|deprecate|remove|fix|build|chore|ci|docs)(\(.*\))?: [^ ].*")
 BYPASS_PREFIX_RE = re.compile(r"^(Update|Bump|Merge|Revert)\b")
 DEPENDABOT_NAME = "dependabot[bot]"
 
@@ -30,7 +30,10 @@ def validate_message(message: str) -> str | None:
 
     if len(meaningful) == 1:
         if not CATEGORY_RE.match(meaningful[0]):
-            return "single-line commits must start with a category (e.g. add:, change:, fix:)"
+            return (
+                "single-line commits must start with a category "
+                "(e.g. add:, change:, fix:, ci:, docs:)"
+            )
         return None
 
     summary = None

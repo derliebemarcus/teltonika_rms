@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from custom_components.teltonika_rms.endpoint_matrix import (
     EndpointMatrix,
@@ -37,7 +38,7 @@ def test_extract_scopes() -> None:
     op = {"security": [{"oauth": ["local"]}]}
     assert _extract_scopes(op, global_sec) == ("local",)
 
-    op_no_sec = {}
+    op_no_sec: dict[str, Any] = {}
     assert _extract_scopes(op_no_sec, global_sec) == ("global",)
 
     assert _extract_scopes({"security": "invalid"}, global_sec) == ()
@@ -135,7 +136,7 @@ def test_matrix_from_openapi_invalid_paths() -> None:
 
     from custom_components.teltonika_rms.endpoint_matrix import _categorize_endpoint
 
-    candidates = {"devices_list": []}
+    candidates: dict[str, list[EndpointSpec]] = {"devices_list": []}
     _categorize_endpoint("/other", {}, [], candidates)
     assert len(candidates["devices_list"]) == 0
 
