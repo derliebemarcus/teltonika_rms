@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.11 - 2026-06-24
+
+### New Features
+
+- None.
+
+### Improvements
+
+- Prepared the repository metadata for submission to the default HACS store.
+- Removed the incorrect Switzerland-only HACS availability restriction.
+
+### Changes
+
+- Updated the manifest documentation, issue tracker, and code owner for the renamed repository.
+
+### Bugfixes
+
+- None.
+
 ## 0.9.11-beta.3 - 2026-04-30
 
 ### New Features
