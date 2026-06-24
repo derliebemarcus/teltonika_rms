@@ -1,13 +1,5 @@
 # This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# A sample workflow which sets up periodic OSV-Scanner scanning for vulnerabilities,
-# in addition to a PR check which fails if new vulnerabilities are introduced.
-#
-# For more examples and options, including how to ignore specific vulnerabilities,
-# see https://google.github.io/osv-scanner/github-action/
+# They are provided by a third-party and are governed by separate terms.
 
 name: OSV-Scanner
 
@@ -22,11 +14,8 @@ on:
     branches: [ "main" ]
 
 permissions:
-  # Require writing security events to upload SARIF file to security tab
   security-events: write
-  # Read commit contents
   contents: read
-  # Required for some reusable workflows to access metadata
   actions: read
 
 jobs:
@@ -37,9 +26,13 @@ jobs:
       scan-args: |-
         -r
         ./
+
   scan-pr:
+    # Use the full scan rather than the differential PR workflow. The latter
+    # can inherit a failed result from vulnerable packages on the base branch
+    # even when the PR result set is empty after documented exceptions.
     if: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@9a498708959aeaef5ef730655706c5a1df1edbc2" # v2.3.8
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@9a498708959aeaef5ef730655706c5a1df1edbc2" # v2.3.8
     with:
       scan-args: |-
         -r
