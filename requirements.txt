@@ -116,7 +116,7 @@ ciso8601==2.3.3
     # via
     #   hass-nabucasa
     #   homeassistant
-click==8.4.1
+click==8.4.2
     # via
     #   mutmut
     #   pip-tools

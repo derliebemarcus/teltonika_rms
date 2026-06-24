@@ -1,4 +1,12 @@
-.PHONY: setup test lint format release mutate audit osv validate hassfest lock snapshot contract
+.PHONY: setup test lint format release mutate audit osv validate hassfest lock lock-upgrade snapshot contract
+
+lock:
+	@echo "Pinning dependencies..."
+	@.venv/bin/python3 -m piptools compile --no-strip-extras --no-header requirements-dev.txt -o requirements.txt
+
+lock-upgrade:
+	@echo "Upgrading pinned dependencies..."
+	@.venv/bin/python3 -m piptools compile --upgrade --no-strip-extras --no-header requirements-dev.txt -o requirements.txt
 
 setup:
 	@echo "Setting up development environment..."
@@ -7,10 +15,6 @@ setup:
 	@tools/install_venv_activation_hook.sh
 	@tools/install_git_hooks.sh
 	@echo "Setup complete. Git hooks are activated."
-
-lock:
-	@echo "Pinning dependencies..."
-	@.venv/bin/python3 -m piptools compile --no-header requirements-dev.txt -o requirements.txt
 
 snapshot:
 	@echo "Updating snapshots..."
