@@ -1,7 +1,7 @@
 # Temporary conflict-free requirements lock baseline.
 # Regenerate the full transitive lock with: make lock
 
-homeassistant==2026.4.4
+homeassistant==2026.6.0
 pytest==9.0.3
 pytest-cov==7.1.0
 python-socketio==5.16.2
