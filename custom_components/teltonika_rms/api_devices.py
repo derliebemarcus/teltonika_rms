@@ -42,7 +42,7 @@ class SpecCompatibleRmsApiClient(RmsApiClient):
             _validate_contract_list(batch, "devices_list", DeviceListResponse)
             devices.extend(batch)
 
-            if not _has_next_offset_page(batch, meta, offset):
+            if not _has_next_offset_page(batch, meta, offset, page_size):
                 break
             offset += page_size
 
@@ -53,9 +53,10 @@ def _has_next_offset_page(
     batch: list[dict[str, Any]],
     meta: dict[str, Any],
     offset: int,
+    page_size: int,
 ) -> bool:
     """Return whether another offset page exists according to RMS metadata."""
     total = meta.get("total")
     if isinstance(total, int):
         return bool(batch) and offset + len(batch) < total
-    return bool(batch)
+    return len(batch) >= page_size
