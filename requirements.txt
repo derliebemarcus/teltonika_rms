@@ -404,7 +404,7 @@ tomli==2.4.1
     # via pip-audit
 tomli-w==1.2.0
     # via pip-audit
-types-pyyaml==6.0.12.20260408
+types-pyyaml==6.0.12.20260518
     # via -r requirements-dev.txt
 typing-extensions==4.15.0
     # via
