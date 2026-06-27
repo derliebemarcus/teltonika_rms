@@ -126,7 +126,7 @@ coverage[toml]==7.14.3
     #   pytest-cov
 cronsim==2.7
     # via homeassistant
-cryptography==48.0.0
+cryptography==48.0.1
     # via
     #   acme
     #   bluetooth-data-tools
