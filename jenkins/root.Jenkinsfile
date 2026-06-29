@@ -34,9 +34,7 @@ void run(def scmConfig) {
     try {
         pipelineScript.runPipeline(scmConfig, modules)
     } catch (err) {
-        currentBuild.result = err instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
-            ? err.result.toString()
-            : 'FAILURE'
+        currentBuild.result = currentBuild.currentResult == 'ABORTED' ? 'ABORTED' : 'FAILURE'
         throw err
     } finally {
         try {
