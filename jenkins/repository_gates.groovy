@@ -64,11 +64,33 @@ def actionlintBranch(def scmConfig) {
     }
 }
 
+
+def lockfileBranch() {
+    return {
+        stage('Lockfile Consistency') {
+            node('klymene') {
+                deleteDir()
+                unstash 'source'
+                def checks = load 'jenkins/checks.groovy'
+                def execution = load 'jenkins/execution.groovy'
+                checks.run('Lockfile Consistency') { logFile ->
+                    execution.inCi(
+                        'tools/compile_lockfile.sh --check',
+                        '',
+                        logFile
+                    )
+                }
+            }
+        }
+    }
+}
+
 def branches(def scmConfig) {
     return [
         repositoryRules: repositoryRulesBranch(scmConfig),
         hassfest: hassfestBranch(),
-        actionlint: actionlintBranch(scmConfig)
+        actionlint: actionlintBranch(scmConfig),
+        lockfile: lockfileBranch()
     ]
 }
 
