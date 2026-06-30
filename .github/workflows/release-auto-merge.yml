@@ -1,15 +1,16 @@
 name: Auto-merge Patch Releases
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
+      - ready_for_review
       - labeled
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -17,38 +18,81 @@ jobs:
     if: "${{ contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     runs-on: ubuntu-latest
     steps:
-      - name: Check out release branch
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Check release level
-        id: release
+      - name: Enable native squash auto-merge for patch releases
         env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
-          MANIFEST="custom_components/teltonika_rms/manifest.json"
-          OLD_VERSION="$(git show "$BASE_SHA:$MANIFEST" | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')"
-          NEW_VERSION="$(python3 -c 'import json; print(json.load(open("custom_components/teltonika_rms/manifest.json"))["version"])')"
-          IFS=. read -r OLD_MAJOR OLD_MINOR OLD_PATCH <<< "$OLD_VERSION"
-          IFS=. read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "$NEW_VERSION"
 
-          if [ "$OLD_MAJOR" = "$NEW_MAJOR" ] && [ "$OLD_MINOR" = "$NEW_MINOR" ] && [ "$NEW_PATCH" -gt "$OLD_PATCH" ]; then
-            echo "patch=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "patch=false" >> "$GITHUB_OUTPUT"
+          test -n "$GH_TOKEN" || {
+            echo "RELEASE_PLEASE_TOKEN is not configured."
+            exit 1
+          }
+
+          if [[ "$BASE_REF" != "main" || "$HEAD_REPOSITORY" != "$REPOSITORY" ]]; then
+            echo "Pull request does not target main from the same repository."
+            exit 0
           fi
 
-      - name: Enable native auto-merge
-        if: steps.release.outputs.patch == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-        shell: bash
-        run: |
-          if ! gh pr merge --auto --squash "$PR_URL"; then
-            echo "::warning::Native auto-merge is unavailable. Enable repository auto-merge and required status checks, then merge this patch release manually."
+          if [[ "$HEAD_REF" != release-please--branches--main--components--* ]]; then
+            echo "Pull request is not a Release Please branch."
+            exit 0
           fi
+
+          read_manifest_version() {
+            local ref="$1"
+            gh api "repos/${REPOSITORY}/contents/.release-please-manifest.json?ref=${ref}" \
+              --jq '.content' | tr -d '\n' | base64 --decode | jq -r '.["."]'
+          }
+
+          old_version="$(read_manifest_version "$BASE_SHA")"
+          new_version="$(read_manifest_version "$HEAD_SHA")"
+
+          set +e
+          node - "$old_version" "$new_version" <<'NODE'
+          const [oldVersion, newVersion] = process.argv.slice(2);
+          const pattern = /^(\d+)\.(\d+)\.(\d+)(?:-[0-9A-Za-z.-]+)?$/;
+          const oldMatch = pattern.exec(oldVersion);
+          const newMatch = pattern.exec(newVersion);
+
+          if (!oldMatch || !newMatch) {
+            console.error(`Invalid release versions: ${oldVersion} -> ${newVersion}`);
+            process.exit(1);
+          }
+
+          const oldParts = oldMatch.slice(1, 4).map(Number);
+          const newParts = newMatch.slice(1, 4).map(Number);
+          const isPatch =
+            oldParts[0] === newParts[0] &&
+            oldParts[1] === newParts[1] &&
+            newParts[2] > oldParts[2];
+
+          if (!isPatch) {
+            console.log(`Manual release required for ${oldVersion} -> ${newVersion}.`);
+            process.exit(78);
+          }
+          NODE
+          result=$?
+          set -e
+
+          if [[ "$result" -eq 78 ]]; then
+            exit 0
+          fi
+          if [[ "$result" -ne 0 ]]; then
+            exit "$result"
+          fi
+
+          if gh pr view "$PR_URL" --json autoMergeRequest --jq '.autoMergeRequest != null' | grep -qx true; then
+            echo "Native auto-merge is already enabled."
+            exit 0
+          fi
+
+          gh pr merge "$PR_URL" --auto --squash

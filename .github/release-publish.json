@@ -1,0 +1,23 @@
+{
+  "version": {
+    "path": "custom_components/teltonika_rms/manifest.json",
+    "property": "version"
+  },
+  "changelog_path": "CHANGELOG.md",
+  "required_workflows": [
+    "Validate HACS & Hassfest",
+    "Runtime Dependency Consistency"
+  ],
+  "required_statuses": [
+    "Continuous Integration / Jenkins"
+  ],
+  "timeout_seconds": 1200,
+  "asset": null,
+  "npm": {
+    "enabled": false
+  },
+  "floating_tags": {
+    "prerelease": "beta",
+    "stable": "stable"
+  }
+}
