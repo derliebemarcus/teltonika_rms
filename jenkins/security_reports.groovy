@@ -93,8 +93,14 @@ def codeqlBranch(def scmConfig) {
                                       --format=sarif-latest --sarif-category=actions \
                                       --output=${env.SB_NAME}/sonar/codeql/codeql-actions.sarif
                                 """, logFile)
-                                external.publishSarif("${env.SB_NAME}/sonar/codeql/codeql-python.sarif")
-                                external.publishSarif("${env.SB_NAME}/sonar/codeql/codeql-actions.sarif")
+                                external.publishSarif(
+                                    "${env.SB_NAME}/sonar/codeql/codeql-python.sarif",
+                                    'CodeQL'
+                                )
+                                external.publishSarif(
+                                    "${env.SB_NAME}/sonar/codeql/codeql-actions.sarif",
+                                    'CodeQL'
+                                )
                             }
                         }
                     }
