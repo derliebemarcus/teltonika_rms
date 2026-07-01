@@ -16,7 +16,7 @@ ciHomeAssistantIntegration(
     requirementsFile: 'requirements.txt',
     constraintsFile: '',
     testPaths: ['tests/unit', 'tests/ha'],
-    coverageFloor: 97,
+    coverageFloor: 97.1,
     reportRoot: 'build/reports',
     runtime: [
         mode: 'container',
@@ -69,7 +69,6 @@ ciHomeAssistantIntegration(
               --cov=. --cov-config=.coveragerc \
               --cov-report=xml:build/reports/pytest/coverage.xml \
               --cov-report=term-missing
-            python3 tools/check_coverage_threshold.py build/reports/pytest/coverage.xml 97.1
         ''',
         ruffLint: '''
             mkdir -p build/reports/ruff
