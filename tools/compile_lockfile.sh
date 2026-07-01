@@ -52,7 +52,7 @@ compile_in() {
 if [ "$CHECK" -eq 1 ]; then
   tmpdir="$(mktemp -d "$ROOT/.lockcheck.XXXXXX")"
   trap 'rm -rf "$tmpdir"' EXIT
-  cp "$ROOT/requirements-dev.in" "$tmpdir/"
+  cp "$ROOT/requirements-dev.in" "$ROOT/requirements.txt" "$tmpdir/"
   compile_in "$tmpdir"
   diff -u "$ROOT/requirements.txt" "$tmpdir/requirements.txt"
 else
