@@ -50,7 +50,7 @@ ciHomeAssistantIntegration(
         podman build --pull=never \
           -t "registry.home.siczb.de/siczb/teltonika-rms-ci:${BUILD_NUMBER}" \
           -f Dockerfile.ci .
-    ''',
+    '''.stripIndent(),
     cleanupCommand: '''
         podman rmi "registry.home.siczb.de/siczb/teltonika-rms-ci:${BUILD_NUMBER}" || true
     ''',
