@@ -14,7 +14,7 @@ aiogithubapi==26.0.0
     # via homeassistant
 aiohappyeyeballs==2.6.2
     # via aiohttp
-aiohttp==3.13.5
+aiohttp==3.14.1
     # via
     #   aiogithubapi
     #   aiohttp-asyncmdnsresolver
@@ -135,7 +135,7 @@ coverage[toml]==7.14.3
     #   pytest-cov
 cronsim==2.7
     # via homeassistant
-cryptography==48.0.0
+cryptography==48.0.1
     # via
     #   acme
     #   bluetooth-data-tools
@@ -182,7 +182,7 @@ hass-nabucasa==2.2.0
     # via homeassistant
 home-assistant-bluetooth==2.0.0
     # via homeassistant
-homeassistant==2026.6.4
+homeassistant==2026.7.0
     # via -r requirements-dev.in
 httpcore==1.0.9
     # via httpx
@@ -387,7 +387,7 @@ snitun==0.45.1
     # via hass-nabucasa
 sortedcontainers==2.4.0
     # via cyclonedx-python-lib
-sqlalchemy==2.0.49
+sqlalchemy==2.0.51
     # via homeassistant
 standard-aifc==3.13.0
     # via homeassistant
@@ -439,7 +439,7 @@ usb-devices==0.5.1
     # via
     #   bluetooth-adapters
     #   bluetooth-auto-recovery
-uv==0.11.16
+uv==0.11.25
     # via homeassistant
 voluptuous==0.15.2
     # via
@@ -448,7 +448,7 @@ voluptuous==0.15.2
     #   homeassistant
     #   voluptuous-openapi
     #   voluptuous-serialize
-voluptuous-openapi==0.3.0
+voluptuous-openapi==0.4.1
     # via homeassistant
 voluptuous-serialize==2.7.0
     # via homeassistant
@@ -465,7 +465,7 @@ yarl==1.24.2
     #   aiohttp
     #   hass-nabucasa
     #   homeassistant
-zeroconf==0.149.16
+zeroconf==0.150.0
     # via
     #   aiohttp-asyncmdnsresolver
     #   homeassistant
