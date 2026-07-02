@@ -161,5 +161,6 @@ this.invokeMethod(releaseStepName, [[
     ],
     packageFile: 'package.json',
     versionSyncCommand: 'npm run version:sync',
+    credentialId: 'github token',
     autoMergePatch: true,
 ]] as Object[])
