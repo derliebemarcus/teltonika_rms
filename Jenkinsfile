@@ -103,7 +103,7 @@ ciHomeAssistantIntegration(
             python3 -m mutmut results \
               > build/reports/mutation/mutation-results.txt || true
         ''',
-        dependencyConsistency: 'tools/compile_lockfile.sh --check',
+        dependencyConsistency: 'npm run check:ha-minimum && tools/compile_lockfile.sh --check',
     ],
     mutation: [
         artifacts: 'build/reports/mutation/**,.mutmut-cache',
